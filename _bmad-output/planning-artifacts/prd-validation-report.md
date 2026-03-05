@@ -8,8 +8,8 @@ inputDocuments:
   - /Users/raj/VSCodeProjects/todo-app-bmad-agile/_bmad-output/planning-artifacts/prd-todo-app.md
 validationStepsCompleted: [step-v-01-discovery, step-v-02-format-detection, step-v-03-density-validation, step-v-04-brief-coverage-validation, step-v-05-measurability-validation, step-v-06-traceability-validation, step-v-07-implementation-leakage-validation, step-v-08-domain-compliance-validation, step-v-09-project-type-validation, step-v-10-smart-validation, step-v-11-holistic-quality-validation, step-v-12-completeness-validation]
 validationStatus: COMPLETE
-holisticQualityRating: '4/5 - Good'
-overallStatus: Warning
+holisticQualityRating: '3.9/5 - Strong Draft, Needs Precision Pass'
+overallStatus: Critical
 ---
 
 # PRD Validation Report
@@ -77,11 +77,13 @@ PRD demonstrates good information density with minimal violations.
 
 **Vision Statement:** Fully Covered
 
-**Target Users:** Fully Covered
+**Target Users:** Partially Covered
+- Informational: Primary users are clear; explicit statement of secondary users as out-of-scope is implied rather than strictly codified.
 
 **Problem Statement:** Fully Covered
 
-**Key Features:** Fully Covered
+**Key Features:** Partially Covered
+- Informational: "Delete with simple confirmation" is only lightly represented in detailed FR language.
 
 **Goals/Objectives:** Fully Covered
 
@@ -89,121 +91,221 @@ PRD demonstrates good information density with minimal violations.
 
 ### Coverage Summary
 
-**Overall Coverage:** Strong (full coverage of brief-defining content)
+**Overall Coverage:** Strong
 **Critical Gaps:** 0
-**Moderate Gaps:** 0
-**Informational Gaps:** 0
+**Moderate Gaps:** 1
+- Potential scope expansion signals (task edit + creation timestamp) beyond brief MVP core set.
+**Informational Gaps:** 3
+- Delete confirmation behavior not fully explicit in requirements.
+- Single-user-only v1 constraint should be explicit in requirements.
+- Brief/PRD KPI framing could be aligned with a short rationale note.
 
 **Recommendation:**
-PRD provides good coverage of Product Brief content.
+PRD provides strong Product Brief coverage. Tighten explicit MVP-boundary language to avoid scope drift.
 
-## Measurability Validation
+## Measurability Validation (FR/NFR)
 
-### Functional Requirements
+### Functional Requirements (FR)
 
-**Total FRs Analyzed:** 34
+**Total FRs:** 34
 
-**Format Violations:** 0
+**FR Actor-Can-Capability Format**
+- Violations: 0
+- Severity: Pass
 
-**Subjective Adjectives Found:** 1
-- [prd.md](prd.md#L253) uses "immediate" without an explicit measurable threshold.
+**FR Subjective Adjectives Without Metrics**
+- Violations: 12
+- Severity: Critical
+- Examples:
+  - FR1 uses subjective adjective "short" with no measurable bound (max characters/words): prd.md:236
+  - FR10 uses subjective phrase "prioritizes actionable work" with no ordering rule: prd.md:248
+  - FR16 uses cognitive verb "understand" with no observable acceptance metric: prd.md:257
+  - FR18 uses trust-oriented wording "Users can trust" with no measurable proxy: prd.md:259
+  - FR33 uses subjective adjective "readable" without quantifiable threshold: prd.md:283
 
-**Vague Quantifiers Found:** 0
+**FR Vague Quantifiers**
+- Violations: 6
+- Severity: Warning
+- Examples:
+  - FR15 context "normal network conditions" is undefined: prd.md:256
+  - FR21 quantifier "later session" does not define time window: prd.md:265
+  - FR30 phrase "modern versions" is non-specific and moving target: prd.md:280
+  - FR31 phrase "core task capabilities" is not enumerated in-line: prd.md:281
 
-**Implementation Leakage:** 0
+**FR Implementation Leakage**
+- Violations: 7
+- Severity: Warning
+- Examples:
+  - FR22 references internal architecture term "backend state" inside a user-facing FR: prd.md:266
+  - FR23 references internal split "frontend and backend" instead of user-observable outcome: prd.md:267
+  - FR24-FR27 define API capability surface details (solution/API-level) in FR list: prd.md:271-274
+  - FR29 includes operational health endpoint behavior, typically an ops/system concern: prd.md:276
 
-**FR Violations Total:** 1
+**FR Overall Measurability Risk (unique violating FRs):** 21
+**FR Overall Severity:** Critical
 
-### Non-Functional Requirements
+### Non-Functional Requirements (NFR)
 
-**Total NFRs Analyzed:** 12
+**Total NFRs:** 12
 
-**Missing Metrics:** 6
-- [prd.md](prd.md#L299), [prd.md](prd.md#L300), [prd.md](prd.md#L301), [prd.md](prd.md#L305), [prd.md](prd.md#L306), [prd.md](prd.md#L307) are testable in principle but lack explicit measurable thresholds.
+**NFR Missing Measurable Metrics**
+- Violations: 2
+- Severity: Pass
+- Examples:
+  - NFR4 includes "durably" but no explicit durability SLO/SLA metric (e.g., success rate, retention window): prd.md:296
+  - NFR6 requires reconciliation on "first sync" but lacks numeric timing/completion threshold: prd.md:298
 
-**Incomplete Template:** 9
-- [prd.md](prd.md#L293), [prd.md](prd.md#L294), [prd.md](prd.md#L295), [prd.md](prd.md#L299), [prd.md](prd.md#L300), [prd.md](prd.md#L301), [prd.md](prd.md#L305), [prd.md](prd.md#L306), [prd.md](prd.md#L307) do not specify a concrete measurement method.
+**NFR Incomplete Template Items (criterion, metric, measurement method, context)**
+- Violations: 5
+- Severity: Warning
+- Missing metric:
+  - NFR4: prd.md:296
+  - NFR6: prd.md:298
+- Missing measurement method:
+  - NFR1: prd.md:290
+  - NFR2: prd.md:291
+  - NFR3: prd.md:292
 
-**Missing Context:** 0
+**NFR Missing Context**
+- Violations: 3
+- Severity: Pass
+- Examples:
+  - NFR1 uses "normal network conditions" without explicit bandwidth/latency/loss profile: prd.md:290
+  - NFR2 uses "expected MVP load" without concrete concurrency/throughput profile: prd.md:291
+  - NFR3 includes "modern desktop/mobile browsers" without explicit browser/version matrix in the requirement itself: prd.md:292
 
-**NFR Violations Total:** 15
+**NFR Overall Measurability Risk (unique violating NFRs):** 5
+**NFR Overall Severity:** Warning
 
-### Overall Assessment
+### Threshold Key
 
-**Total Requirements:** 46
-**Total Violations:** 16
-
-**Severity:** Critical
-
-**Recommendation:**
-Many requirements are not measurable or testable with explicit verification methods. Revise flagged FR/NFR items to include concrete thresholds and measurement methods for downstream implementation quality.
+- Critical: >10 violations
+- Warning: 5-10 violations
+- Pass: <5 violations
 
 ## Traceability Validation
 
-### Chain Validation
+### Extraction Summary
 
-**Executive Summary → Success Criteria:** Intact
+**Executive Summary Vision/Goals (extracted):**
+- Build a minimal-friction personal task web app that optimizes capture → visibility → completion.
+- Prioritize speed, clarity, and reduced cognitive load over feature breadth.
+- Deliver immediate utility without onboarding/account setup.
+- Preserve trust via reliable task persistence across refresh/return sessions.
 
-**Success Criteria → User Journeys:** Intact
+**Success Criteria (extracted):**
+- User success: first task under 60 seconds; complete create/view/complete/delete flow in one session; active vs completed distinction at a glance; trusted persistence across sessions.
+- Business success: deferred to later iteration (no current business KPIs).
+- Technical success: reliable persistence, stable CRUD under normal/error conditions, predictable optimistic feedback + rollback, responsive desktop/mobile UI with clear states, deterministic minimal API contracts.
+- Measurable outcomes: first-task-time, unaided core flow completion, zero data-loss incidents in validation, understandable key UI states on desktop/mobile.
 
-**User Journeys → Functional Requirements:** Gaps Identified
-- FR7 (task description editing) has no explicit support in documented primary user journeys.
+**User Journeys (extracted):**
+- Journey 1: fast capture-and-completion success path with optional typo edit and persistence trust after refresh/return.
+- Journey 2: failure/recovery path with clear failure feedback, rollback, retry, and state confidence.
 
-**Scope → FR Alignment:** Misaligned
-- [prd.md](prd.md#L239) (FR7) is outside the explicit MVP feature list and is not included in post-MVP phase definitions.
+**Functional Requirements (extracted):**
+- FR1..FR34 present.
 
-### Orphan Elements
+**Product Scope (extracted):**
+- MVP: create/view/complete-delete/persist/responsive + clear empty-loading-error states.
+- Growth: prioritization, due dates, reminders, tags/categories, edit descriptions, optional auth/multi-user.
+- Vision: broader productivity platform while preserving simplicity-first principle.
 
-**Orphan Functional Requirements:** 1
-- FR7: Users can edit a task description after creation.
+### Chain Validation Results
 
-**Unsupported Success Criteria:** 0
+**Chain A — Executive Summary → Success Criteria:** **PARTIAL**
+- Alignment present on speed, clarity, low friction, and trust/persistence.
+- Gap: Business-success criteria are explicitly deferred, so Executive Summary outcomes are not connected to current business KPIs.
 
-**User Journeys Without FRs:** 0
+**Chain B — Success Criteria → User Journeys:** **PARTIAL**
+- Strong support for user success criteria and failure/recovery technical criteria.
+- Gap: Deterministic/minimal API contract success criterion has no explicit supporting journey narrative.
+- Gap: Desktop/mobile coverage and complete empty/loading/error-state clarity are only partially represented in journey narratives.
 
-### Traceability Matrix
+**Chain C — User Journeys → Functional Requirements:** **PARTIAL**
+- Core journey capabilities map well to FR1-5, FR8-23, FR31, FR34.
+- Gap: Journey statement "simple, non-cluttered interface" is not directly translated to a specific testable FR constraint.
 
-- Task CRUD core loop (create/view/complete/delete) → User Journeys 1 & 2 → FR1-FR5, FR8-FR19, FR20-FR23
-- Reliability and recovery goals → User Journey 2 + Technical Success → FR13-FR19, FR20-FR23, FR28-FR29
-- Platform/browser/accessibility scope → Web App requirements + Product Scope → FR30-FR34
-- API capability surface from technical scope → Web App requirements + MVP architecture direction → FR24-FR29
-- Timestamp metadata trace → Product Brief data shape + brainstorming insights → FR6
+**Chain D — Scope → FR Alignment:** **PARTIAL**
+- MVP-aligned FR coverage is strong for core CRUD, state visibility, persistence, reliability, responsive behavior, and no-login baseline.
+- Growth alignment present for edit capability (FR7).
+- Gap: Some FRs are not clearly assigned to MVP/Growth/Vision tiers, creating phase-boundary ambiguity.
 
-**Total Traceability Issues:** 2
+### Orphan Analysis
 
-**Severity:** Critical
+**Orphan FRs (not traceable to a user journey or explicit business objective): 2**
+- FR6 (task creation timestamp): not represented in journeys, success criteria, or scope rationale.
+- FR29 (health-status exposure): operational concern not tied to user journey or business outcome in current PRD.
 
-**Recommendation:**
-Orphan requirement detected. Either add explicit journey/scope justification for FR7 or remove/defer it to restore full traceability.
+**Success Criteria unsupported by journeys: 2**
+- Technical success criterion on deterministic/minimal API contracts.
+- Measurable outcome requiring full empty/loading/error-state understandability across both desktop and mobile (only partially journey-evidenced).
 
-## Implementation Leakage Validation
+**Journeys without supporting FRs: 1**
+- Journey requirement for a "simple, non-cluttered interface" lacks a direct, testable FR-level constraint.
 
-### Leakage by Category
+### Traceability Matrix Summary (Concise)
 
-**Frontend Frameworks:** 0 violations
+- Executive Summary goals covered by Success Criteria: **4/5** (business KPI linkage missing).
+- Success Criteria covered by User Journeys: **11/13** (2 unsupported/partial).
+- Journey capabilities covered by FRs: **6/7** (simplicity constraint missing FR).
+- FRs traceable to Journey or Business Objective: **32/34**.
+- Scope-tier alignment across FRs: **32/34** clear, **2/34** ambiguous/unscoped (FR6, FR29).
 
-**Backend Frameworks:** 0 violations
+### Issue Totals & Severity
 
-**Databases:** 0 violations
+- Total traceability issues: **7**
+  - Orphan FR issues: 2
+  - Success-criteria support gaps: 2
+  - Journey-to-FR gap: 1
+  - Chain/phase-boundary alignment gaps: 2
 
-**Cloud Platforms:** 0 violations
+**Overall Severity:** **Critical**
 
-**Infrastructure:** 0 violations
+Severity rule applied: Critical if any orphan FR exists. Two orphan FRs were found.
 
-**Libraries:** 0 violations
+### Recommended Corrections (Targeted)
 
-**Other Implementation Details:** 0 violations
+- Decide whether FR6 is MVP/Growth/removed; if retained, add explicit journey/objective rationale.
+- Move FR29 to NFR/operational section or introduce an operational journey/objective that justifies it.
+- Add a business KPI subsection now (even lightweight) to close Executive→Business traceability.
+- Add one explicit journey acceptance statement for mobile + empty/loading/error comprehension.
+- Add one FR explicitly codifying simplicity/non-clutter as a testable interaction constraint.
 
-### Summary
+## Implementation Leakage Validation (FR/NFR)
 
-**Total Implementation Leakage Violations:** 0
+**Scope Scanned:** Functional Requirements (FR1-FR34) and Non-Functional Requirements (NFR1-NFR12) only.
 
-**Severity:** Pass
+### Term Classification (Found in FR/NFR)
 
-**Recommendation:**
-No significant implementation leakage found. Requirements properly specify WHAT without HOW.
+| Category | Term Found | Classification | Notes |
+|---|---|---|---|
+| Frontend frameworks | None | Capability-relevant | No frontend framework names found in FR/NFR. |
+| Backend frameworks | None | Capability-relevant | No backend framework names found in FR/NFR. |
+| Databases | None | Capability-relevant | No database technologies found in FR/NFR. |
+| Cloud platforms | None | Capability-relevant | No cloud provider/platform names found in FR/NFR. |
+| Infrastructure | health-status (FR29) | Implementation leakage | Operational/monitoring concern appears in FR layer. |
+| Libraries | None | Capability-relevant | No library/package names found in FR/NFR. |
+| Other implementation details/protocols/data formats | backend state (FR22), frontend/backend split (FR23), API/client-app surface (FR24-FR27) | Implementation leakage | Internal architecture/interface surfacing in user/system capability requirements. |
+| Other implementation details/protocols/data formats | API (NFR2, NFR8, NFR9), client/server (NFR4-NFR7, NFR9), HTTPS/TLS 1.2+ (NFR7), semantic HTML (NFR11) | Capability-relevant | Security, interoperability, and accessibility constraints are valid NFR-level quality requirements. |
 
-**Note:** Capability-relevant terms such as API and HTTPS are acceptable in this PRD context and were not treated as implementation leakage.
+### Leakage Counts by Category (Violations Only)
+
+| Category | Leakage Count | Violation Examples (line-numbered) |
+|---|---:|---|
+| Frontend frameworks | 0 | None |
+| Backend frameworks | 0 | None |
+| Databases | 0 | None |
+| Cloud platforms | 0 | None |
+| Infrastructure | 1 | FR29 operational health-status exposure: prd.md:276 |
+| Libraries | 0 | None |
+| Other implementation details/protocols/data formats | 6 | FR22 backend-state coupling: prd.md:266; FR23 frontend/backend coupling: prd.md:267; FR24-FR27 API-to-client capability surface: prd.md:271-274 |
+
+### Totals & Severity
+
+- **Total implementation leakage violations (FR/NFR): 7**
+- **Severity rule applied:** Critical >5, Warning 2-5, Pass <2
+- **Severity result:** **Critical**
 
 ## Domain Compliance Validation
 
@@ -252,66 +354,79 @@ All required sections for web_app are present. No excluded sections found.
 
 ### Scoring Summary
 
-**All scores ≥ 3:** 94.1% (32/34)
-**All scores ≥ 4:** 79.4% (27/34)
-**Overall Average Score:** 4.5/5.0
+**All scores ≥ 3:** 52.9% (18/34)
+**All scores ≥ 4:** 26.5% (9/34)
+**Overall Average Score:** 3.95/5.0
 
 ### Scoring Table
 
 | FR # | Specific | Measurable | Attainable | Relevant | Traceable | Average | Flag |
 |------|----------|------------|------------|----------|-----------|--------|------|
-| FR1 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
-| FR2 | 4 | 4 | 5 | 5 | 5 | 4.6 | |
-| FR3 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
-| FR4 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
-| FR5 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
-| FR6 | 4 | 4 | 5 | 4 | 4 | 4.2 | |
-| FR7 | 4 | 3 | 5 | 3 | 2 | 3.4 | X |
-| FR8 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
-| FR9 | 4 | 4 | 5 | 5 | 5 | 4.6 | |
-| FR10 | 4 | 3 | 5 | 4 | 4 | 4.0 | |
-| FR11 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
-| FR12 | 4 | 4 | 5 | 4 | 4 | 4.2 | |
-| FR13 | 4 | 4 | 5 | 5 | 5 | 4.6 | |
-| FR14 | 4 | 3 | 5 | 5 | 4 | 4.2 | |
-| FR15 | 4 | 2 | 5 | 5 | 5 | 4.2 | X |
-| FR16 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR17 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR18 | 4 | 4 | 5 | 5 | 5 | 4.6 | |
-| FR19 | 4 | 3 | 5 | 5 | 4 | 4.2 | |
-| FR20 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR21 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR22 | 4 | 4 | 5 | 5 | 5 | 4.6 | |
-| FR23 | 4 | 3 | 5 | 5 | 5 | 4.4 | |
-| FR24 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
-| FR25 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
-| FR26 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
-| FR27 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
-| FR28 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR29 | 4 | 4 | 5 | 4 | 4 | 4.2 | |
-| FR30 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
-| FR31 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR32 | 5 | 4 | 5 | 5 | 5 | 4.8 | |
-| FR33 | 4 | 3 | 5 | 5 | 5 | 4.4 | |
-| FR34 | 5 | 5 | 5 | 5 | 5 | 5.0 | |
+| FR1 | 3 | 2 | 5 | 5 | 4 | 3.8 | X |
+| FR2 | 3 | 2 | 5 | 5 | 4 | 3.8 | X |
+| FR3 | 5 | 4 | 5 | 5 | 4 | 4.6 | |
+| FR4 | 5 | 4 | 5 | 5 | 4 | 4.6 | |
+| FR5 | 5 | 4 | 5 | 5 | 4 | 4.6 | |
+| FR6 | 4 | 3 | 5 | 4 | 4 | 4.0 | |
+| FR7 | 5 | 4 | 5 | 5 | 4 | 4.6 | |
+| FR8 | 2 | 2 | 5 | 5 | 3 | 3.4 | X |
+| FR9 | 4 | 3 | 5 | 5 | 4 | 4.2 | |
+| FR10 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR11 | 4 | 4 | 5 | 4 | 4 | 4.2 | |
+| FR12 | 3 | 2 | 5 | 4 | 4 | 3.6 | X |
+| FR13 | 4 | 3 | 5 | 5 | 4 | 4.2 | |
+| FR14 | 3 | 2 | 5 | 5 | 4 | 3.8 | X |
+| FR15 | 5 | 5 | 4 | 5 | 5 | 4.8 | |
+| FR16 | 3 | 2 | 5 | 5 | 4 | 3.8 | X |
+| FR17 | 4 | 3 | 5 | 5 | 4 | 4.2 | |
+| FR18 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR19 | 2 | 2 | 4 | 5 | 3 | 3.2 | X |
+| FR20 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
+| FR21 | 4 | 3 | 5 | 5 | 4 | 4.2 | |
+| FR22 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR23 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR24 | 4 | 3 | 5 | 4 | 5 | 4.2 | |
+| FR25 | 4 | 3 | 5 | 4 | 5 | 4.2 | |
+| FR26 | 4 | 3 | 5 | 4 | 5 | 4.2 | |
+| FR27 | 4 | 3 | 5 | 4 | 5 | 4.2 | |
+| FR28 | 4 | 4 | 5 | 5 | 5 | 4.6 | |
+| FR29 | 3 | 2 | 5 | 4 | 4 | 3.6 | X |
+| FR30 | 2 | 2 | 4 | 4 | 4 | 3.2 | X |
+| FR31 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR32 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR33 | 2 | 2 | 4 | 5 | 4 | 3.4 | X |
+| FR34 | 4 | 4 | 5 | 5 | 4 | 4.4 | |
 
-**Legend:** 1=Poor, 3=Acceptable, 5=Excellent  
+**Legend:** 1=Poor, 3=Acceptable, 5=Excellent
 **Flag:** X = Score < 3 in one or more categories
 
 ### Improvement Suggestions
 
 **Low-Scoring FRs:**
 
-**FR7:** Add explicit traceability by either mapping it to a documented user journey and scope phase, or moving it to a post-MVP phase with rationale.
-
-**FR15:** Replace "immediate" with a measurable threshold consistent with NFRs (e.g., "feedback visible within 500 ms under normal conditions").
+- FR1: Define “short text” with an explicit limit.
+- FR2: Define list scope and default ordering rule.
+- FR8: Enumerate allowed in-list actions.
+- FR10: Specify deterministic sort rule.
+- FR12: Define loading-state trigger and visibility criteria.
+- FR14: Define in-progress indicator behavior at task level.
+- FR16: Require explicit success/failure signal within a measurable bound.
+- FR18: Convert trust wording to observable rollback criteria.
+- FR19: Specify failure isolation behavior.
+- FR22: Define reconciliation behavior and time window after reload.
+- FR23: Define consistency check and conflict-resolution expectation post-CRUD.
+- FR29: Specify health-status contract semantics.
+- FR30: Replace “modern versions” with pinned minimum browser versions.
+- FR31: Define required capabilities per form factor and breakpoints.
+- FR32: Define keyboard acceptance criteria.
+- FR33: Replace “readable contrast” with explicit accessibility targets.
 
 ### Overall Assessment
 
-**Severity:** Pass
+**Severity:** Critical
 
 **Recommendation:**
-Functional Requirements demonstrate good SMART quality overall. Address flagged FR7 and FR15 to reach stronger traceability and measurability rigor.
+Many FRs have quality issues. Revise flagged FRs using SMART framework to improve clarity and testability.
 
 ## Holistic Quality Assessment
 
@@ -320,48 +435,48 @@ Functional Requirements demonstrate good SMART quality overall. Address flagged 
 **Assessment:** Good
 
 **Strengths:**
-- Clear section progression from vision to scope to capability contract.
-- Strong consistency of product positioning (clarity-first, minimal scope) across sections.
-- Good use of markdown hierarchy for navigation and extraction.
+- Strong top-down narrative from vision to execution requirements.
+- Consistent simplicity-first product positioning.
+- Clear attention to reliability and failure recovery.
 
 **Areas for Improvement:**
-- Small duplication between Success Criteria, Measurable Outcomes, and NFR intent.
-- One capability (FR7) is not consistently aligned with scope/journey narrative.
-- Some quality constraints are split between FR/NFR language and could be tightened for single-source clarity.
+- Scope boundaries blur in a few places against MVP minimalism.
+- Business success criteria remain deferred and reduce decision closure.
+- Some requirement layers mix user outcomes with solution/ops concerns.
 
 ### Dual Audience Effectiveness
 
 **For Humans:**
-- Executive-friendly: Good
-- Developer clarity: Good
-- Designer clarity: Good
-- Stakeholder decision-making: Good
+- Executive-friendly: Strong
+- Developer clarity: Moderate-High
+- Designer clarity: Moderate
+- Stakeholder decision-making: Moderate
 
 **For LLMs:**
-- Machine-readable structure: Excellent
-- UX readiness: Good
-- Architecture readiness: Good
-- Epic/Story readiness: Good
+- Machine-readable structure: Strong
+- UX readiness: Moderate
+- Architecture readiness: Moderate
+- Epic/Story readiness: Moderate
 
-**Dual Audience Score:** 4.5/5
+**Dual Audience Score:** 3.8/5
 
 ### BMAD PRD Principles Compliance
 
 | Principle | Status | Notes |
 |-----------|--------|-------|
-| Information Density | Met | Dense and generally concise across sections. |
-| Measurability | Partial | Several NFRs and one FR need stronger measurable verification language. |
-| Traceability | Partial | FR7 currently lacks explicit journey/scope traceability. |
-| Domain Awareness | Met | Correct low-complexity domain handling and classification present. |
-| Zero Anti-Patterns | Met | No meaningful filler/wordiness violations detected. |
-| Dual Audience | Met | Structured and readable for human and LLM downstream use. |
-| Markdown Format | Met | Strong ## section structure and consistent formatting. |
+| Information Density | Met | High signal and low filler overall. |
+| Measurability | Partial | Several FRs remain subjective or context-ambiguous. |
+| Traceability | Partial | A few FRs remain weakly tied to journeys/scope. |
+| Domain Awareness | Met | Domain-appropriate scope and context are clear. |
+| Zero Anti-Patterns | Partial | Minor scope creep and leakage patterns persist. |
+| Dual Audience | Partial | Strong structure with remaining precision gaps. |
+| Markdown Format | Met | Clean and extractable markdown structure. |
 
-**Principles Met:** 5/7
+**Principles Met:** 3/7 (4 Partial)
 
 ### Overall Quality Rating
 
-**Rating:** 4/5 - Good
+**Rating:** 3.9/5 - Strong Draft, Needs Precision Pass
 
 **Scale:**
 - 5/5 - Excellent: Exemplary, ready for production use
@@ -372,20 +487,20 @@ Functional Requirements demonstrate good SMART quality overall. Address flagged 
 
 ### Top 3 Improvements
 
-1. **Resolve FR7 traceability gap**
-  Align FR7 to an explicit user journey and phased scope decision, or remove/defer it.
+1. **Tighten FR measurability**
+  Replace subjective terms with explicit thresholds and conditions.
 
-2. **Harden measurability for flagged NFRs**
-  Add explicit thresholds and measurement methods for security/accessibility/reliability verification.
+2. **Separate requirement layers clearly**
+  Keep user outcomes in PRD; move detailed API/ops implementation specifics downstream.
 
-3. **Normalize quality language across sections**
-  Reduce overlap between Success Criteria, Measurable Outcomes, and NFR statements to improve single-source clarity.
+3. **Resolve scope-phase conflicts explicitly**
+  Tag FRs as MVP vs Post-MVP where ambiguity currently exists.
 
 ### Summary
 
-**This PRD is:** A strong, implementation-ready PRD with clear product intent and solid structure.
+**This PRD is:** Structurally strong and broadly usable.
 
-**To make it great:** Focus on the top 3 improvements above.
+**To make it great:** Focus on measurability precision and scope/traceability hardening.
 
 ## Completeness Validation
 
@@ -411,36 +526,32 @@ No template variables remaining ✓
 ### Section-Specific Completeness
 
 **Success Criteria Measurability:** Some measurable
-- Business success criteria are intentionally deferred, so section is complete by stated scope but not fully metricized.
 
 **User Journeys Coverage:** Partial - covers all in-scope user types
-- Only primary user journeys are documented by explicit scope decision; secondary user types are intentionally deferred.
 
 **FRs Cover MVP Scope:** Yes
 
-**NFRs Have Specific Criteria:** Some
-- Security/accessibility/reliability NFRs are present but several lack explicit thresholds and measurement methods.
+**NFRs Have Specific Criteria:** All
 
 ### Frontmatter Completeness
 
 **stepsCompleted:** Present
 **classification:** Present
 **inputDocuments:** Present
-**date:** Missing
+**date:** Present
 
-**Frontmatter Completeness:** 3/4
+**Frontmatter Completeness:** 4/4
 
 ### Completeness Summary
 
-**Overall Completeness:** 92% (11/12 checks complete)
+**Overall Completeness:** 93% (14/15 weighted checks)
 
 **Critical Gaps:** 0
-**Minor Gaps:** 3
-- Missing frontmatter date field
-- Partial user-type coverage by intentional deferment
-- Some NFRs lack explicit measurable criteria/methods
+**Minor Gaps:** 2
+- Business success criteria measurability is deferred by scope decision.
+- Journey coverage is intentionally limited to primary user paths.
 
 **Severity:** Warning
 
 **Recommendation:**
-PRD is substantially complete with minor completeness gaps. Add frontmatter date and tighten measurable specificity for flagged NFRs to reach full completeness.
+PRD has minor completeness gaps. Address minor gaps for complete documentation.
