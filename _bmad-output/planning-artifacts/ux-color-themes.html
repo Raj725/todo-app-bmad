@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX Color Themes — todo-app-bmad-agile</title>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #f5f6f7; color: #1f2937; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 8px; font-size: 1.35rem; }
+    p { margin: 0 0 20px; color: #6b7280; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 16px; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .card h2 { margin: 0; font-size: 1rem; padding: 12px 14px; border-bottom: 1px solid #e5e7eb; }
+    .palette { display: grid; grid-template-columns: repeat(3,1fr); }
+    .swatch { min-height: 74px; padding: 8px; color: #111827; font-size: .76rem; display: flex; align-items: end; }
+    .preview { padding: 12px; border-top: 1px solid #e5e7eb; }
+    .bar { display: flex; gap: 8px; margin-bottom: 8px; }
+    .btn { padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; font-size: .82rem; }
+    .task { border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: .88rem; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Color Theme Visualizer</h1>
+    <p>Clarity-first neutral options for todo-app-bmad-agile with semantic state previews.</p>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Theme A — Soft Neutral (Recommended)</h2>
+        <div class="palette">
+          <div class="swatch" style="background:#f8fafc">bg #f8fafc</div>
+          <div class="swatch" style="background:#ffffff">surface #ffffff</div>
+          <div class="swatch" style="background:#1f2937;color:#fff">text #1f2937</div>
+          <div class="swatch" style="background:#334155;color:#fff">primary #334155</div>
+          <div class="swatch" style="background:#166534;color:#fff">success #166534</div>
+          <div class="swatch" style="background:#991b1b;color:#fff">error #991b1b</div>
+        </div>
+        <div class="preview">
+          <div class="bar">
+            <button class="btn" style="background:#334155;color:#fff">Add</button>
+            <button class="btn" style="background:#fff;border-color:#cbd5e1;color:#334155">Cancel</button>
+          </div>
+          <div class="task">Active task row</div>
+          <div class="task" style="color:#6b7280;text-decoration:line-through">Completed task row</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Theme B — Slate Contrast</h2>
+        <div class="palette">
+          <div class="swatch" style="background:#f1f5f9">bg #f1f5f9</div>
+          <div class="swatch" style="background:#ffffff">surface #ffffff</div>
+          <div class="swatch" style="background:#0f172a;color:#fff">text #0f172a</div>
+          <div class="swatch" style="background:#1e293b;color:#fff">primary #1e293b</div>
+          <div class="swatch" style="background:#065f46;color:#fff">success #065f46</div>
+          <div class="swatch" style="background:#7f1d1d;color:#fff">error #7f1d1d</div>
+        </div>
+        <div class="preview">
+          <div class="bar">
+            <button class="btn" style="background:#1e293b;color:#fff">Add</button>
+            <button class="btn" style="background:#fff;border-color:#94a3b8;color:#1e293b">Cancel</button>
+          </div>
+          <div class="task">Active task row</div>
+          <div class="task" style="color:#64748b;text-decoration:line-through">Completed task row</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Theme C — Warm Gray Neutral</h2>
+        <div class="palette">
+          <div class="swatch" style="background:#fafaf9">bg #fafaf9</div>
+          <div class="swatch" style="background:#ffffff">surface #ffffff</div>
+          <div class="swatch" style="background:#292524;color:#fff">text #292524</div>
+          <div class="swatch" style="background:#44403c;color:#fff">primary #44403c</div>
+          <div class="swatch" style="background:#166534;color:#fff">success #166534</div>
+          <div class="swatch" style="background:#b91c1c;color:#fff">error #b91c1c</div>
+        </div>
+        <div class="preview">
+          <div class="bar">
+            <button class="btn" style="background:#44403c;color:#fff">Add</button>
+            <button class="btn" style="background:#fff;border-color:#d6d3d1;color:#44403c">Cancel</button>
+          </div>
+          <div class="task">Active task row</div>
+          <div class="task" style="color:#78716c;text-decoration:line-through">Completed task row</div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

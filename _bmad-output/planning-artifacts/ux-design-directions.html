@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX Design Directions — todo-app-bmad-agile</title>
+  <style>
+    :root {
+      --bg: #f6f7f8;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #334155;
+      --success: #166534;
+      --warning: #92400e;
+      --error: #991b1b;
+      --radius: 14px;
+      --space: 8px;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 6px 20px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: calc(var(--space) * 3);
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: calc(var(--space) * 2);
+      margin-bottom: calc(var(--space) * 3);
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space);
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.active {
+      border-color: var(--primary);
+      background: #e2e8f0;
+    }
+
+    .directions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: calc(var(--space) * 2);
+    }
+
+    .direction {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .direction header {
+      padding: calc(var(--space) * 2);
+      border-bottom: 1px solid var(--line);
+      background: #fafafa;
+    }
+
+    .direction h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .direction .meta {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 4px;
+    }
+
+    .phone {
+      padding: calc(var(--space) * 2);
+      background: #fcfcfd;
+    }
+
+    .app {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .app-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    .quick-add {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .quick-add input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+    }
+
+    .quick-add .add {
+      border: 1px solid #94a3b8;
+      background: #334155;
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: .92rem;
+    }
+
+    .task:last-child { border-bottom: 0; }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid #64748b;
+    }
+
+    .done .dot { background: #64748b; }
+    .done .label { text-decoration: line-through; color: #6b7280; }
+
+    .badge {
+      font-size: .75rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: var(--muted);
+    }
+
+    .legend {
+      padding: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: .8rem;
+      background: #fafafa;
+    }
+
+    .d1 .app-head { background: #f8fafc; }
+    .d2 .app { border-width: 2px; }
+    .d2 .quick-add { background: #fff; }
+    .d3 .task { grid-template-columns: 1fr auto; }
+    .d3 .dot { display: none; }
+    .d4 .app-head { background: #eef2ff; }
+    .d4 .add { background: #1e3a8a; }
+    .d5 .phone { background: #111827; }
+    .d5 .app { border-color: #374151; background: #1f2937; color: #f9fafb; }
+    .d5 .quick-add { background: #111827; border-color: #374151; }
+    .d5 .quick-add input { background: #0b1220; color: #f9fafb; border-color: #374151; }
+    .d5 .task { border-color: #374151; }
+    .d5 .legend { background: #111827; color: #cbd5e1; border-color: #374151; }
+    .d6 .app-head { position: sticky; top: 0; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="header">
+      <div class="title">
+        <h1>Design Direction Mockups</h1>
+        <p>todo-app-bmad-agile — clarity-first neutral palette explorations</p>
+      </div>
+      <div class="controls">
+        <button data-filter="all" class="active">All</button>
+        <button data-filter="minimal">Minimal</button>
+        <button data-filter="dense">Dense</button>
+        <button data-filter="calm">Calm</button>
+      </div>
+    </section>
+
+    <section class="directions">
+      <article class="direction d1" data-tags="minimal calm">
+        <header>
+          <h2>Direction 1 — Balanced Minimal</h2>
+          <div class="meta">Single-column, clear hierarchy, moderate spacing</div>
+        </header>
+        <div class="phone">
+          <div class="app">
+            <div class="app-head">Today’s Tasks <span class="badge">3 active</span></div>
+            <div class="quick-add"><input placeholder="Add a task" /><button class="add">Add</button></div>
+            <div class="task"><span class="dot"></span><span class="label">Send invoice</span><span>•••</span></div>
+            <div class="task"><span class="dot"></span><span class="label">Refine API error copy</span><span>•••</span></div>
+            <div class="task done"><span class="dot"></span><span class="label">Draft sprint notes</span><span>↺</span></div>
+            <div class="legend">Best for: calm, default MVP baseline</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="direction d2" data-tags="dense">
+        <header>
+          <h2>Direction 2 — Compact Productivity</h2>
+          <div class="meta">Tighter row height, high information density</div>
+        </header>
+        <div class="phone">
+          <div class="app">
+            <div class="app-head">Tasks <span class="badge">fast mode</span></div>
+            <div class="quick-add"><input placeholder="Quick add (Enter)" /><button class="add">+</button></div>
+            <div class="task"><span class="dot"></span><span class="label">Review PR #58</span><span>✓ ✎ 🗑</span></div>
+            <div class="task"><span class="dot"></span><span class="label">Book dentist</span><span>✓ ✎ 🗑</span></div>
+            <div class="task done"><span class="dot"></span><span class="label">Sync docs</span><span>↺</span></div>
+            <div class="legend">Best for: frequent users needing fast scanning</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="direction d3" data-tags="minimal">
+        <header>
+          <h2>Direction 3 — Action-First Rows</h2>
+          <div class="meta">Text-led list with right-aligned action chips</div>
+        </header>
+        <div class="phone">
+          <div class="app">
+            <div class="app-head">Inbox</div>
+            <div class="quick-add"><input placeholder="Capture task" /><button class="add">Create</button></div>
+            <div class="task"><span class="label">Plan roadmap checkpoint</span><span>Complete</span></div>
+            <div class="task"><span class="label">Fix mobile spacing issue</span><span>Complete</span></div>
+            <div class="task done"><span class="label">Pay internet bill</span><span>Restore</span></div>
+            <div class="legend">Best for: text-centric minimal interfaces</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="direction d4" data-tags="calm">
+        <header>
+          <h2>Direction 4 — Calm Emphasis</h2>
+          <div class="meta">Subtle tinted header and clearer sectioning</div>
+        </header>
+        <div class="phone">
+          <div class="app">
+            <div class="app-head">Focus List <span class="badge">safe sync</span></div>
+            <div class="quick-add"><input placeholder="What needs attention?" /><button class="add">Add Task</button></div>
+            <div class="task"><span class="dot"></span><span class="label">Prepare demo agenda</span><span>pending…</span></div>
+            <div class="task"><span class="dot"></span><span class="label">Call supplier</span><span>retry</span></div>
+            <div class="task done"><span class="dot"></span><span class="label">Weekly review</span><span>done</span></div>
+            <div class="legend">Best for: trust-forward feedback and clarity</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="direction d5" data-tags="dense">
+        <header>
+          <h2>Direction 5 — Dark Contrast Utility</h2>
+          <div class="meta">Dark neutral variant for high visual contrast</div>
+        </header>
+        <div class="phone">
+          <div class="app">
+            <div class="app-head">Tasks at Night <span class="badge">3 active</span></div>
+            <div class="quick-add"><input placeholder="Add task" /><button class="add">Add</button></div>
+            <div class="task"><span class="dot"></span><span class="label">Refactor API client</span><span>•••</span></div>
+            <div class="task"><span class="dot"></span><span class="label">Submit timesheet</span><span>•••</span></div>
+            <div class="task done"><span class="dot"></span><span class="label">Backup database</span><span>↺</span></div>
+            <div class="legend">Best for: optional future theme variant</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="direction d6" data-tags="minimal calm">
+        <header>
+          <h2>Direction 6 — Sticky Input Flow</h2>
+          <div class="meta">Persistent input + relaxed row rhythm</div>
+        </header>
+        <div class="phone">
+          <div class="app">
+            <div class="app-head">My Tasks <span class="badge">returning user</span></div>
+            <div class="quick-add"><input placeholder="Always-ready quick add" /><button class="add">Add</button></div>
+            <div class="task"><span class="dot"></span><span class="label">Read architecture note</span><span>edit</span></div>
+            <div class="task"><span class="dot"></span><span class="label">Schedule release window</span><span>edit</span></div>
+            <div class="task done"><span class="dot"></span><span class="label">Confirm backups</span><span>restore</span></div>
+            <div class="legend">Best for: momentum and repeat capture behavior</div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const buttons = document.querySelectorAll('[data-filter]');
+    const cards = document.querySelectorAll('.direction');
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        buttons.forEach((b) => b.classList.remove('active'));
+        button.classList.add('active');
+        const filter = button.getAttribute('data-filter');
+
+        cards.forEach((card) => {
+          if (filter === 'all') {
+            card.classList.remove('hidden');
+            return;
+          }
+          const tags = card.getAttribute('data-tags') || '';
+          card.classList.toggle('hidden', !tags.includes(filter));
+        });
+      });
+    });
+  </script>
+</body>
+</html>
