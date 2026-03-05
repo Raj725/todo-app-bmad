@@ -1,6 +1,6 @@
 # Story 1.2: Create Task API and Request Validation
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -17,28 +17,40 @@ so that I can capture work immediately.
 
 ## Tasks / Subtasks
 
-- [ ] Implement todo create endpoint and request/response schemas (AC: 1, 2)
-  - [ ] Add `POST /todos` route in `backend/app/api/routes/todos.py`
-  - [ ] Define request schema for create payload in `backend/app/schemas/todo.py`
-  - [ ] Define envelope schemas for success/error in `backend/app/api/schemas/response.py` and `backend/app/api/schemas/error.py`
-  - [ ] Register todos router in `backend/app/main.py` without changing existing `/health` and `/ready` behavior
-- [ ] Implement persistence layer for task creation (AC: 1)
-  - [ ] Add SQLAlchemy model for `todos` in `backend/app/db/models/todo.py`
-  - [ ] Add session/base setup in `backend/app/db/base.py` and `backend/app/db/session.py`
-  - [ ] Add repository create method in `backend/app/repositories/todo_repository.py`
-  - [ ] Add service create method in `backend/app/services/todo_service.py`
-- [ ] Add migration and backend configuration for durability path (AC: 1)
-  - [ ] Introduce Alembic config/bootstrap (`backend/alembic.ini`, `backend/alembic/env.py`) if missing
-  - [ ] Add first todo table migration under `backend/alembic/versions/`
-  - [ ] Wire database settings in `backend/app/core/config.py` and add `backend/.env.example`
-- [ ] Enforce validation and sanitized error handling (AC: 2)
-  - [ ] Enforce short-text constraints at API boundary with Pydantic validators
-  - [ ] Add exception-to-envelope mapping in `backend/app/api/error_handlers.py`
-  - [ ] Ensure validation failures return standardized error envelope and do not leak stack traces
-- [ ] Add tests for create success and validation failure (AC: 1, 2)
-  - [ ] Add backend integration tests for `POST /todos` success envelope shape and persisted result
-  - [ ] Add negative tests for empty/invalid payload returning validation error envelope and unchanged DB state
-  - [ ] Keep/update existing health/readiness tests as regression coverage
+- [x] Implement todo create endpoint and request/response schemas (AC: 1, 2)
+  - [x] Add `POST /todos` route in `backend/app/api/routes/todos.py`
+  - [x] Define request schema for create payload in `backend/app/schemas/todo.py`
+  - [x] Define envelope schemas for success/error in `backend/app/api/schemas/response.py` and `backend/app/api/schemas/error.py`
+  - [x] Register todos router in `backend/app/main.py` without changing existing `/health` and `/ready` behavior
+- [x] Implement persistence layer for task creation (AC: 1)
+  - [x] Add SQLAlchemy model for `todos` in `backend/app/db/models/todo.py`
+  - [x] Add session/base setup in `backend/app/db/base.py` and `backend/app/db/session.py`
+  - [x] Add repository create method in `backend/app/repositories/todo_repository.py`
+  - [x] Add service create method in `backend/app/services/todo_service.py`
+- [x] Add migration and backend configuration for durability path (AC: 1)
+  - [x] Introduce Alembic config/bootstrap (`backend/alembic.ini`, `backend/alembic/env.py`) if missing
+  - [x] Add first todo table migration under `backend/alembic/versions/`
+  - [x] Wire database settings in `backend/app/core/config.py` and add `backend/.env.example`
+- [x] Enforce validation and sanitized error handling (AC: 2)
+  - [x] Enforce short-text constraints at API boundary with Pydantic validators
+  - [x] Add exception-to-envelope mapping in `backend/app/api/error_handlers.py`
+  - [x] Ensure validation failures return standardized error envelope and do not leak stack traces
+- [x] Add tests for create success and validation failure (AC: 1, 2)
+  - [x] Add backend integration tests for `POST /todos` success envelope shape and persisted result
+  - [x] Add negative tests for empty/invalid payload returning validation error envelope and unchanged DB state
+  - [x] Keep/update existing health/readiness tests as regression coverage
+
+### Review Follow-ups (AI)
+
+- Do not transition story status to `review` until all items tagged `[Gate: Must Before Review]` are completed.
+- Ordering: Severity (High → Medium → Low), then Created date (oldest → newest).
+- [x] [AI-Review][High][Created: 2026-03-05][Owner: QA][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Expand invalid payload coverage beyond whitespace-only input to include malformed payload variants promised by task scope [backend/tests/test_todo_create.py:95]
+- [x] [AI-Review][Medium][Created: 2026-03-05][Owner: Tech Writer][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Add missing changed file to story File List for traceability (`sprint-status.yaml`) [_bmad-output/implementation-artifacts/1-2-create-task-api-and-request-validation.md:153]
+- [x] [AI-Review][Medium][Created: 2026-03-05][Owner: Dev][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Use timezone-aware timestamps for `created_at` in model and migration to strengthen UTC consistency [backend/app/db/models/todo.py:15]
+- [x] [AI-Review][Medium][Created: 2026-03-05][Owner: Dev][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Align migration `created_at` column with timezone-aware type configuration [backend/alembic/versions/20260305_000001_create_todos_table.py:24]
+- [x] [AI-Review][Medium][Created: 2026-03-05][Owner: Dev][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Pin `pydantic` explicitly in backend dependencies to avoid transitive dependency drift [backend/requirements.txt:1]
+- [x] [AI-Review][Medium][Created: 2026-03-05][Owner: QA][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Replace hard-coded integration test ports with dynamic free-port allocation to reduce CI flakiness [backend/tests/test_todo_create.py:42]
+- [x] [AI-Review][Low][Created: 2026-03-05][Owner: Dev][Target: Sprint 1 / 2026-03-12][Gate: Must Before Review] Align error code casing with standardized contract style to avoid client normalization drift [backend/app/api/error_handlers.py:20]
 
 ## Dev Notes
 
@@ -144,7 +156,45 @@ GPT-5.3-Codex
 ### Completion Notes List
 
 - Comprehensive story context generated with architecture, UX, previous story, and git intelligence.
+- Implemented `POST /todos` with strict layered boundaries (route → service → repository) and standardized success envelope `{ "data": ... }`.
+- Added persistence foundation with SQLAlchemy base/session/model and an initial Alembic migration for durable `todos` table creation.
+- Added validation and sanitized error envelopes with `400` request validation mapping and `500` internal error mapping including `request_id`.
+- Added backend integration tests for create success and validation failure non-persistence scenarios.
+- Executed backend regression and new tests via `python3 -m unittest discover -s tests -p 'test_*.py'` with all tests passing.
+- Closed all `[Gate: Must Before Review]` follow-ups: expanded invalid payload variants, switched tests to dynamic ports, aligned `created_at` timezone configuration in model/migration, pinned `pydantic`, normalized error code casing, and updated story file list traceability.
+- Completed automatic AI review remediations: switched integration setup to Alembic migration path, made health/readiness tests use dynamic ports, added server-side exception logging, and added ignore rules for runtime artifacts.
 
 ### File List
 
 - _bmad-output/implementation-artifacts/1-2-create-task-api-and-request-validation.md
+- .gitignore
+- backend/.env.example
+- backend/alembic.ini
+- backend/alembic/env.py
+- backend/alembic/script.py.mako
+- backend/alembic/versions/20260305_000001_create_todos_table.py
+- backend/app/api/error_handlers.py
+- backend/app/api/routes/todos.py
+- backend/app/api/schemas/__init__.py
+- backend/app/api/schemas/error.py
+- backend/app/api/schemas/response.py
+- backend/app/core/config.py
+- backend/app/db/base.py
+- backend/app/db/models/__init__.py
+- backend/app/db/models/todo.py
+- backend/app/db/session.py
+- backend/app/main.py
+- backend/app/repositories/todo_repository.py
+- backend/app/schemas/todo.py
+- backend/app/services/todo_service.py
+- backend/requirements.txt
+- backend/tests/test_health_readiness.py
+- backend/tests/test_todo_create.py
+- _bmad-output/implementation-artifacts/sprint-status.yaml
+
+## Change Log
+
+- 2026-03-05: Implemented Story 1.2 backend vertical slice for todo creation (API route, validation, persistence, migration bootstrap, and integration tests) and set story status to `review`.
+- 2026-03-05: Code review completed; added `Review Follow-ups (AI)` action items and moved story status to `in-progress` pending follow-up implementation.
+- 2026-03-05: Completed and checked off all `[Gate: Must Before Review]` follow-ups; updated story status back to `review`.
+- 2026-03-05: Applied automated code review remediations (migration-path test coverage, dynamic health-test ports, exception logging, runtime artifact ignore rules) and set story status to `done`.

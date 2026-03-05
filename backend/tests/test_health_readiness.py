@@ -1,4 +1,5 @@
 import json
+import socket
 import subprocess
 import time
 import unittest
@@ -7,9 +8,18 @@ from pathlib import Path
 
 
 class HealthReadinessTests(unittest.TestCase):
+    @staticmethod
+    def _get_free_port() -> int:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.bind(("127.0.0.1", 0))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            return int(sock.getsockname()[1])
+
     @classmethod
     def setUpClass(cls) -> None:
         backend_root = Path(__file__).resolve().parents[1]
+        cls.port = cls._get_free_port()
+        cls.base_url = f"http://127.0.0.1:{cls.port}"
         cls.server = subprocess.Popen(
             [
                 "uvicorn",
@@ -17,7 +27,7 @@ class HealthReadinessTests(unittest.TestCase):
                 "--host",
                 "127.0.0.1",
                 "--port",
-                "8001",
+                str(cls.port),
             ],
             cwd=backend_root,
             stdout=subprocess.DEVNULL,
@@ -26,7 +36,7 @@ class HealthReadinessTests(unittest.TestCase):
 
         for _ in range(30):
             try:
-                with urllib.request.urlopen("http://127.0.0.1:8001/health") as response:
+                with urllib.request.urlopen(f"{cls.base_url}/health") as response:
                     if response.status == 200:
                         return
             except Exception:
@@ -41,13 +51,13 @@ class HealthReadinessTests(unittest.TestCase):
             cls.server.wait(timeout=5)
 
     def test_health_endpoint(self) -> None:
-        with urllib.request.urlopen("http://127.0.0.1:8001/health") as response:
+        with urllib.request.urlopen(f"{self.base_url}/health") as response:
             payload = json.loads(response.read().decode("utf-8"))
 
         self.assertEqual(payload, {"status": "ok"})
 
     def test_readiness_endpoint(self) -> None:
-        with urllib.request.urlopen("http://127.0.0.1:8001/ready") as response:
+        with urllib.request.urlopen(f"{self.base_url}/ready") as response:
             payload = json.loads(response.read().decode("utf-8"))
 
         self.assertEqual(payload, {"status": "ready"})
