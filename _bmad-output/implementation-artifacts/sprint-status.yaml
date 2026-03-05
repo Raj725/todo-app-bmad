@@ -41,7 +41,7 @@ story_location: /Users/raj/VSCodeProjects/todo-app-bmad-agile/_bmad-output/imple
 
 development_status:
   epic-1: in-progress
-  1-1-set-up-initial-project-from-starter-template: in-progress
+  1-1-set-up-initial-project-from-starter-template: review
   1-2-create-task-api-and-request-validation: backlog
   1-3-display-task-list-with-loading-and-empty-states: backlog
   1-4-quick-add-task-flow-with-immediate-feedback: backlog

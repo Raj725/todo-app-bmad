@@ -1,6 +1,6 @@
 # Story 1.1: Set Up Initial Project from Starter Template
 
-Status: in-progress
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -17,24 +17,24 @@ so that implementation can proceed on a stable, architecture-aligned foundation.
 
 ## Tasks / Subtasks
 
-- [ ] Bootstrap frontend with Vite React TypeScript starter (AC: 1)
-  - [ ] Run `npm create vite@latest frontend -- --template react-ts`
-  - [ ] Install dependencies and verify frontend dev server starts
-  - [ ] Commit baseline frontend scaffold files only
-- [ ] Bootstrap backend with FastAPI baseline (AC: 1)
-  - [ ] Create Python virtual environment and install `fastapi==0.135.1` and `uvicorn[standard]`
-  - [ ] Create backend app entrypoint at `backend/app/main.py`
-  - [ ] Add `GET /health` and `GET /ready` routes with deterministic success responses
-  - [ ] Verify backend server starts and endpoints return success
-- [ ] Align repository structure to architecture boundaries (AC: 1)
-  - [ ] Ensure top-level split remains `frontend/` and `backend/`
-  - [ ] Create initial backend package structure (`app/api`, `app/core`, `app/db`, `app/schemas`, `app/services`, `app/repositories`)
-- [ ] Validate no-auth MVP shell is reachable (AC: 2)
-  - [ ] Confirm frontend app loads with no login gate
-  - [ ] Confirm baseline task shell route renders from `frontend/src/app/App.tsx`
-- [ ] Add baseline checks for startup confidence (AC: 1,2)
-  - [ ] Add minimal backend API test for `/health` and `/ready`
-  - [ ] Add minimal frontend smoke test for app shell rendering
+- [x] Bootstrap frontend with Vite React TypeScript starter (AC: 1)
+  - [x] Run `npm create vite@latest frontend -- --template react-ts`
+  - [x] Install dependencies and verify frontend dev server starts
+  - [x] Commit baseline frontend scaffold files only
+- [x] Bootstrap backend with FastAPI baseline (AC: 1)
+  - [x] Create Python virtual environment and install `fastapi==0.135.1` and `uvicorn[standard]`
+  - [x] Create backend app entrypoint at `backend/app/main.py`
+  - [x] Add `GET /health` and `GET /ready` routes with deterministic success responses
+  - [x] Verify backend server starts and endpoints return success
+- [x] Align repository structure to architecture boundaries (AC: 1)
+  - [x] Ensure top-level split remains `frontend/` and `backend/`
+  - [x] Create initial backend package structure (`app/api`, `app/core`, `app/db`, `app/schemas`, `app/services`, `app/repositories`)
+- [x] Validate no-auth MVP shell is reachable (AC: 2)
+  - [x] Confirm frontend app loads with no login gate
+  - [x] Confirm baseline task shell route renders from `frontend/src/app/App.tsx`
+- [x] Add baseline checks for startup confidence (AC: 1,2)
+  - [x] Add minimal backend API test for `/health` and `/ready`
+  - [x] Add minimal frontend smoke test for app shell rendering
 
 ## Dev Notes
 
@@ -68,11 +68,79 @@ GPT-5.3-Codex
 ### Debug Log References
 
 - Story generated from sprint kickoff after sprint planning output.
+- Frontend bootstrap: `npm create vite@latest frontend -- --template react-ts`
+- Frontend checks: `npm test`, `npm run lint`, `npm run build`, `npm run dev -- --host 127.0.0.1 --port 4173`
+- Backend checks: `python -m unittest discover -s tests -p "test_*.py"`, `uvicorn app.main:app --host 127.0.0.1 --port 8002`, `curl http://127.0.0.1:8002/health`, `curl http://127.0.0.1:8002/ready`
+
+### Implementation Plan
+
+- Use Vite React+TS scaffold as the canonical frontend baseline, then move app shell rendering target to `frontend/src/app/App.tsx`.
+- Build a minimal FastAPI app with route modules for `/health` and `/ready` and include both routers in `backend/app/main.py`.
+- Add only baseline directory and package scaffolding needed by the architecture boundaries for future stories.
+- Add minimal startup-confidence tests: frontend render smoke test and backend endpoint smoke tests.
 
 ### Completion Notes List
 
-- Story context prepared for implementation handoff.
+- Implemented frontend baseline with Vite React+TypeScript and verified dev startup.
+- Implemented FastAPI backend baseline with deterministic `/health` and `/ready` responses.
+- Added backend package skeleton matching architecture boundaries for future story layering.
+- Added frontend smoke test for app-shell render and backend smoke tests for health/readiness.
+- Validated with frontend test/lint/build and backend unit test execution.
 
 ### File List
 
 - _bmad-output/implementation-artifacts/1-1-set-up-initial-project-from-starter-template.md
+- _bmad-output/implementation-artifacts/sprint-status.yaml
+- backend/app/__init__.py
+- backend/app/api/__init__.py
+- backend/app/api/routes/__init__.py
+- backend/app/api/routes/health.py
+- backend/app/api/routes/readiness.py
+- backend/app/core/__init__.py
+- backend/app/db/__init__.py
+- backend/app/main.py
+- backend/app/repositories/__init__.py
+- backend/app/schemas/__init__.py
+- backend/app/services/__init__.py
+- backend/requirements.txt
+- backend/tests/test_health_readiness.py
+- frontend/package.json
+- frontend/package-lock.json
+- frontend/src/App.tsx
+- frontend/src/app/App.tsx
+- frontend/src/app/App.test.tsx
+- frontend/src/setupTests.ts
+- frontend/tsconfig.app.json
+- frontend/vitest.config.ts
+
+## Senior Developer Review (AI)
+
+### Review Summary
+- **Reviewer**: GitHub Copilot
+- **Date**: 2026-03-05
+- **Outcome**: Approve
+- **Severity**: Low
+
+### Validation Results
+1. **AC Validation**:
+   - AC1 (Run setup commands): Validated. Frontend and backend created and runnable.
+   - AC2 (Run app): Validated. Frontend loads, backend endpoints respond.
+2. **Task Audit**:
+   - All tasks Marked [x] are verified as completed.
+3. **Code Quality**:
+   - Codebase is clean and minimal, adhering to the "init" phase requirements.
+   - Project structure aligns with the architectural requirements.
+4. **Test Quality**:
+   - Frontend smoke test: PASS.
+   - Backend smoke tests: PASS.
+
+### Issues Found
+- **Minor**: Missing root `.gitignore`. Created one to exclude `frontend/node_modules`, `backend/__pycache__`, `backend/.venv`, `.DS_Store`, and `.env`.
+
+### Recommendations
+- Continue with the next story.
+
+## Change Log
+
+- 2026-03-05: Completed Story 1.1 implementation baseline (frontend bootstrap, backend bootstrap, health/readiness endpoints, architecture-aligned folder scaffolding, and smoke tests). Status moved to `review`.
+- 2026-03-05: Senior Developer Review - Approved. Added `.gitignore` to root.
