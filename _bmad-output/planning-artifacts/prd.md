@@ -15,6 +15,7 @@ classification:
   complexity: low
   projectContext: greenfield
 workflowType: 'prd'
+date: 2026-03-05
 ---
 
 # Product Requirements Document - todo-app-bmad-agile
@@ -82,6 +83,7 @@ Business success metrics are intentionally deferred for this phase and will be d
 - Due dates/deadlines.
 - Reminders/notifications.
 - Tags/categories.
+- Task description editing for typo correction and clarification.
 - Optional account/authentication and multi-user support, if validated by usage.
 
 ### Vision (Future)
@@ -98,6 +100,7 @@ A user starts their day with several tasks in mind and limited attention. They o
 
 **Rising Action:**
 They see a clean list view and a quick-add input. They type a task, submit once, and see it appear instantly in the active list. They add several more tasks in the same flow, then mark completed items as they finish them.
+If they notice a typo in a task, they can edit the task description to keep the list accurate.
 
 **Climax:**
 Within seconds, they have captured and managed their entire list without navigating menus, categories, or settings.
@@ -250,7 +253,7 @@ Single-developer execution may be stressed by reliability/polish requirements. M
 
 ### Interaction Reliability & Recovery
 
-- FR15: Users can receive immediate interface feedback after initiating create, update, or delete actions.
+- FR15: Users can receive visible interface feedback within 500 ms after initiating create, update, or delete actions under normal network conditions.
 - FR16: Users can understand whether each initiated task action succeeded or failed.
 - FR17: Users can recover from failed task actions by retrying the action.
 - FR18: Users can trust that unsuccessful task actions do not silently persist as successful changes.
@@ -290,18 +293,18 @@ Single-developer execution may be stressed by reliability/polish requirements. M
 
 ### Reliability
 
-- NFR4: The system must persist confirmed task mutations durably before returning success to the client.
-- NFR5: On mutation failure, the client must present explicit error feedback and restore a consistent visible task state.
-- NFR6: After page refresh or session return, task state must reconcile to persisted backend truth with no orphaned optimistic changes displayed as confirmed.
+- NFR4: The system must persist confirmed task mutations durably before returning success to the client, as verified by integration tests that confirm successful mutations remain after service restart.
+- NFR5: On mutation failure, the client must present explicit error feedback and restore a consistent visible task state within 1 second, as verified by automated failure-path integration tests.
+- NFR6: After page refresh or session return, client task state must reconcile to persisted backend truth on first sync, with no orphaned optimistic changes displayed as confirmed, as verified by end-to-end reconciliation tests.
 
 ### Security
 
-- NFR7: All client-server communication must use HTTPS/TLS in production environments.
-- NFR8: Server-side input validation must be enforced for all task mutation requests.
-- NFR9: The API must not expose stack traces or internal implementation details in client-facing error responses.
+- NFR7: All client-server communication must use HTTPS/TLS 1.2+ in production environments, as verified by deployment-time TLS configuration checks.
+- NFR8: Server-side input validation must be enforced for 100% of task mutation requests, as verified by automated API contract and negative tests.
+- NFR9: The API must expose 0 stack traces or internal implementation details in client-facing error responses, as verified by negative API test cases for each mutation endpoint.
 
 ### Accessibility
 
-- NFR10: Core task flows must be fully operable via keyboard-only interaction.
-- NFR11: UI markup for primary task interactions must use semantic HTML structures.
-- NFR12: Text and interactive controls must meet readable contrast expectations for standard use (baseline accessibility target, without formal compliance certification).
+- NFR10: Core task flows must be fully operable via keyboard-only interaction, with 100% pass rate in keyboard-only end-to-end test scenarios for create, complete, uncomplete, delete, and retry flows.
+- NFR11: UI markup for primary task interactions must use semantic HTML structures, as verified by automated accessibility linting with zero critical semantic-role violations.
+- NFR12: Text and interactive controls must meet minimum contrast ratios of 4.5:1 for normal text and 3:1 for large text, as verified by automated accessibility checks in CI.
