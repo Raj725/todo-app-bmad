@@ -16,3 +16,11 @@ def create_todo(payload: TodoCreateRequest, session: Session = Depends(get_sessi
     service = TodoService(repository)
     todo = service.create_todo(description=payload.description)
     return SuccessResponse(data=TodoResponse.model_validate(todo))
+
+
+@router.get("", response_model=SuccessResponse[list[TodoResponse]], status_code=status.HTTP_200_OK)
+def list_todos(session: Session = Depends(get_session)) -> SuccessResponse[list[TodoResponse]]:
+    repository = TodoRepository(session)
+    service = TodoService(repository)
+    todos = service.list_todos()
+    return SuccessResponse(data=[TodoResponse.model_validate(todo) for todo in todos])

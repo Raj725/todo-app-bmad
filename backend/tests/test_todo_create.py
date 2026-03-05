@@ -140,6 +140,47 @@ class TodoCreateIntegrationTests(unittest.TestCase):
 
         self.assertEqual(final_count, initial_count)
 
+    def test_get_todos_returns_empty_list_in_success_envelope(self) -> None:
+        with sqlite3.connect(self.test_db_path) as connection:
+            connection.execute("DELETE FROM todos")
+            connection.commit()
+
+        with urllib.request.urlopen(f"{self.base_url}/todos") as response:
+            payload = json.loads(response.read().decode("utf-8"))
+            status_code = response.status
+
+        self.assertEqual(status_code, 200)
+        self.assertEqual(payload, {"data": []})
+
+    def test_get_todos_returns_populated_list_with_expected_fields(self) -> None:
+        for description in ["First task", "Second task"]:
+            request = urllib.request.Request(
+                f"{self.base_url}/todos",
+                data=json.dumps({"description": description}).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(request) as response:
+                self.assertEqual(response.status, 201)
+
+        with urllib.request.urlopen(f"{self.base_url}/todos") as response:
+            payload = json.loads(response.read().decode("utf-8"))
+            status_code = response.status
+
+        self.assertEqual(status_code, 200)
+        self.assertIn("data", payload)
+        self.assertEqual(len(payload["data"]), 2)
+
+        first_item = payload["data"][0]
+        self.assertSetEqual(set(first_item.keys()), {"id", "description", "is_completed", "created_at"})
+        self.assertIsInstance(first_item["id"], int)
+        self.assertIsInstance(first_item["description"], str)
+        self.assertIs(first_item["is_completed"], False)
+        self.assertIsInstance(first_item["created_at"], str)
+
+        descriptions = [item["description"] for item in payload["data"]]
+        self.assertEqual(descriptions, ["Second task", "First task"])
+
 
 if __name__ == "__main__":
     unittest.main()
