@@ -11,7 +11,7 @@ type UpdateTodoContext = {
 
 export function useUpdateTodoMutation() {
   const queryClient = useQueryClient()
-  const [pendingTodoId, setPendingTodoId] = useState<number | null>(null)
+  const [pendingTodoIds, setPendingTodoIds] = useState<Set<number>>(() => new Set())
   const [failedTodoId, setFailedTodoId] = useState<number | null>(null)
 
   const mutation = useMutation({
@@ -21,7 +21,7 @@ export function useUpdateTodoMutation() {
 
       const previousTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
 
-      setPendingTodoId(variables.todoId)
+      setPendingTodoIds((prev) => new Set([...prev, variables.todoId]))
       setFailedTodoId((current) => (current === variables.todoId ? null : current))
 
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
@@ -50,14 +50,18 @@ export function useUpdateTodoMutation() {
       )
     },
     onSettled: async (_data, _error, variables) => {
-      setPendingTodoId((current) => (current === variables.todoId ? null : current))
+      setPendingTodoIds((prev) => {
+        const next = new Set(prev)
+        next.delete(variables.todoId)
+        return next
+      })
       await queryClient.invalidateQueries({ queryKey: TODOS_QUERY_KEY })
     },
   })
 
   return {
     ...mutation,
-    pendingTodoId,
+    pendingTodoIds,
     failedTodoId,
   }
 }

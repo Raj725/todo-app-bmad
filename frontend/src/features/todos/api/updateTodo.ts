@@ -68,7 +68,24 @@ export async function updateTodo(input: UpdateTodoInput): Promise<Todo> {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to update todo')
+    let errorMessage = 'Failed to update todo'
+    try {
+      const errorBody = (await response.json()) as unknown
+      if (
+        typeof errorBody === 'object' &&
+        errorBody !== null &&
+        'error' in errorBody &&
+        typeof (errorBody as { error: unknown }).error === 'object' &&
+        (errorBody as { error: unknown }).error !== null &&
+        'message' in (errorBody as { error: { message: unknown } }).error &&
+        typeof (errorBody as { error: { message: unknown } }).error.message === 'string'
+      ) {
+        errorMessage = (errorBody as { error: { message: string } }).error.message
+      }
+    } catch {
+      // ignore parse errors, use default message
+    }
+    throw new Error(errorMessage)
   }
 
   const parsed = await response.json()

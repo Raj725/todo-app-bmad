@@ -14,6 +14,16 @@ describe('updateTodo', () => {
       json: async () => ({ error: { message: 'not found' } }),
     } as Response)
 
+    await expect(updateTodo({ todoId: 22, isCompleted: true })).rejects.toThrow('not found')
+  })
+
+  it('rejects with generic message when error response body cannot be parsed', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => { throw new Error('not json') },
+    } as unknown as Response)
+
     await expect(updateTodo({ todoId: 22, isCompleted: true })).rejects.toThrow('Failed to update todo')
   })
 

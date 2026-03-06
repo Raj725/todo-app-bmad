@@ -27,7 +27,7 @@ function App() {
       {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length > 0 && (
         <TodoList
           todos={todosQuery.data}
-          pendingTodoId={updateTodoMutation.pendingTodoId}
+          pendingTodoIds={updateTodoMutation.pendingTodoIds}
           failedTodoId={updateTodoMutation.failedTodoId}
           onToggleTodo={(todo) => {
             updateTodoMutation.mutate({
