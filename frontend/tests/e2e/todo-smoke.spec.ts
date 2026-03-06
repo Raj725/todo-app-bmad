@@ -545,3 +545,56 @@ test('inline edit failure is scoped and retry persists updated description', asy
   await expect(page.getByText('Unrelated task')).toBeVisible()
   await expect(page.getByText('Edit failed once.')).not.toBeVisible()
 })
+
+test('real backend reload shows only confirmed persistence and drops failed optimistic create state', async ({ page }) => {
+  const failedDescription = `Transient failure ${Date.now()}`
+  const persistedDescription = `Persisted after reload ${Date.now()}`
+  let failedInterceptUsed = false
+
+  await page.route(/\/todos(?:\?.*)?$/, async (route) => {
+    const isCreate = route.request().method() === 'POST'
+    if (!isCreate || failedInterceptUsed) {
+      await route.fallback()
+      return
+    }
+
+    const requestBody = route.request().postDataJSON() as { description?: unknown }
+    if (requestBody.description !== failedDescription) {
+      await route.fallback()
+      return
+    }
+
+    failedInterceptUsed = true
+    await route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        error: {
+          code: 'TODO_CREATE_FAILED',
+          message: 'Create failed once.',
+          details: [],
+          request_id: 'req-create-failed-once',
+        },
+      }),
+    })
+  })
+
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Todo App' })).toBeVisible()
+
+  await page.getByLabel('Task description').fill(failedDescription)
+  await page.getByRole('button', { name: 'Quick add task' }).click()
+  await expect(page.getByText('Create failed once.')).toBeVisible()
+  await expect(page.getByText(failedDescription)).not.toBeVisible()
+
+  await page.getByLabel('Task description').fill(persistedDescription)
+  await page.getByRole('button', { name: 'Quick add task' }).click()
+  await expect(page.getByText(persistedDescription)).toBeVisible()
+  await expect(page.getByText('Create failed once.')).not.toBeVisible()
+
+  await page.reload()
+
+  await expect(page.getByText(persistedDescription)).toBeVisible()
+  await expect(page.getByText(failedDescription)).not.toBeVisible()
+  await expect(page.getByText('Create failed once.')).not.toBeVisible()
+})
