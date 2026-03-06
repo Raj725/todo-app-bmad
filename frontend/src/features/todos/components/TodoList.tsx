@@ -5,20 +5,12 @@ type TodoListProps = {
   todos: Todo[]
   pendingTodoIds: Set<number>
   failedTodoId: number | null
-  failedEditTodoId: number | null
+  failedEditTodoIds: Set<number>
   onToggleTodo: (todo: Todo) => void
   onEditTodo: (todo: Todo, description: string) => void
   pendingDeleteIds: Set<number>
-  failedDeleteTodoId: number | null
+  failedDeleteTodoIds: Set<number>
   onDeleteTodo: (todo: Todo) => void
-}
-
-const formatCreatedAt = (createdAt: string): string => {
-  const date = new Date(createdAt)
-  if (Number.isNaN(date.getTime())) {
-    return createdAt
-  }
-  return createdAt
 }
 
 const sortTodos = (todos: Todo[]): Todo[] => {
@@ -40,11 +32,11 @@ export function TodoList({
   todos,
   pendingTodoIds,
   failedTodoId,
-  failedEditTodoId,
+  failedEditTodoIds,
   onToggleTodo,
   onEditTodo,
   pendingDeleteIds,
-  failedDeleteTodoId,
+  failedDeleteTodoIds,
   onDeleteTodo,
 }: TodoListProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
@@ -88,8 +80,8 @@ export function TodoList({
         // Disable all controls while either operation is in-flight
         const isAnyPending = isTogglePending || isEditPending || isDeletePending
         const isConfirmingDelete = confirmDeleteId === todo.id
-        const hasDeleteError = failedDeleteTodoId === todo.id
-        const hasEditError = failedEditTodoId === todo.id
+        const hasDeleteError = failedDeleteTodoIds.has(todo.id)
+        const hasEditError = failedEditTodoIds.has(todo.id)
         const isEditing = editTodoId === todo.id
         const canRetryEdit = Boolean(lastSubmittedEdits[todo.id])
 
@@ -133,7 +125,7 @@ export function TodoList({
                 {todo.description} {todo.isCompleted ? <strong>Completed</strong> : <strong>Active</strong>}
               </p>
             )}
-            <p>Created: {formatCreatedAt(todo.createdAt)}</p>
+            <p>Created: {todo.createdAt}</p>
 
             {/* Toggle button */}
             <button

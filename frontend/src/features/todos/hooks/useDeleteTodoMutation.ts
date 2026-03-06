@@ -12,7 +12,7 @@ type DeleteTodoContext = {
 export function useDeleteTodoMutation() {
   const queryClient = useQueryClient()
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<number>>(() => new Set())
-  const [failedDeleteTodoId, setFailedDeleteTodoId] = useState<number | null>(null)
+  const [failedDeleteTodoIds, setFailedDeleteTodoIds] = useState<Set<number>>(() => new Set())
 
   const mutation = useMutation({
     mutationFn: deleteTodo,
@@ -23,7 +23,11 @@ export function useDeleteTodoMutation() {
       const deletedTodo = previousTodos.find((todo) => todo.id === variables.todoId) ?? null
 
       setPendingDeleteIds((prev) => new Set([...prev, variables.todoId]))
-      setFailedDeleteTodoId((current) => (current === variables.todoId ? null : current))
+      setFailedDeleteTodoIds((current) => {
+        const next = new Set(current)
+        next.delete(variables.todoId)
+        return next
+      })
 
       // Optimistically remove the todo from cache
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
@@ -44,10 +48,14 @@ export function useDeleteTodoMutation() {
           return [...currentTodos, deletedTodo]
         })
       }
-      setFailedDeleteTodoId(variables.todoId)
+      setFailedDeleteTodoIds((current) => new Set([...current, variables.todoId]))
     },
     onSuccess: (_data, variables) => {
-      setFailedDeleteTodoId((current) => (current === variables.todoId ? null : current))
+      setFailedDeleteTodoIds((current) => {
+        const next = new Set(current)
+        next.delete(variables.todoId)
+        return next
+      })
     },
     onSettled: async (_data, _error, variables) => {
       setPendingDeleteIds((prev) => {
@@ -62,6 +70,6 @@ export function useDeleteTodoMutation() {
   return {
     ...mutation,
     pendingDeleteIds,
-    failedDeleteTodoId,
+    failedDeleteTodoIds,
   }
 }

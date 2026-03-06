@@ -34,12 +34,12 @@ afterEach(() => {
 })
 
 describe('useDeleteTodoMutation', () => {
-  it('exposes empty pendingDeleteIds Set and null failedDeleteTodoId on initial render', () => {
+  it('exposes empty pendingDeleteIds Set and empty failedDeleteTodoIds Set on initial render', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteTodoMutation(), { wrapper })
 
     expect(result.current.pendingDeleteIds).toEqual(new Set())
-    expect(result.current.failedDeleteTodoId).toBeNull()
+    expect(result.current.failedDeleteTodoIds).toEqual(new Set())
   })
 
   it('optimistically removes the todo from the cache on mutate', async () => {
@@ -93,7 +93,7 @@ describe('useDeleteTodoMutation', () => {
     })
   })
 
-  it('rolls back the optimistic removal and sets failedDeleteTodoId on failure', async () => {
+  it('rolls back the optimistic removal and adds todoId to failedDeleteTodoIds on failure', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 500,
@@ -111,7 +111,7 @@ describe('useDeleteTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedDeleteTodoId).toBe(7)
+      expect(result.current.failedDeleteTodoIds.has(7)).toBe(true)
     })
 
     const todos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)
@@ -144,7 +144,7 @@ describe('useDeleteTodoMutation', () => {
     })
   })
 
-  it('clears failedDeleteTodoId after a successful retry', async () => {
+  it('clears failedDeleteTodoIds entry after a successful retry', async () => {
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce({
         ok: false,
@@ -164,7 +164,7 @@ describe('useDeleteTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedDeleteTodoId).toBe(3)
+      expect(result.current.failedDeleteTodoIds.has(3)).toBe(true)
     })
 
     act(() => {
@@ -172,7 +172,7 @@ describe('useDeleteTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedDeleteTodoId).toBeNull()
+      expect(result.current.failedDeleteTodoIds.has(3)).toBe(false)
     })
   })
 
@@ -236,7 +236,7 @@ describe('useDeleteTodoMutation', () => {
       const current = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
       expect(current.find((todo) => todo.id === 5)).toBeUndefined()
       expect(current.find((todo) => todo.id === 9)).toBeDefined()
-      expect(result.current.failedDeleteTodoId).toBe(9)
+      expect(result.current.failedDeleteTodoIds.has(9)).toBe(true)
     })
   })
 })
