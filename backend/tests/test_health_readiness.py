@@ -62,9 +62,9 @@ class HealthReadinessTests(unittest.TestCase):
 
         self.assertEqual(payload, {"status": "ready"})
 
-    def test_todos_simple_cors_response_includes_allow_origin_for_frontend(self) -> None:
+    def test_health_simple_cors_response_includes_allow_origin_for_frontend(self) -> None:
         request = urllib.request.Request(
-            f"{self.base_url}/todos",
+            f"{self.base_url}/health",
             headers={"Origin": "http://localhost:5173"},
             method="GET",
         )
