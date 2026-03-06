@@ -6,7 +6,7 @@ import type { Todo } from '../types'
 import { TODOS_QUERY_KEY } from './useTodosQuery'
 
 type DeleteTodoContext = {
-  previousTodos: Todo[]
+  deletedTodo: Todo | null
 }
 
 export function useDeleteTodoMutation() {
@@ -20,6 +20,7 @@ export function useDeleteTodoMutation() {
       await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY })
 
       const previousTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      const deletedTodo = previousTodos.find((todo) => todo.id === variables.todoId) ?? null
 
       setPendingDeleteIds((prev) => new Set([...prev, variables.todoId]))
       setFailedDeleteTodoId((current) => (current === variables.todoId ? null : current))
@@ -29,12 +30,19 @@ export function useDeleteTodoMutation() {
         currentTodos.filter((todo) => todo.id !== variables.todoId),
       )
 
-      return { previousTodos }
+      return { deletedTodo }
     },
     onError: (_error, variables, context) => {
-      // Rollback: restore the original list
-      if (context?.previousTodos) {
-        queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, context.previousTodos)
+      // Rollback only the failed item to avoid stale overwrite during concurrent deletes.
+      if (context?.deletedTodo) {
+        const deletedTodo = context.deletedTodo
+        queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) => {
+          if (currentTodos.some((todo) => todo.id === deletedTodo.id)) {
+            return currentTodos
+          }
+
+          return [...currentTodos, deletedTodo]
+        })
       }
       setFailedDeleteTodoId(variables.todoId)
     },

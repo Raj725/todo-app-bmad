@@ -370,4 +370,105 @@ describe('Task list and quick-add flows', () => {
 
     expect(screen.getByRole('button', { name: 'Mark task "Stable task" as complete' })).toBeInTheDocument()
   })
+
+  it('supports delete confirm then cancel without removing the task', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: [
+              {
+                id: 41,
+                description: 'Cancelable delete task',
+                is_completed: false,
+                created_at: '2026-03-06T11:00:00.000Z',
+              },
+            ],
+          }),
+        } as Response
+      }
+
+      return { ok: true, status: 204 } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Cancelable delete task')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete task "Cancelable delete task"' }))
+    expect(screen.getByRole('button', { name: 'Confirm delete task "Cancelable delete task"' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel delete task "Cancelable delete task"' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel delete task "Cancelable delete task"' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Delete task "Cancelable delete task"' })).toBeInTheDocument()
+      expect(screen.getByText('Cancelable delete task')).toBeInTheDocument()
+    })
+  })
+
+  it('shows delete retry affordance after failed confirm and removes task after retry succeeds', async () => {
+    let deleteAttemptCount = 0
+    let serverTodos = [
+      {
+        id: 55,
+        description: 'Retry delete task',
+        is_completed: false,
+        created_at: '2026-03-06T12:00:00.000Z',
+      },
+    ]
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({ data: serverTodos }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/55') && init?.method === 'DELETE') {
+        deleteAttemptCount += 1
+
+        if (deleteAttemptCount === 1) {
+          return {
+            ok: false,
+            status: 500,
+            json: async () => ({ error: { message: 'delete failed' } }),
+          } as Response
+        }
+
+        serverTodos = []
+        return { ok: true, status: 204 } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Retry delete task')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete task "Retry delete task"' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm delete task "Retry delete task"' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Retry delete task "Retry delete task"' })).toBeInTheDocument()
+      expect(screen.getByText('Retry delete task')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry delete task "Retry delete task"' }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Retry delete task')).not.toBeInTheDocument()
+      expect(deleteAttemptCount).toBe(2)
+    })
+  })
 })

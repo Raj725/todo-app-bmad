@@ -1,6 +1,6 @@
 # Story 2.2: Delete Task with Lightweight Confirmation
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -37,6 +37,15 @@ so that my list stays relevant and uncluttered.
 - [x] Add/extend tests for delete paths (AC: 1, 2)
   - [x] Backend tests: `DELETE /todos/{todo_id}` success (204), not-found 404 error envelope
   - [x] Frontend tests: delete success removes item, rollback on failure, scoped error feedback, confirm/cancel flow, concurrent pending IDs via Set
+
+### Review Follow-ups (AI)
+
+- [x] [AI-Review][High] Add UI-level test coverage for delete confirm/cancel/retry interaction in list rendering flow; current app-level suite contains no delete interaction assertions. [frontend/src/app/App.test.tsx:1]
+- [x] [AI-Review][High] Prevent stale rollback overwrite during concurrent deletes by rolling back only the failed item (or by merge-safe reconciliation) instead of restoring whole `previousTodos` snapshot. [frontend/src/features/todos/hooks/useDeleteTodoMutation.ts:1]
+- [x] [AI-Review][Medium] Fix repository return type contract for `delete` to reflect `None` on not-found (`bool | None`), matching implementation and docstring. [backend/app/repositories/todo_repository.py:32]
+- [x] [AI-Review][Medium] Update backend service README endpoint documentation to include delete capability (`DELETE /todos/{todo_id}`). [backend/README.md:1]
+- [x] [AI-Review][Medium] Update frontend API integration README section to include `DELETE /todos/{todo_id}` usage. [frontend/README.md:1]
+- [x] [AI-Review][Medium] Document review context when working tree is clean (implementation reviewed from commit `5bbf361` because working tree was clean at review start). [_bmad-output/implementation-artifacts/2-2-delete-task-with-lightweight-confirmation.md:1]
 
 ## Dev Notes
 
@@ -195,8 +204,29 @@ frontend/src/features/todos/hooks/useDeleteTodoMutation.test.ts
 frontend/src/features/todos/components/TodoList.tsx
 frontend/src/app/App.tsx
 
+### Senior Developer Review (AI)
+
+- Reviewer: Raj
+- Date: 2026-03-06
+- Outcome: Changes Requested
+- Summary:
+  - AC 1 is largely implemented end-to-end (delete endpoint, service/repository path, optimistic client mutation, inline confirm UX, retry affordance).
+  - AC 2 is partially validated in hook/API tests, but UI-level delete confirmation/retry behavior is not covered in the app/component test layer.
+  - Concurrency safety gap identified: concurrent delete rollback restores full snapshot and can transiently reintroduce successfully deleted items until refetch settles.
+  - Documentation parity gap identified for both frontend and backend READMEs (missing delete endpoint mention).
+  - Story moved to `in-progress` pending follow-up completion.
+
+- Follow-up remediation (2026-03-06):
+  - Applied per-item rollback logic in delete mutation to avoid concurrent stale-list restoration.
+  - Added app-level tests for delete confirm/cancel and failed-delete retry flows.
+  - Updated backend/frontend READMEs to include delete endpoint/API integration parity.
+  - Verified with targeted frontend tests, frontend lint, and full backend test suite.
+  - Final outcome: Approved after fixes.
+
 ### Change Log
 
 - 2026-03-06: feat(story-2.2): implement delete task with lightweight confirmation — added DELETE /todos/{todo_id} API endpoint (204/404), deleteTodo adapter, useDeleteTodoMutation hook with optimistic removal and rollback, per-item inline confirm/cancel UX in TodoList, scoped error with retry, App.tsx wiring (14 backend + 34 frontend tests passing)
+- 2026-03-06: Senior Developer Review (AI) completed — 2 High and 4 Medium findings recorded; follow-up tasks added under `Review Follow-ups (AI)`; status moved to `in-progress`.
+- 2026-03-06: Applied all review follow-up fixes (high + medium), validated via tests/lint, and moved story to `done`.
 
 ```

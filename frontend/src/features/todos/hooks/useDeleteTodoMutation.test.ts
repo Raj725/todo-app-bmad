@@ -175,4 +175,68 @@ describe('useDeleteTodoMutation', () => {
       expect(result.current.failedDeleteTodoId).toBeNull()
     })
   })
+
+  it('does not restore a successfully deleted sibling todo when another concurrent delete fails', async () => {
+    let resolveDeleteFive: (value: Response) => void
+    let resolveDeleteNine: (value: Response) => void
+
+    const deleteFiveResponse = new Promise<Response>((resolve) => {
+      resolveDeleteFive = resolve
+    })
+
+    const deleteNineResponse = new Promise<Response>((resolve) => {
+      resolveDeleteNine = resolve
+    })
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos/5')) {
+        return deleteFiveResponse
+      }
+
+      if (url.endsWith('/todos/9')) {
+        return deleteNineResponse
+      }
+
+      return { ok: true, status: 204 } as Response
+    })
+
+    const todos: Todo[] = [
+      seedTodo({ id: 5, description: 'Delete succeeds' }),
+      seedTodo({ id: 9, description: 'Delete fails' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, todos)
+
+    const { result } = renderHook(() => useDeleteTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 5 })
+    })
+    act(() => {
+      result.current.mutate({ todoId: 9 })
+    })
+
+    await waitFor(() => {
+      const current = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      expect(current.find((todo) => todo.id === 5)).toBeUndefined()
+      expect(current.find((todo) => todo.id === 9)).toBeUndefined()
+    })
+
+    resolveDeleteFive!({ ok: true, status: 204 } as Response)
+    resolveDeleteNine!({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { message: 'delete failed for 9' } }),
+    } as Response)
+
+    await waitFor(() => {
+      const current = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      expect(current.find((todo) => todo.id === 5)).toBeUndefined()
+      expect(current.find((todo) => todo.id === 9)).toBeDefined()
+      expect(result.current.failedDeleteTodoId).toBe(9)
+    })
+  })
 })
