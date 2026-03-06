@@ -172,3 +172,17 @@ test('failed mutation remains scoped and does not block unrelated task actions',
   await page.getByRole('button', { name: 'Mark task "Should still work" as complete' }).click()
   await expect(page.getByRole('button', { name: 'Mark task "Should still work" as active' })).toBeVisible()
 })
+
+test('real backend integration works without CORS errors', async ({ page }) => {
+  const description = `CORS integration task ${Date.now()}`
+
+  await page.goto('/')
+
+  await expect(page.getByRole('heading', { name: 'Todo App' })).toBeVisible()
+  await expect(page.getByText('Unable to load tasks.')).not.toBeVisible()
+
+  await page.getByLabel('Task description').fill(description)
+  await page.getByRole('button', { name: 'Quick add task' }).click()
+
+  await expect(page.getByText(description)).toBeVisible()
+})

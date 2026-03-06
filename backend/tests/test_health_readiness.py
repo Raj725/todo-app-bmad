@@ -62,6 +62,38 @@ class HealthReadinessTests(unittest.TestCase):
 
         self.assertEqual(payload, {"status": "ready"})
 
+    def test_todos_simple_cors_response_includes_allow_origin_for_frontend(self) -> None:
+        request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            headers={"Origin": "http://localhost:5173"},
+            method="GET",
+        )
+
+        with urllib.request.urlopen(request) as response:
+            self.assertEqual(response.status, 200)
+            self.assertEqual(
+                response.headers.get("Access-Control-Allow-Origin"),
+                "http://localhost:5173",
+            )
+
+    def test_todos_preflight_cors_response_includes_required_headers(self) -> None:
+        request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "GET",
+            },
+            method="OPTIONS",
+        )
+
+        with urllib.request.urlopen(request) as response:
+            self.assertEqual(response.status, 200)
+            self.assertEqual(
+                response.headers.get("Access-Control-Allow-Origin"),
+                "http://localhost:5173",
+            )
+            self.assertIn("GET", response.headers.get("Access-Control-Allow-Methods", ""))
+
 
 if __name__ == "__main__":
     unittest.main()
