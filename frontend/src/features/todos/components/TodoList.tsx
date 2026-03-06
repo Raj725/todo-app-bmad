@@ -66,6 +66,7 @@ export function TodoList({
   return (
     <ul>
       {sortedTodos.map((todo) => {
+        const isOptimisticCreate = todo.id < 0
         const isTogglePending = pendingTodoIds.has(todo.id)
         const isEditPending = pendingTodoIds.has(todo.id)
         const isDeletePending = pendingDeleteIds.has(todo.id)
@@ -120,6 +121,7 @@ export function TodoList({
             ) : (
               <p>
                 {todo.description} {todo.isCompleted ? <strong>Completed</strong> : <strong>Active</strong>}
+                {isOptimisticCreate ? <strong> Pending</strong> : null}
               </p>
             )}
             <p>Created: {todo.createdAt}</p>

@@ -5,17 +5,20 @@ import { createTodo } from '../api/createTodo'
 import type { Todo } from '../types'
 import { TODOS_QUERY_KEY } from './useTodosQuery'
 
+type CreateTodoContext = {
+  optimisticTodoId: number
+}
+
 export function useCreateTodoMutation() {
   const queryClient = useQueryClient()
   const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null)
 
   const mutation = useMutation({
     mutationFn: createTodo,
-    onMutate: async (description) => {
+    onMutate: async (description): Promise<CreateTodoContext> => {
       await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY })
       setCreateErrorMessage(null)
 
-      const previousTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
       const optimisticTodo: Todo = {
         id: -Date.now(),
         description,
@@ -23,13 +26,15 @@ export function useCreateTodoMutation() {
         createdAt: new Date().toISOString(),
       }
 
-      queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [...previousTodos, optimisticTodo])
+      queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) => [...currentTodos, optimisticTodo])
 
-      return { previousTodos, optimisticTodoId: optimisticTodo.id }
+      return { optimisticTodoId: optimisticTodo.id }
     },
     onError: (error, _description, context) => {
-      if (context?.previousTodos) {
-        queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, context.previousTodos)
+      if (context?.optimisticTodoId !== undefined) {
+        queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
+          currentTodos.filter((todo) => todo.id !== context.optimisticTodoId),
+        )
       }
 
       setCreateErrorMessage(error instanceof Error ? error.message : 'Unable to create task.')

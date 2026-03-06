@@ -7,6 +7,7 @@ import { TODOS_QUERY_KEY } from './useTodosQuery'
 
 type DeleteTodoContext = {
   deletedTodo: Todo | null
+  deletedTodoIndex: number
 }
 
 export function useDeleteTodoMutation() {
@@ -24,6 +25,7 @@ export function useDeleteTodoMutation() {
 
       const previousTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
       const deletedTodo = previousTodos.find((todo) => todo.id === variables.todoId) ?? null
+      const deletedTodoIndex = previousTodos.findIndex((todo) => todo.id === variables.todoId)
 
       setPendingDeleteIds((prev) => new Set([...prev, variables.todoId]))
       setFailedDeleteTodoIds((current) => {
@@ -42,18 +44,21 @@ export function useDeleteTodoMutation() {
         currentTodos.filter((todo) => todo.id !== variables.todoId),
       )
 
-      return { deletedTodo }
+      return { deletedTodo, deletedTodoIndex }
     },
     onError: (error, variables, context) => {
-      // Rollback only the failed item to avoid stale overwrite during concurrent deletes.
-      if (context?.deletedTodo) {
+      if (context?.deletedTodo && context.deletedTodoIndex >= 0) {
         const deletedTodo = context.deletedTodo
         queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) => {
           if (currentTodos.some((todo) => todo.id === deletedTodo.id)) {
             return currentTodos
           }
 
-          return [...currentTodos, deletedTodo]
+          const restoreIndex = Math.min(context.deletedTodoIndex, currentTodos.length)
+          const nextTodos = [...currentTodos]
+          nextTodos.splice(restoreIndex, 0, deletedTodo)
+
+          return nextTodos
         })
       }
       setFailedDeleteTodoIds((current) => new Set([...current, variables.todoId]))
