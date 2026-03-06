@@ -10,6 +10,9 @@
 - [ ] MCP doc search performed (or web fallback) and references captured
 - [ ] Acceptance Criteria cross-checked against implementation
 - [ ] File List reviewed and validated for completeness
+- [ ] README parity verified for each changed service (frontend/backend): run, test, env, and DB/migration commands are accurate
+- [ ] README update required for any service change is enforced (or explicit "No README impact" rationale recorded)
+- [ ] Documentation ownership confirmed: implementing developer/agent owns README updates for touched services; reviewer enforces
 - [ ] Tests identified and mapped to ACs; gaps noted
 - [ ] Code quality review performed on changed files
 - [ ] Security review performed on changed files and dependencies

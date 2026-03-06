@@ -50,10 +50,12 @@ validation-rules:
 ## 📝 Documentation & Tracking
 
 - [ ] **File List Complete:** File List includes EVERY new, modified, or deleted file (paths relative to repo root)
+- [ ] **README Sync (Mandatory):** For any service change (frontend/backend), the corresponding service README is updated in the same story (or explicitly marked "No README impact" with rationale)
 - [ ] **Dev Agent Record Updated:** Contains relevant Implementation Notes and/or Debug Log for this work
 - [ ] **Change Log Updated:** Change Log includes clear summary of what changed and why
 - [ ] **Review Follow-ups:** All review follow-up tasks (marked [AI-Review]) completed and corresponding review items marked resolved (if applicable)
 - [ ] **Story Structure Compliance:** Only permitted sections of story file were modified
+- [ ] **Documentation Ownership Applied:** Implementing developer/agent is recorded as responsible for README and command documentation updates for touched services
 
 ## 🔚 Final Status Verification
 
