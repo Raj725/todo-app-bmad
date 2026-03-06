@@ -34,12 +34,12 @@ afterEach(() => {
 })
 
 describe('useUpdateTodoMutation', () => {
-  it('exposes empty pendingTodoIds Set and null failedTodoId on initial render', () => {
+  it('exposes empty pendingTodoIds and failedToggleTodoIds Sets on initial render', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
 
     expect(result.current.pendingTodoIds).toEqual(new Set())
-    expect(result.current.failedTodoId).toBeNull()
+    expect(result.current.failedToggleTodoIds).toEqual(new Set())
   })
 
   it('adds todoId to pendingTodoIds while mutation is in-flight and removes it on successful settle', async () => {
@@ -81,7 +81,7 @@ describe('useUpdateTodoMutation', () => {
     })
   })
 
-  it('sets failedTodoId and rolls back the optimistic update when the PATCH fails', async () => {
+  it('tracks failed toggle id and rolls back the optimistic update when the PATCH fails', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 500,
@@ -99,7 +99,7 @@ describe('useUpdateTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedTodoId).toBe(7)
+      expect(result.current.failedToggleTodoIds.has(7)).toBe(true)
     })
 
     const todos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)
@@ -139,7 +139,7 @@ describe('useUpdateTodoMutation', () => {
     })
   })
 
-  it('clears failedTodoId on the next successful mutation for the same todo', async () => {
+  it('clears failed toggle id on the next successful mutation for the same todo', async () => {
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce({
         ok: false,
@@ -169,7 +169,7 @@ describe('useUpdateTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedTodoId).toBe(3)
+      expect(result.current.failedToggleTodoIds.has(3)).toBe(true)
     })
 
     act(() => {
@@ -177,7 +177,61 @@ describe('useUpdateTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedTodoId).toBeNull()
+      expect(result.current.failedToggleTodoIds.has(3)).toBe(false)
+    })
+  })
+
+  it('maintains actionable ordering after failed optimistic toggle rollback', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { message: 'server error' } }),
+    } as Response)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 91, description: 'Newest active', isCompleted: false, createdAt: '2026-03-06T10:00:00.000Z' }),
+      seedTodo({ id: 92, description: 'Older active', isCompleted: false, createdAt: '2026-03-06T09:00:00.000Z' }),
+      seedTodo({ id: 93, description: 'Completed', isCompleted: true, createdAt: '2026-03-06T08:00:00.000Z' }),
+    ])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 91, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedToggleTodoIds.has(91)).toBe(true)
+    })
+
+    const rolledBackTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+    expect(rolledBackTodos.map((todo) => todo.id)).toEqual([91, 92, 93])
+  })
+
+  it('tracks concurrent failed toggles independently', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { message: 'server error' } }),
+    } as Response)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 101, description: 'Task 101' }),
+      seedTodo({ id: 102, description: 'Task 102' }),
+    ])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 101, isCompleted: true })
+      result.current.mutate({ todoId: 102, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedToggleTodoIds.has(101)).toBe(true)
+      expect(result.current.failedToggleTodoIds.has(102)).toBe(true)
     })
   })
 
@@ -268,5 +322,31 @@ describe('useUpdateTodoMutation', () => {
     await waitFor(() => {
       expect(result.current.failedDescriptionTodoIds.has(14)).toBe(false)
     })
+  })
+
+  it('reorders cached todos immediately on optimistic toggle using active-first policy', async () => {
+    const deferredResponse = new Promise<Response>(() => undefined)
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => deferredResponse)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 21, description: 'Will complete', isCompleted: false, createdAt: '2026-03-06T10:00:00.000Z' }),
+      seedTodo({ id: 20, description: 'Older active', isCompleted: false, createdAt: '2026-03-06T08:00:00.000Z' }),
+      seedTodo({ id: 22, description: 'Existing completed', isCompleted: true, createdAt: '2026-03-06T09:00:00.000Z' }),
+    ])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 21, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.pendingTodoIds.has(21)).toBe(true)
+    })
+
+    const optimisticallyOrderedTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+    expect(optimisticallyOrderedTodos.map((todo) => todo.id)).toEqual([20, 21, 22])
   })
 })

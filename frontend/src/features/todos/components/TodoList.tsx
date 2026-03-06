@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { sortTodosByActionableOrder } from '../orderTodos'
 import type { Todo } from '../types'
 
 type TodoListProps = {
   todos: Todo[]
   pendingTodoIds: Set<number>
-  failedTodoId: number | null
+  failedToggleTodoIds: Set<number>
   failedEditTodoIds: Set<number>
   onToggleTodo: (todo: Todo) => void
   onEditTodo: (todo: Todo, description: string) => void
@@ -13,25 +14,10 @@ type TodoListProps = {
   onDeleteTodo: (todo: Todo) => void
 }
 
-const sortTodos = (todos: Todo[]): Todo[] => {
-  return [...todos].sort((left, right) => {
-    if (left.isCompleted !== right.isCompleted) {
-      return left.isCompleted ? 1 : -1
-    }
-
-    const createdAtDiff = new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-    if (!Number.isNaN(createdAtDiff) && createdAtDiff !== 0) {
-      return createdAtDiff
-    }
-
-    return right.id - left.id
-  })
-}
-
 export function TodoList({
   todos,
   pendingTodoIds,
-  failedTodoId,
+  failedToggleTodoIds,
   failedEditTodoIds,
   onToggleTodo,
   onEditTodo,
@@ -44,7 +30,7 @@ export function TodoList({
   const [editDraft, setEditDraft] = useState('')
   const [editValidationError, setEditValidationError] = useState<string | null>(null)
   const [lastSubmittedEdits, setLastSubmittedEdits] = useState<Record<number, string>>({})
-  const sortedTodos = sortTodos(todos)
+  const sortedTodos = sortTodosByActionableOrder(todos)
 
   const startEditing = (todo: Todo) => {
     setEditTodoId(todo.id)
@@ -84,6 +70,7 @@ export function TodoList({
         const hasEditError = failedEditTodoIds.has(todo.id)
         const isEditing = editTodoId === todo.id
         const canRetryEdit = Boolean(lastSubmittedEdits[todo.id])
+        const hasToggleError = failedToggleTodoIds.has(todo.id)
 
         return (
           <li key={todo.id}>
@@ -140,7 +127,7 @@ export function TodoList({
                   ? 'Mark active'
                   : 'Mark complete'}
             </button>
-            {failedTodoId === todo.id && <p role="alert">Unable to update task status.</p>}
+            {hasToggleError && <p role="alert">Unable to update task status.</p>}
 
             {!isEditing && (
               <button

@@ -371,6 +371,93 @@ describe('Task list and quick-add flows', () => {
     expect(screen.getByRole('button', { name: 'Mark task "Stable task" as complete' })).toBeInTheDocument()
   })
 
+  it('repositions task back into active section when toggled from completed to active', async () => {
+    let toggleRequested = false
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        if (toggleRequested) {
+          return {
+            ok: true,
+            json: async () => ({
+              data: [
+                {
+                  id: 61,
+                  description: 'Alpha completed',
+                  is_completed: false,
+                  created_at: '2026-03-06T10:00:00.000Z',
+                },
+                {
+                  id: 62,
+                  description: 'Beta active',
+                  is_completed: false,
+                  created_at: '2026-03-06T09:00:00.000Z',
+                },
+              ],
+            }),
+          } as Response
+        }
+
+        return {
+          ok: true,
+          json: async () => ({
+            data: [
+              {
+                id: 61,
+                description: 'Alpha completed',
+                is_completed: true,
+                created_at: '2026-03-06T10:00:00.000Z',
+              },
+              {
+                id: 62,
+                description: 'Beta active',
+                is_completed: false,
+                created_at: '2026-03-06T09:00:00.000Z',
+              },
+            ],
+          }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/61') && init?.method === 'PATCH') {
+        toggleRequested = true
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              id: 61,
+              description: 'Alpha completed',
+              is_completed: false,
+              created_at: '2026-03-06T10:00:00.000Z',
+            },
+          }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Alpha completed')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Mark task "Alpha completed" as active' }))
+
+    await waitFor(() => {
+      expect(toggleRequested).toBe(true)
+      expect(screen.getByRole('button', { name: 'Mark task "Alpha completed" as complete' })).toBeInTheDocument()
+      expect(screen.getAllByText('Active').length).toBeGreaterThan(0)
+    })
+
+    const items = screen.getAllByRole('listitem')
+    expect(within(items[0]).getByText('Alpha completed')).toBeInTheDocument()
+    expect(within(items[1]).getByText('Beta active')).toBeInTheDocument()
+  })
+
   it('supports inline edit save and persists updated description through PATCH', async () => {
     let serverTodos = [
       {

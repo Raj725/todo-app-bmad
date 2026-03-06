@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { updateTodo, type UpdateTodoInput } from '../api/updateTodo'
+import { sortTodosByActionableOrder } from '../orderTodos'
 import type { Todo } from '../types'
 import { TODOS_QUERY_KEY } from './useTodosQuery'
 
@@ -12,7 +13,7 @@ type UpdateTodoContext = {
 export function useUpdateTodoMutation() {
   const queryClient = useQueryClient()
   const [pendingTodoIds, setPendingTodoIds] = useState<Set<number>>(() => new Set())
-  const [failedTodoId, setFailedTodoId] = useState<number | null>(null)
+  const [failedToggleTodoIds, setFailedToggleTodoIds] = useState<Set<number>>(() => new Set())
   const [failedDescriptionTodoIds, setFailedDescriptionTodoIds] = useState<Set<number>>(() => new Set())
 
   const mutation = useMutation({
@@ -32,20 +33,26 @@ export function useUpdateTodoMutation() {
         })
       }
       if (typeof variables.isCompleted === 'boolean') {
-        setFailedTodoId((current) => (current === variables.todoId ? null : current))
+        setFailedToggleTodoIds((current) => {
+          const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
 
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
-        currentTodos.map((todo) =>
-          todo.id === variables.todoId
-            ? {
-                ...todo,
-                isCompleted:
-                  typeof variables.isCompleted === 'boolean' ? variables.isCompleted : todo.isCompleted,
-                description:
-                  typeof variables.description === 'string' ? variables.description : todo.description,
-              }
-            : todo,
+        sortTodosByActionableOrder(
+          currentTodos.map((todo) =>
+            todo.id === variables.todoId
+              ? {
+                  ...todo,
+                  isCompleted:
+                    typeof variables.isCompleted === 'boolean' ? variables.isCompleted : todo.isCompleted,
+                  description:
+                    typeof variables.description === 'string' ? variables.description : todo.description,
+                }
+              : todo,
+          ),
         ),
       )
 
@@ -54,7 +61,9 @@ export function useUpdateTodoMutation() {
     onError: (_error, variables, context) => {
       if (context?.previousTodo) {
         queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
-          currentTodos.map((todo) => (todo.id === context.previousTodo?.id ? context.previousTodo : todo)),
+          sortTodosByActionableOrder(
+            currentTodos.map((todo) => (todo.id === context.previousTodo?.id ? context.previousTodo : todo)),
+          ),
         )
       }
 
@@ -62,7 +71,7 @@ export function useUpdateTodoMutation() {
         setFailedDescriptionTodoIds((current) => new Set([...current, variables.todoId]))
       }
       if (typeof variables.isCompleted === 'boolean') {
-        setFailedTodoId(variables.todoId)
+        setFailedToggleTodoIds((current) => new Set([...current, variables.todoId]))
       }
     },
     onSuccess: (updatedTodo, variables) => {
@@ -74,10 +83,16 @@ export function useUpdateTodoMutation() {
         })
       }
       if (typeof variables.isCompleted === 'boolean') {
-        setFailedTodoId((current) => (current === variables.todoId ? null : current))
+        setFailedToggleTodoIds((current) => {
+          const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
-        currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
+        sortTodosByActionableOrder(
+          currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
+        ),
       )
     },
     onSettled: async (_data, _error, variables) => {
@@ -93,7 +108,7 @@ export function useUpdateTodoMutation() {
   return {
     ...mutation,
     pendingTodoIds,
-    failedTodoId,
+    failedToggleTodoIds,
     failedDescriptionTodoIds,
   }
 }

@@ -30,7 +30,7 @@ function App() {
         <TodoList
           todos={todosQuery.data}
           pendingTodoIds={updateTodoMutation.pendingTodoIds}
-          failedTodoId={updateTodoMutation.failedTodoId}
+          failedToggleTodoIds={updateTodoMutation.failedToggleTodoIds}
           failedEditTodoIds={updateTodoMutation.failedDescriptionTodoIds}
           onToggleTodo={(todo) => {
             updateTodoMutation.mutate({

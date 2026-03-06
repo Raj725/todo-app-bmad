@@ -51,7 +51,7 @@ development_status:
   2-1-toggle-task-complete-and-incomplete-from-list: done
   2-2-delete-task-with-lightweight-confirmation: done
   2-3-edit-task-description-in-context: done
-  2-4-enforce-actionable-ordering-and-status-clarity: backlog
+  2-4-enforce-actionable-ordering-and-status-clarity: done
   epic-2-retrospective: optional
 
   epic-3: backlog
