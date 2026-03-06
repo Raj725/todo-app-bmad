@@ -190,6 +190,7 @@ Claude Sonnet 4.6
 - All controls use semantic `<button>` elements with descriptive `aria-label` attributes.
 - Backend: 14/14 tests pass (3 new delete tests added). Frontend: 34/34 tests pass (10 new tests added across adapter, hook, no regressions).
 - TypeScript type-check clean. ESLint clean.
+- Fixed Playwright E2E smoke test CI failure by broadening route interception in `frontend/tests/e2e/todo-smoke.spec.ts` from `**/todos` to a matcher that also covers `PATCH /todos/{id}`; this prevents unmocked toggle requests from rolling back optimistic UI state in CI.
 
 ### File List
 
@@ -203,6 +204,7 @@ frontend/src/features/todos/hooks/useDeleteTodoMutation.ts
 frontend/src/features/todos/hooks/useDeleteTodoMutation.test.ts
 frontend/src/features/todos/components/TodoList.tsx
 frontend/src/app/App.tsx
+frontend/tests/e2e/todo-smoke.spec.ts
 
 ### Senior Developer Review (AI)
 
@@ -228,5 +230,6 @@ frontend/src/app/App.tsx
 - 2026-03-06: feat(story-2.2): implement delete task with lightweight confirmation — added DELETE /todos/{todo_id} API endpoint (204/404), deleteTodo adapter, useDeleteTodoMutation hook with optimistic removal and rollback, per-item inline confirm/cancel UX in TodoList, scoped error with retry, App.tsx wiring (14 backend + 34 frontend tests passing)
 - 2026-03-06: Senior Developer Review (AI) completed — 2 High and 4 Medium findings recorded; follow-up tasks added under `Review Follow-ups (AI)`; status moved to `in-progress`.
 - 2026-03-06: Applied all review follow-up fixes (high + medium), validated via tests/lint, and moved story to `done`.
+- 2026-03-06: Fixed frontend Playwright smoke test route interception to include item-level `PATCH /todos/{id}` calls, resolving CI E2E failure where the post-toggle "as active" button was not found.
 
 ```

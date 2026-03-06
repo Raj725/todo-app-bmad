@@ -7,6 +7,7 @@ Completes Story 2.2 (`Delete Task with Lightweight Confirmation`) by addressing 
 - Added app-level UI tests for delete confirm/cancel and failed-delete retry flows in `App.test.tsx`.
 - Corrected backend repository contract: `TodoRepository.delete` now returns `bool | None` (matches implementation and docstring).
 - Updated backend and frontend READMEs to include `DELETE /todos/{todo_id}` endpoint/API integration parity.
+- Fixed Playwright E2E smoke test interception in `frontend/tests/e2e/todo-smoke.spec.ts` so mocked routes include item-level `PATCH /todos/{id}` requests (prevents CI-only optimistic rollback mismatch).
 - Updated story artifact and sprint tracking:
   - Story `2-2-delete-task-with-lightweight-confirmation` moved to `done`.
   - `_bmad-output/implementation-artifacts/sprint-status.yaml` synced to `done`.
