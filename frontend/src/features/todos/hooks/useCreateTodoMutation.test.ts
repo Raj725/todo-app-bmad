@@ -34,6 +34,29 @@ afterEach(() => {
 })
 
 describe('useCreateTodoMutation', () => {
+  it('assigns unique optimistic ids for concurrent creates even if Date.now matches', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000)
+    vi.spyOn(globalThis, 'fetch').mockReturnValue(new Promise(() => undefined))
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [seedTodo({ id: 20, description: 'Existing task' })])
+
+    const { result } = renderHook(() => useCreateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate('First optimistic task')
+      result.current.mutate('Second optimistic task')
+    })
+
+    await waitFor(() => {
+      const todos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      const optimisticTodos = todos.filter((todo) => todo.id < 0)
+
+      expect(optimisticTodos).toHaveLength(2)
+      expect(new Set(optimisticTodos.map((todo) => todo.id)).size).toBe(2)
+    })
+  })
+
   it('adds an optimistic todo row immediately while create is pending', async () => {
     vi.spyOn(globalThis, 'fetch').mockReturnValue(new Promise(() => undefined))
 
@@ -85,5 +108,51 @@ describe('useCreateTodoMutation', () => {
     const todosAfterFailure = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
     expect(todosAfterFailure.map((todo) => todo.description)).toEqual(['Stable task'])
     expect(todosAfterFailure.find((todo) => todo.description === 'Will rollback')).toBeUndefined()
+  })
+
+  it('does not append a duplicate created todo when cache already has authoritative item before onSuccess', async () => {
+    let resolveResponse: (value: Response) => void
+    const deferredResponse = new Promise<Response>((resolve) => {
+      resolveResponse = resolve
+    })
+
+    vi.spyOn(globalThis, 'fetch').mockReturnValue(deferredResponse)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [seedTodo({ id: 1, description: 'Existing task' })])
+
+    const { result } = renderHook(() => useCreateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate('Race created task')
+    })
+
+    await waitFor(() => {
+      const todos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      expect(todos.some((todo) => todo.description === 'Race created task')).toBe(true)
+    })
+
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 1, description: 'Existing task' }),
+      seedTodo({ id: 999, description: 'Race created task' }),
+    ])
+
+    resolveResponse!({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        data: {
+          id: 999,
+          description: 'Race created task',
+          is_completed: false,
+          created_at: '2026-03-06T10:00:00.000Z',
+        },
+      }),
+    } as Response)
+
+    await waitFor(() => {
+      const todos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      expect(todos.filter((todo) => todo.id === 999)).toHaveLength(1)
+    })
   })
 })

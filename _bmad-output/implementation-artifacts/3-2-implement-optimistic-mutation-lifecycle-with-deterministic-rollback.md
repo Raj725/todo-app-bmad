@@ -1,6 +1,6 @@
 # Story 3.2: Implement Optimistic Mutation Lifecycle with Deterministic Rollback
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -209,8 +209,34 @@ GPT-5.3-Codex
 - frontend/src/features/todos/hooks/useDeleteTodoMutation.test.ts
 - frontend/src/features/todos/components/TodoList.test.tsx
 - frontend/tests/e2e/todo-smoke.spec.ts
+- _bmad-output/implementation-artifacts/3-2-implement-optimistic-mutation-lifecycle-with-deterministic-rollback.md
+- _bmad-output/implementation-artifacts/sprint-status.yaml
 
 ### Change Log
 
 - 2026-03-06: Story created and prepared for implementation handoff (`ready-for-dev`).
 - 2026-03-06: Implemented Story 3.2 optimistic mutation lifecycle with deterministic rollback, scoped feedback/retry, E2E failure isolation, and passed quality gates; status moved to `review`.
+- 2026-03-06: Senior Developer Review (AI) identified and fixed optimistic create lifecycle defects (ID-collision rollback risk and create-success duplicate race), added regression tests, and moved status to `done`.
+
+### Senior Developer Review (AI)
+
+Reviewer: Raj (GPT-5.3-Codex)
+Date: 2026-03-06
+Outcome: Approved after fixes
+
+#### Findings
+
+- HIGH: Optimistic create IDs were generated from `-Date.now()`, which can collide for concurrent creates in the same millisecond and cause rollback to remove multiple optimistic rows.
+- MEDIUM: Create `onSuccess` could append a duplicate authoritative todo when the cache already contained the server item due to refetch race timing.
+- MEDIUM: No regression tests existed to protect against optimistic-create ID collision and duplicate-authoritative insertion race behavior.
+
+#### Fixes Applied
+
+- Updated optimistic ID generation in `useCreateTodoMutation` to derive a unique negative ID from current cache state.
+- Hardened create `onSuccess` merge logic to avoid appending duplicate authoritative todos by ID.
+- Added focused regression tests in `useCreateTodoMutation.test.ts` for concurrent unique optimistic IDs and duplicate-race prevention.
+
+#### Validation Evidence
+
+- `cd frontend && npm run test -- src/features/todos/hooks/useCreateTodoMutation.test.ts` (pass)
+- `cd frontend && npm run lint` (pass)
