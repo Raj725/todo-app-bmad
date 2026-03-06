@@ -210,4 +210,43 @@ describe('useCreateTodoMutation', () => {
       expect(todos.find((todo) => todo.description === 'Retry created task')?.id).toBe(77)
     })
   })
+
+  it('reconciles to authoritative backend list on settle even when todos query is inactive', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        data: {
+          id: 500,
+          description: 'Client optimistic create',
+          is_completed: false,
+          created_at: '2026-03-06T10:20:00.000Z',
+        },
+      }),
+    } as Response)
+
+    const authoritativeTodos: Todo[] = [
+      seedTodo({ id: 601, description: 'Persisted backend task', createdAt: '2026-03-06T10:30:00.000Z' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryDefaults(TODOS_QUERY_KEY, {
+      queryFn: async () => authoritativeTodos,
+    })
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [seedTodo({ id: 1, description: 'Initial cache task' })])
+
+    const { result } = renderHook(() => useCreateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate('Client optimistic create')
+    })
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true)
+    })
+
+    await waitFor(() => {
+      expect(queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)).toEqual(authoritativeTodos)
+    })
+  })
 })

@@ -312,3 +312,102 @@ test('delete workflow supports cancel, scoped error, and retry success', async (
   await expect(page.getByText('Keep task')).toBeVisible()
   await expect(page.getByText('Delete failed for selected task.')).not.toBeVisible()
 })
+
+test('mutation failure then retry success reconciles after reload to persisted backend truth', async ({ page }) => {
+  const todos: TodoApiItem[] = [
+    {
+      id: 1,
+      description: 'Retry then reload task',
+      is_completed: false,
+      created_at: '2026-03-06T15:30:01.000Z',
+    },
+    {
+      id: 2,
+      description: 'Unaffected persisted task',
+      is_completed: false,
+      created_at: '2026-03-06T15:30:02.000Z',
+    },
+  ]
+  let toggleAttemptCount = 0
+
+  await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todos }),
+      })
+      return
+    }
+
+    if (route.request().method() === 'PATCH') {
+      const todoId = Number(route.request().url().split('/').pop())
+      const updateBody = route.request().postDataJSON() as { is_completed: boolean }
+
+      if (todoId !== 1) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            error: {
+              code: 'TODO_NOT_FOUND',
+              message: 'Todo not found',
+              details: [],
+              request_id: 'req-reconcile-not-found',
+            },
+          }),
+        })
+        return
+      }
+
+      toggleAttemptCount += 1
+      if (toggleAttemptCount === 1) {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            error: {
+              code: 'TODO_UPDATE_FAILED',
+              message: 'Toggle failed once.',
+              details: [],
+              request_id: 'req-reconcile-toggle-1',
+            },
+          }),
+        })
+        return
+      }
+
+      const todo = todos.find((item) => item.id === todoId)!
+      todo.is_completed = updateBody.is_completed
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todo }),
+      })
+      return
+    }
+
+    await route.fallback()
+  })
+
+  await page.goto('/')
+
+  await expect(page.getByText('Retry then reload task')).toBeVisible()
+  await expect(page.getByText('Unaffected persisted task')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Mark task "Retry then reload task" as complete' }).click()
+  await expect(page.getByText('Toggle failed once.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retry toggle task "Retry then reload task"' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Retry toggle task "Retry then reload task"' }).click()
+  await expect(page.getByRole('button', { name: 'Mark task "Retry then reload task" as active' })).toBeVisible()
+  await expect(page.getByText('Toggle failed once.')).not.toBeVisible()
+
+  await page.reload()
+
+  await expect(page.getByText('Retry then reload task')).toBeVisible()
+  await expect(page.getByText('Unaffected persisted task')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Mark task "Retry then reload task" as active' })).toBeVisible()
+  await expect(page.getByText('Toggle failed once.')).not.toBeVisible()
+})

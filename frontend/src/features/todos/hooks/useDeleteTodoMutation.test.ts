@@ -269,4 +269,35 @@ describe('useDeleteTodoMutation', () => {
     const todosAfterRollback = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
     expect(todosAfterRollback.map((todo) => todo.id)).toEqual([41, 42, 43])
   })
+
+  it('reconciles to authoritative backend list on settle even when todos query is inactive', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true, status: 204 } as Response)
+
+    const authoritativeTodos: Todo[] = [
+      seedTodo({ id: 83, description: 'Persisted survivor', createdAt: '2026-03-06T11:00:00.000Z' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryDefaults(TODOS_QUERY_KEY, {
+      queryFn: async () => authoritativeTodos,
+    })
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 82, description: 'Client deleted item' }),
+      seedTodo({ id: 83, description: 'Persisted survivor' }),
+    ])
+
+    const { result } = renderHook(() => useDeleteTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 82 })
+    })
+
+    await waitFor(() => {
+      expect(result.current.pendingDeleteIds.has(82)).toBe(false)
+    })
+
+    await waitFor(() => {
+      expect(queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)).toEqual(authoritativeTodos)
+    })
+  })
 })
