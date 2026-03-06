@@ -14,7 +14,12 @@ persona:
   principles: []
 
 # Add custom critical actions (appended after standard config loading)
-critical_actions: []
+critical_actions:
+  - "NEVER perform implementation work directly on main."
+  - "Before editing files, create or switch to a short-lived branch named with a prefix: feat/, fix/, chore/, or docs/."
+  - "Balance PR volume: prefer one PR per coherent story/bug, but batching tightly related small items in the same area is allowed when still easy to review."
+  - "At completion of that coherent scope, commit changes, push the branch to origin, and create a pull request targeting main."
+  - "If a PR cannot be created automatically due to missing auth/tooling, provide exact commands and keep the task marked pending until PR creation is completed."
 
 # Add persistent memories for the agent
 memories: []

@@ -159,3 +159,7 @@ cp .env.example .env
 ### Reusable Template for Non-BMAD Workflows
 
 - Use `docs/process/documentation-governance.md` as the standard ownership + checklist template in any workflow.
+
+### Branch + PR Workflow (Balanced)
+
+- Use `docs/process/git-branch-pr-governance.md` for branch naming, PR sizing balance, and completion checklist.
