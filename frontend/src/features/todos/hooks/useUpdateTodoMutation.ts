@@ -49,8 +49,8 @@ export function useUpdateTodoMutation() {
         currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
       )
     },
-    onSettled: async () => {
-      setPendingTodoId(null)
+    onSettled: async (_data, _error, variables) => {
+      setPendingTodoId((current) => (current === variables.todoId ? null : current))
       await queryClient.invalidateQueries({ queryKey: TODOS_QUERY_KEY })
     },
   })
