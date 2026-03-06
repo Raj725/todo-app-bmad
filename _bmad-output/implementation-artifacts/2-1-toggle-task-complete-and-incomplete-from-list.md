@@ -1,6 +1,6 @@
 # Story 2.1: Toggle Task Complete and Incomplete from List
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -167,6 +167,7 @@ GPT-5.3-Codex
 - Added/updated tests for backend patch success + validation/not-found and frontend toggle success + rollback + ordering.
 - Updated `backend/README.md` and `frontend/README.md` to document new toggle endpoint/behavior.
 - Validation results: `python3 -m pytest -q` (11 passed), `npm run lint` (pass), `npm run test` (18 passed).
+- Code review (2026-03-06): Fixed M2 — `updateTodo` now reads the standardized error envelope body and surfaces the server error message instead of always throwing a generic message. Fixed M3 — `pendingTodoIds` changed from `number | null` to `Set<number>` in the hook, `TodoList`, and `App`, enabling correct concurrent toggle tracking. Fixed L1 — `formatCreatedAt` simplified to return the original server-sent string, eliminating UTC re-serialization that would silently drop timezone offset data. Added L2 — `useUpdateTodoMutation.test.ts` with 5 dedicated hook-level tests (initial state, in-flight Set tracking, rollback on failure, concurrent IDs, failure-then-recovery). Accepted: Playwright E2E dependency, `todo-smoke.spec.ts`, CI `frontend-e2e` job, and BMAD framework updates (branch policy injection in `dev-story` workflow). Post-review validation: `npm run test` (24 passed).
 
 ### File List
 
@@ -186,9 +187,18 @@ GPT-5.3-Codex
 - frontend/src/features/todos/api/updateTodo.ts
 - frontend/src/features/todos/components/TodoList.tsx
 - frontend/src/features/todos/hooks/useUpdateTodoMutation.ts
+- frontend/src/features/todos/hooks/useUpdateTodoMutation.test.ts
 - frontend/README.md
+- frontend/package.json
+- frontend/package-lock.json
+- frontend/playwright.config.ts
+- frontend/vitest.config.ts
+- frontend/tests/e2e/todo-smoke.spec.ts
+- .github/workflows/tests.yml
+- _bmad-output/implementation-artifacts/tests/test-summary.md
 
 ## Change Log
 
 - 2026-03-06: Story created and status set to `ready-for-dev`; Epic 2 moved to `in-progress`.
 - 2026-03-06: Implemented backend/frontend complete-incomplete toggle flow, added tests, updated docs, and moved story to `review`.
+- 2026-03-06: Code review complete — fixed M2 (error envelope surfacing), M3 (concurrent pendingTodoIds Set), L1 (formatCreatedAt no-op), L2 (hook unit tests); accepted Playwright E2E and BMAD workflow additions; moved to `done`.

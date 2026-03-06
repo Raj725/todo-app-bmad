@@ -2,7 +2,7 @@ import type { Todo } from '../types'
 
 type TodoListProps = {
   todos: Todo[]
-  pendingTodoId: number | null
+  pendingTodoIds: Set<number>
   failedTodoId: number | null
   onToggleTodo: (todo: Todo) => void
 }
@@ -12,7 +12,7 @@ const formatCreatedAt = (createdAt: string): string => {
   if (Number.isNaN(date.getTime())) {
     return createdAt
   }
-  return date.toISOString()
+  return createdAt
 }
 
 const sortTodos = (todos: Todo[]): Todo[] => {
@@ -30,7 +30,7 @@ const sortTodos = (todos: Todo[]): Todo[] => {
   })
 }
 
-export function TodoList({ todos, pendingTodoId, failedTodoId, onToggleTodo }: TodoListProps) {
+export function TodoList({ todos, pendingTodoIds, failedTodoId, onToggleTodo }: TodoListProps) {
   const sortedTodos = sortTodos(todos)
 
   return (
@@ -44,10 +44,10 @@ export function TodoList({ todos, pendingTodoId, failedTodoId, onToggleTodo }: T
           <button
             type="button"
             onClick={() => onToggleTodo(todo)}
-            disabled={pendingTodoId === todo.id}
+            disabled={pendingTodoIds.has(todo.id)}
             aria-label={`Mark task "${todo.description}" as ${todo.isCompleted ? 'active' : 'complete'}`}
           >
-            {pendingTodoId === todo.id
+            {pendingTodoIds.has(todo.id)
               ? 'Updating task...'
               : todo.isCompleted
                 ? 'Mark active'
