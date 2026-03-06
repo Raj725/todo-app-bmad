@@ -22,3 +22,9 @@ class TodoResponse(BaseModel):
     description: str
     is_completed: bool
     created_at: datetime
+
+
+class TodoUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    is_completed: bool

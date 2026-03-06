@@ -181,6 +181,74 @@ class TodoCreateIntegrationTests(unittest.TestCase):
         descriptions = [item["description"] for item in payload["data"]]
         self.assertEqual(descriptions, ["Second task", "First task"])
 
+    def test_patch_todo_updates_is_completed_and_returns_success_envelope(self) -> None:
+        create_request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            data=json.dumps({"description": "Toggle me"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(create_request) as create_response:
+            created = json.loads(create_response.read().decode("utf-8"))["data"]
+
+        patch_request = urllib.request.Request(
+            f"{self.base_url}/todos/{created['id']}",
+            data=json.dumps({"is_completed": True}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="PATCH",
+        )
+        with urllib.request.urlopen(patch_request) as patch_response:
+            payload = json.loads(patch_response.read().decode("utf-8"))
+            status_code = patch_response.status
+
+        self.assertEqual(status_code, 200)
+        self.assertIn("data", payload)
+        self.assertEqual(payload["data"]["id"], created["id"])
+        self.assertEqual(payload["data"]["description"], "Toggle me")
+        self.assertIs(payload["data"]["is_completed"], True)
+
+        with sqlite3.connect(self.test_db_path) as connection:
+            row = connection.execute(
+                "SELECT is_completed FROM todos WHERE id = ?",
+                (created["id"],),
+            ).fetchone()
+            self.assertEqual(row[0], 1)
+
+    def test_patch_todo_validation_and_not_found_errors_return_error_envelope(self) -> None:
+        invalid_payload_request = urllib.request.Request(
+            f"{self.base_url}/todos/99999",
+            data=json.dumps({"description": "no updates allowed"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="PATCH",
+        )
+
+        with self.assertRaises(urllib.error.HTTPError) as invalid_payload_context:
+            urllib.request.urlopen(invalid_payload_request)
+
+        self.assertEqual(invalid_payload_context.exception.code, 400)
+        invalid_payload_response = json.loads(invalid_payload_context.exception.read().decode("utf-8"))
+        self.assertEqual(invalid_payload_response["error"]["code"], "VALIDATION_ERROR")
+        self.assertEqual(invalid_payload_response["error"]["message"], "Request validation failed")
+        self.assertIsInstance(invalid_payload_response["error"]["details"], list)
+        self.assertTrue(invalid_payload_response["error"]["request_id"])
+
+        not_found_request = urllib.request.Request(
+            f"{self.base_url}/todos/99999",
+            data=json.dumps({"is_completed": True}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="PATCH",
+        )
+
+        with self.assertRaises(urllib.error.HTTPError) as not_found_context:
+            urllib.request.urlopen(not_found_request)
+
+        self.assertEqual(not_found_context.exception.code, 404)
+        not_found_response = json.loads(not_found_context.exception.read().decode("utf-8"))
+        self.assertEqual(not_found_response["error"]["code"], "NOT_FOUND")
+        self.assertEqual(not_found_response["error"]["message"], "Todo not found")
+        self.assertEqual(not_found_response["error"]["details"], [])
+        self.assertTrue(not_found_response["error"]["request_id"])
+
 
 if __name__ == "__main__":
     unittest.main()

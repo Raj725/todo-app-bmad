@@ -4,6 +4,7 @@
 <critical>You MUST have already loaded and processed: {project-root}/_bmad/bmm/workflows/4-implementation/correct-course/workflow.yaml</critical>
 <critical>Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}</critical>
 <critical>Generate all documents in {document_output_language}</critical>
+<critical>For each new story/bug produced by this workflow, implementation handoff MUST include dedicated branch guidance: `feat/<story-key>` for feature stories and `fix/<story-key>` for bug/fix work.</critical>
 
 <critical>DOCUMENT OUTPUT: Updated epics, stories, or PRD sections. Clear, actionable changes. User skill level ({user_skill_level}) affects conversation style ONLY, not document updates.</critical>
 
@@ -169,6 +170,7 @@
 
 <check if="Minor scope">
   <action>Route to: Development team for direct implementation</action>
+  <action>Include explicit git branch instruction in handoff: create/switch to `feat/<story-key>` for story work or `fix/<story-key>` for bug/fix work before editing code</action>
   <action>Deliverables: Finalized edit proposals and implementation tasks</action>
 </check>
 

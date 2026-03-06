@@ -230,4 +230,144 @@ describe('Task list and quick-add flows', () => {
       expect(screen.getByText('Immediate task')).toBeInTheDocument()
     })
   })
+
+  it('toggles a task to completed with scoped pending state and active-first ordering', async () => {
+    let toggleRequested = false
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        if (toggleRequested) {
+          return {
+            ok: true,
+            json: async () => ({
+              data: [
+                {
+                  id: 11,
+                  description: 'Alpha active',
+                  is_completed: true,
+                  created_at: '2026-03-06T10:00:00.000Z',
+                },
+                {
+                  id: 12,
+                  description: 'Beta active',
+                  is_completed: false,
+                  created_at: '2026-03-06T09:00:00.000Z',
+                },
+              ],
+            }),
+          } as Response
+        }
+
+        return {
+          ok: true,
+          json: async () => ({
+            data: [
+              {
+                id: 11,
+                description: 'Alpha active',
+                is_completed: false,
+                created_at: '2026-03-06T10:00:00.000Z',
+              },
+              {
+                id: 12,
+                description: 'Beta active',
+                is_completed: false,
+                created_at: '2026-03-06T09:00:00.000Z',
+              },
+            ],
+          }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/11') && init?.method === 'PATCH') {
+        toggleRequested = true
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              id: 11,
+              description: 'Alpha active',
+              is_completed: true,
+              created_at: '2026-03-06T10:00:00.000Z',
+            },
+          }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Alpha active')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Mark task "Alpha active" as complete' }))
+
+    await waitFor(() => {
+      expect(toggleRequested).toBe(true)
+      expect(screen.getByRole('button', { name: 'Mark task "Alpha active" as active' })).toBeInTheDocument()
+      expect(screen.getByText('Completed')).toBeInTheDocument()
+    })
+
+    const items = screen.getAllByRole('listitem')
+    expect(within(items[0]).getByText('Beta active')).toBeInTheDocument()
+    expect(within(items[1]).getByText('Alpha active')).toBeInTheDocument()
+  })
+
+  it('rolls back optimistic toggle and shows scoped error on update failure', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: [
+              {
+                id: 31,
+                description: 'Fail toggle task',
+                is_completed: false,
+                created_at: '2026-03-06T08:00:00.000Z',
+              },
+              {
+                id: 32,
+                description: 'Stable task',
+                is_completed: false,
+                created_at: '2026-03-06T07:00:00.000Z',
+              },
+            ],
+          }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/31') && init?.method === 'PATCH') {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({ error: { message: 'update failed' } }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Fail toggle task')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Mark task "Fail toggle task" as complete' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Mark task "Fail toggle task" as complete' })).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Unable to update task status.')
+    })
+
+    expect(screen.getByRole('button', { name: 'Mark task "Stable task" as complete' })).toBeInTheDocument()
+  })
 })

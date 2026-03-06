@@ -11,6 +11,8 @@ It is built with React + TypeScript + Vite and uses TanStack Query for server st
 - Task list with loading and empty states
 - Immediate feedback for task creation (optimistic UI)
 - Inline error and retry affordance on create failures
+- In-list complete/incomplete toggle with optimistic updates and rollback on failure
+- Active-first deterministic ordering with clear active/completed status labels
 - API envelope validation at the client boundary
 
 ## Tech Stack
@@ -112,6 +114,8 @@ cd frontend && npm run preview
 - `npm run dev` - start Vite dev server
 - `npm run build` - type-check and build
 - `npm run test` - run Vitest suite
+- `npm run test:e2e` - run Playwright browser E2E tests
+- `npm run test:e2e:ui` - run Playwright in interactive UI mode
 - `npm run lint` - run ESLint
 - `npm run preview` - preview production build
 
@@ -121,6 +125,7 @@ The frontend currently consumes:
 
 - `GET /todos`
 - `POST /todos`
+- `PATCH /todos/{todo_id}`
 
 Response conventions expected by adapters:
 
@@ -139,6 +144,18 @@ From repository root:
 
 ```bash
 cd frontend && npm run test
+```
+
+Run browser E2E tests:
+
+```bash
+npm run test:e2e
+```
+
+From repository root:
+
+```bash
+cd frontend && npm run test:e2e
 ```
 
 Run linting:
@@ -161,13 +178,17 @@ Frontend-related checks:
 
 - Frontend tests: `npm run test`
 - Frontend lint: `npm run lint`
+- Frontend E2E: `npm run test:e2e`
 
 Run both locally before opening or updating a PR:
 
 ```bash
 npm run test
 npm run lint
+npm run test:e2e
 ```
+
+If the E2E job fails in CI, open the failed GitHub Actions run and download the `playwright-artifacts` bundle to inspect the HTML report, traces, screenshots, and videos.
 
 ## Troubleshooting
 
