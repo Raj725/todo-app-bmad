@@ -108,14 +108,16 @@ cd backend && python3 -m alembic revision -m "describe-change"
 Start the API locally from the backend directory:
 
 ```bash
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+python3 -m alembic upgrade head && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 From repository root:
 
 ```bash
-cd backend && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+cd backend && python3 -m alembic upgrade head && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+This ensures schema migrations are applied before the API starts serving traffic in local and CI-style runs.
 
 Interactive API docs:
 
