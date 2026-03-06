@@ -114,6 +114,8 @@ cd frontend && npm run preview
 - `npm run dev` - start Vite dev server
 - `npm run build` - type-check and build
 - `npm run test` - run Vitest suite
+- `npm run test:e2e` - run Playwright browser E2E tests
+- `npm run test:e2e:ui` - run Playwright in interactive UI mode
 - `npm run lint` - run ESLint
 - `npm run preview` - preview production build
 
@@ -144,6 +146,18 @@ From repository root:
 cd frontend && npm run test
 ```
 
+Run browser E2E tests:
+
+```bash
+npm run test:e2e
+```
+
+From repository root:
+
+```bash
+cd frontend && npm run test:e2e
+```
+
 Run linting:
 
 ```bash
@@ -164,13 +178,17 @@ Frontend-related checks:
 
 - Frontend tests: `npm run test`
 - Frontend lint: `npm run lint`
+- Frontend E2E: `npm run test:e2e`
 
 Run both locally before opening or updating a PR:
 
 ```bash
 npm run test
 npm run lint
+npm run test:e2e
 ```
+
+If the E2E job fails in CI, open the failed GitHub Actions run and download the `playwright-artifacts` bundle to inspect the HTML report, traces, screenshots, and videos.
 
 ## Troubleshooting
 
