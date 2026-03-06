@@ -9,11 +9,14 @@ const noop = vi.fn()
 const baseProps = {
   pendingTodoIds: new Set<number>(),
   failedToggleTodoIds: new Set<number>(),
+  failedToggleErrorMessages: new Map<number, string>(),
   failedEditTodoIds: new Set<number>(),
+  failedEditErrorMessages: new Map<number, string>(),
   onToggleTodo: noop,
   onEditTodo: noop,
   pendingDeleteIds: new Set<number>(),
   failedDeleteTodoIds: new Set<number>(),
+  failedDeleteErrorMessages: new Map<number, string>(),
   onDeleteTodo: noop,
 }
 

@@ -1,6 +1,6 @@
 # Story 3.1: Standardized Error Envelope and Client Error Normalization
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -170,12 +170,20 @@ GPT-5.3-Codex
 - ✅ Added frontend tests for normalizer utility and adapter behavior with standardized envelopes and malformed-body fallback.
 - ✅ Quality gates passed: `python3 -m pytest -q`, focused frontend Vitest suite, and `npm run lint`.
 - ✅ No README impact for this story; service commands and usage remain unchanged.
+- ✅ Code review follow-up fixed: normalized mutation error messages now flow from API adapters to hooks and render inline per affected action (quick add, toggle, edit, delete).
+- ✅ Code review follow-up fixed: backend error handlers now build envelopes through typed `ErrorResponse` schema for stronger contract consistency.
+- ✅ Code review follow-up fixed: backend integration coverage now includes `PATCH /todos/not-an-int` validation envelope and mutation not-found envelope assertions.
+- ✅ Code review follow-up fixed: `App.test.tsx` now uses complete standardized error envelopes for failure-path mocks.
+- ✅ Verification rerun passed after fixes: targeted frontend suite, full frontend suite, focused backend envelope tests, full backend suite, and frontend lint.
 
 ### File List
 
 - _bmad-output/implementation-artifacts/3-1-standardized-error-envelope-and-client-error-normalization.md
 - _bmad-output/implementation-artifacts/sprint-status.yaml
 - backend/tests/test_api_error_responses.py
+- backend/app/api/error_handlers.py
+- frontend/src/app/App.tsx
+- frontend/src/app/App.test.tsx
 - frontend/src/features/todos/api/normalizeTodoApiError.ts
 - frontend/src/features/todos/api/normalizeTodoApiError.test.ts
 - frontend/src/features/todos/api/createTodo.ts
@@ -184,8 +192,15 @@ GPT-5.3-Codex
 - frontend/src/features/todos/api/createTodo.test.ts
 - frontend/src/features/todos/api/updateTodo.test.ts
 - frontend/src/features/todos/api/deleteTodo.test.ts
+- frontend/src/features/todos/components/TodoQuickAdd.tsx
+- frontend/src/features/todos/components/TodoList.tsx
+- frontend/src/features/todos/components/TodoList.test.tsx
+- frontend/src/features/todos/hooks/useCreateTodoMutation.ts
+- frontend/src/features/todos/hooks/useUpdateTodoMutation.ts
+- frontend/src/features/todos/hooks/useDeleteTodoMutation.ts
 
 ### Change Log
 
 - 2026-03-06: Story created and prepared for implementation handoff (`ready-for-dev`).
 - 2026-03-06: Implemented standardized mutation error normalization across frontend adapters and extended backend/frontend envelope test coverage; quality gates passed and story moved to `review`.
+- 2026-03-06: Addressed code-review findings by wiring normalized messages into scoped UI feedback, typing backend error envelope construction, extending mutation envelope integration tests, and updating envelope fidelity in app-level tests; full validations passed and story moved to `done`.
