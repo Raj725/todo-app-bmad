@@ -66,4 +66,16 @@ describe('TodoList', () => {
     expect(screen.getByText('Active')).toBeInTheDocument()
     expect(screen.getByText('Completed')).toBeInTheDocument()
   })
+
+  it('shows a pending affordance for optimistic create rows', () => {
+    render(
+      <TodoList
+        todos={[todo({ id: -99, description: 'Optimistic task', isCompleted: false })]}
+        {...baseProps}
+      />,
+    )
+
+    expect(screen.getByText('Optimistic task')).toBeInTheDocument()
+    expect(screen.getByText('Pending')).toBeInTheDocument()
+  })
 })

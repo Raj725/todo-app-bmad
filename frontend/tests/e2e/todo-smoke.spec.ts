@@ -84,3 +84,91 @@ test('quick add and toggle complete in browser', async ({ page }) => {
   await expect(page.getByText('Completed')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Mark task "Playwright smoke task" as active' })).toBeVisible()
 })
+
+test('failed mutation remains scoped and does not block unrelated task actions', async ({ page }) => {
+  const todos: TodoApiItem[] = [
+    {
+      id: 1,
+      description: 'Will fail toggle',
+      is_completed: false,
+      created_at: '2026-03-06T15:00:01.000Z',
+    },
+    {
+      id: 2,
+      description: 'Should still work',
+      is_completed: false,
+      created_at: '2026-03-06T15:00:02.000Z',
+    },
+  ]
+
+  await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todos }),
+      })
+      return
+    }
+
+    if (route.request().method() === 'PATCH') {
+      const todoId = Number(route.request().url().split('/').pop())
+      const updateBody = route.request().postDataJSON() as { is_completed: boolean }
+
+      if (todoId === 1) {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            error: {
+              code: 'TODO_UPDATE_FAILED',
+              message: 'Toggle failed for first task.',
+              details: [],
+              request_id: 'req-toggle-fail-1',
+            },
+          }),
+        })
+        return
+      }
+
+      const todo = todos.find((item) => item.id === todoId)
+      if (!todo) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            error: {
+              code: 'TODO_NOT_FOUND',
+              message: 'Todo not found',
+              details: [],
+              request_id: 'req-not-found',
+            },
+          }),
+        })
+        return
+      }
+
+      todo.is_completed = updateBody.is_completed
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todo }),
+      })
+      return
+    }
+
+    await route.fallback()
+  })
+
+  await page.goto('/')
+
+  await expect(page.getByText('Will fail toggle')).toBeVisible()
+  await expect(page.getByText('Should still work')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Mark task "Will fail toggle" as complete' }).click()
+  await expect(page.getByText('Toggle failed for first task.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Mark task "Should still work" as complete' }).click()
+  await expect(page.getByRole('button', { name: 'Mark task "Should still work" as active' })).toBeVisible()
+})

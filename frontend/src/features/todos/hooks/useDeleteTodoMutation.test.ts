@@ -239,4 +239,34 @@ describe('useDeleteTodoMutation', () => {
       expect(result.current.failedDeleteTodoIds.has(9)).toBe(true)
     })
   })
+
+  it('restores a failed delete at its deterministic previous position', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { message: 'server error' } }),
+    } as Response)
+
+    const todos: Todo[] = [
+      seedTodo({ id: 41, description: 'First item' }),
+      seedTodo({ id: 42, description: 'Target item' }),
+      seedTodo({ id: 43, description: 'Last item' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, todos)
+
+    const { result } = renderHook(() => useDeleteTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 42 })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedDeleteTodoIds.has(42)).toBe(true)
+    })
+
+    const todosAfterRollback = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+    expect(todosAfterRollback.map((todo) => todo.id)).toEqual([41, 42, 43])
+  })
 })
