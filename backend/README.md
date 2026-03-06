@@ -10,6 +10,7 @@ It is built with FastAPI and SQLAlchemy and exposes health, readiness, and todo 
 - Health and readiness probes
 - Create todo endpoint with request validation and error envelope handling
 - List todos endpoint with success envelope responses
+- Update todo completion endpoint (`PATCH /todos/{todo_id}`) with not-found + validation envelope handling
 - Database access through SQLAlchemy session management
 - Alembic migration support
 
@@ -123,6 +124,7 @@ Interactive API docs:
 - GET /ready
 - POST /todos
 - GET /todos
+- PATCH /todos/{todo_id}
 
 Response pattern:
 

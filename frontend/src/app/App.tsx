@@ -3,11 +3,13 @@ import { TodoListEmptyState } from '../features/todos/components/TodoListEmptySt
 import { TodoListLoadingState } from '../features/todos/components/TodoListLoadingState'
 import { TodoQuickAdd } from '../features/todos/components/TodoQuickAdd'
 import { useCreateTodoMutation } from '../features/todos/hooks/useCreateTodoMutation'
+import { useUpdateTodoMutation } from '../features/todos/hooks/useUpdateTodoMutation'
 import { useTodosQuery } from '../features/todos/hooks/useTodosQuery'
 
 function App() {
   const todosQuery = useTodosQuery()
   const createTodoMutation = useCreateTodoMutation()
+  const updateTodoMutation = useUpdateTodoMutation()
 
   return (
     <main>
@@ -23,7 +25,17 @@ function App() {
         <TodoListEmptyState />
       )}
       {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length > 0 && (
-        <TodoList todos={todosQuery.data} />
+        <TodoList
+          todos={todosQuery.data}
+          pendingTodoId={updateTodoMutation.pendingTodoId}
+          failedTodoId={updateTodoMutation.failedTodoId}
+          onToggleTodo={(todo) => {
+            updateTodoMutation.mutate({
+              todoId: todo.id,
+              isCompleted: !todo.isCompleted,
+            })
+          }}
+        />
       )}
     </main>
   )

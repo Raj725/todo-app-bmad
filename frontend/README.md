@@ -11,6 +11,8 @@ It is built with React + TypeScript + Vite and uses TanStack Query for server st
 - Task list with loading and empty states
 - Immediate feedback for task creation (optimistic UI)
 - Inline error and retry affordance on create failures
+- In-list complete/incomplete toggle with optimistic updates and rollback on failure
+- Active-first deterministic ordering with clear active/completed status labels
 - API envelope validation at the client boundary
 
 ## Tech Stack
@@ -121,6 +123,7 @@ The frontend currently consumes:
 
 - `GET /todos`
 - `POST /todos`
+- `PATCH /todos/{todo_id}`
 
 Response conventions expected by adapters:
 

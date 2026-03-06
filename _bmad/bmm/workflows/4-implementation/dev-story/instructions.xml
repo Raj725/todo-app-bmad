@@ -11,6 +11,7 @@
     other instruction.</critical>
   <critical>Do NOT schedule a "next session" or request review pauses unless a HALT condition applies. Only Step 6 decides completion.</critical>
   <critical>User skill level ({user_skill_level}) affects conversation style ONLY, not code updates.</critical>
+  <critical>For EVERY new story or bug implementation, create or switch to a dedicated git branch BEFORE code changes. Use `feat/{{story_key}}` for feature stories and `fix/{{story_key}}` for bug/fix stories.</critical>
 
   <step n="1" goal="Find next ready story and load it" tag="sprint-status">
     <check if="{{story_path}} is provided">
@@ -187,7 +188,20 @@
     </check>
   </step>
 
-  <step n="4" goal="Mark story in-progress" tag="sprint-status">
+  <step n="4" goal="Create/switch branch and mark story in-progress" tag="sprint-status">
+    <action>Determine branch type from story context:</action>
+    <action>- If story title/key indicates bug, defect, hotfix, or fix work, set branch_prefix = "fix/"</action>
+    <action>- Otherwise set branch_prefix = "feat/"</action>
+    <action>Set target_branch = {{branch_prefix}}{{story_key}}</action>
+    <action>Check current git branch status</action>
+    <check if="current branch != target_branch">
+      <action>Create and switch to target_branch if it does not exist; otherwise switch to existing target_branch</action>
+      <action>Confirm active branch is target_branch before proceeding</action>
+    </check>
+    <check if="branch switch/create fails due to local git constraints">
+      <action>ASK user how to proceed and HALT implementation until branch policy is satisfied</action>
+    </check>
+
     <check if="{{sprint_status}} file exists">
       <action>Load the FULL file: {{sprint_status}}</action>
       <action>Read all development_status entries to find {{story_key}}</action>

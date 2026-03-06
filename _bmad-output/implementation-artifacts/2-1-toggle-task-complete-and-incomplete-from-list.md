@@ -1,6 +1,6 @@
 # Story 2.1: Toggle Task Complete and Incomplete from List
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -17,24 +17,24 @@ so that I can track progress without leaving context.
 
 ## Tasks / Subtasks
 
-- [ ] Add backend update capability for completion toggling through existing API boundaries (AC: 1, 2)
-  - [ ] Add `PATCH /todos/{todo_id}` route in `backend/app/api/routes/todos.py` using standardized success envelope response model
-  - [ ] Add `TodoUpdateRequest` schema in `backend/app/schemas/todo.py` for `is_completed` updates with strict validation
-  - [ ] Extend `TodoService` and `TodoRepository` with update-by-id behavior and not-found handling consistent with existing error envelope middleware
-- [ ] Add frontend update adapter and mutation hook for in-list toggling (AC: 1, 2)
-  - [ ] Add `updateTodo` API function in `frontend/src/features/todos/api/` for `PATCH /todos/{todo_id}` with runtime envelope guards
-  - [ ] Add `useUpdateTodoMutation` hook in `frontend/src/features/todos/hooks/` with optimistic toggle, rollback on failure, and list query reconciliation
-  - [ ] Keep error handling scoped to affected task action and preserve usability for unaffected items
-- [ ] Implement in-list complete/incomplete controls and clear status distinction (AC: 1, 2)
-  - [ ] Update `TodoList` row rendering in `frontend/src/features/todos/components/TodoList.tsx` to include a toggle control per item
-  - [ ] Add clear visual distinction for completed items (for example label/text style/affordance) without introducing new pages or modal flows
-  - [ ] Ensure toggle actions are keyboard-operable and use semantic controls
-- [ ] Enforce actionable ordering after state changes (AC: 2)
-  - [ ] Update list rendering strategy so active tasks remain prioritized ahead of completed tasks
-  - [ ] Ensure ordering remains deterministic after optimistic toggle and authoritative refetch
-- [ ] Add/extend tests for complete and uncomplete paths (AC: 1, 2)
-  - [ ] Backend tests for `PATCH /todos/{todo_id}` success and validation/not-found behavior
-  - [ ] Frontend tests for toggle success, rollback on failure, status styling, and active-first ordering after mutation
+- [x] Add backend update capability for completion toggling through existing API boundaries (AC: 1, 2)
+  - [x] Add `PATCH /todos/{todo_id}` route in `backend/app/api/routes/todos.py` using standardized success envelope response model
+  - [x] Add `TodoUpdateRequest` schema in `backend/app/schemas/todo.py` for `is_completed` updates with strict validation
+  - [x] Extend `TodoService` and `TodoRepository` with update-by-id behavior and not-found handling consistent with existing error envelope middleware
+- [x] Add frontend update adapter and mutation hook for in-list toggling (AC: 1, 2)
+  - [x] Add `updateTodo` API function in `frontend/src/features/todos/api/` for `PATCH /todos/{todo_id}` with runtime envelope guards
+  - [x] Add `useUpdateTodoMutation` hook in `frontend/src/features/todos/hooks/` with optimistic toggle, rollback on failure, and list query reconciliation
+  - [x] Keep error handling scoped to affected task action and preserve usability for unaffected items
+- [x] Implement in-list complete/incomplete controls and clear status distinction (AC: 1, 2)
+  - [x] Update `TodoList` row rendering in `frontend/src/features/todos/components/TodoList.tsx` to include a toggle control per item
+  - [x] Add clear visual distinction for completed items (for example label/text style/affordance) without introducing new pages or modal flows
+  - [x] Ensure toggle actions are keyboard-operable and use semantic controls
+- [x] Enforce actionable ordering after state changes (AC: 2)
+  - [x] Update list rendering strategy so active tasks remain prioritized ahead of completed tasks
+  - [x] Ensure ordering remains deterministic after optimistic toggle and authoritative refetch
+- [x] Add/extend tests for complete and uncomplete paths (AC: 1, 2)
+  - [x] Backend tests for `PATCH /todos/{todo_id}` success and validation/not-found behavior
+  - [x] Frontend tests for toggle success, rollback on failure, status styling, and active-first ordering after mutation
 
 ## Dev Notes
 
@@ -141,6 +141,15 @@ so that I can track progress without leaving context.
 
 GPT-5.3-Codex
 
+### Implementation Plan
+
+- Add backend update contract and route for completion toggling with strict request validation.
+- Add service/repository update-by-id behavior and emit standardized not-found error envelope.
+- Add frontend update adapter and optimistic mutation hook with rollback and query reconciliation.
+- Update list UI with semantic toggle controls, status distinction, and active-first deterministic ordering.
+- Extend backend and frontend tests for success, validation/not-found, rollback, and ordering behaviors.
+- Run full backend and frontend validation suites and update service READMEs.
+
 ### Debug Log References
 
 - Auto-selected first backlog story from `sprint-status.yaml`: `2-1-toggle-task-complete-and-incomplete-from-list`.
@@ -149,15 +158,37 @@ GPT-5.3-Codex
 
 ### Completion Notes List
 
-- Created comprehensive implementation-ready context for Story 2.1.
-- Included backend + frontend work breakdown for completion toggling.
-- Included testing guardrails and ordering/status-clarity requirements.
+- Implemented `PATCH /todos/{todo_id}` with `TodoUpdateRequest` strict payload validation.
+- Added repository/service update flow and `TodoNotFoundError` handling mapped to standardized 404 error envelope.
+- Added frontend `updateTodo` adapter with runtime success-envelope validation and snake_case→camelCase mapping.
+- Added `useUpdateTodoMutation` with optimistic toggle, rollback-on-failure, scoped pending state, and authoritative refetch.
+- Updated `TodoList` with semantic per-item toggle buttons, status labels, scoped error messaging, and deterministic active-first ordering.
+- Updated app wiring to perform in-list complete/incomplete mutation from the list row.
+- Added/updated tests for backend patch success + validation/not-found and frontend toggle success + rollback + ordering.
+- Updated `backend/README.md` and `frontend/README.md` to document new toggle endpoint/behavior.
+- Validation results: `python3 -m pytest -q` (11 passed), `npm run lint` (pass), `npm run test` (18 passed).
 
 ### File List
 
 - _bmad-output/implementation-artifacts/2-1-toggle-task-complete-and-incomplete-from-list.md
 - _bmad-output/implementation-artifacts/sprint-status.yaml
+- backend/app/api/error_handlers.py
+- backend/app/api/routes/todos.py
+- backend/app/main.py
+- backend/app/repositories/todo_repository.py
+- backend/app/schemas/todo.py
+- backend/app/services/todo_service.py
+- backend/tests/test_todo_create.py
+- backend/README.md
+- frontend/src/app/App.test.tsx
+- frontend/src/app/App.tsx
+- frontend/src/features/todos/api/updateTodo.test.ts
+- frontend/src/features/todos/api/updateTodo.ts
+- frontend/src/features/todos/components/TodoList.tsx
+- frontend/src/features/todos/hooks/useUpdateTodoMutation.ts
+- frontend/README.md
 
 ## Change Log
 
 - 2026-03-06: Story created and status set to `ready-for-dev`; Epic 2 moved to `in-progress`.
+- 2026-03-06: Implemented backend/frontend complete-incomplete toggle flow, added tests, updated docs, and moved story to `review`.
