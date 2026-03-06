@@ -349,4 +349,116 @@ describe('useUpdateTodoMutation', () => {
     const optimisticallyOrderedTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
     expect(optimisticallyOrderedTodos.map((todo) => todo.id)).toEqual([20, 21, 22])
   })
+
+  it('reconciles to authoritative backend list on settle even when todos query is inactive', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: {
+          id: 73,
+          description: 'Client toggled state',
+          is_completed: true,
+          created_at: '2026-03-06T10:00:00.000Z',
+        },
+      }),
+    } as Response)
+
+    const authoritativeTodos: Todo[] = [
+      seedTodo({ id: 73, description: 'Persisted backend state', isCompleted: false, createdAt: '2026-03-06T11:00:00.000Z' }),
+      seedTodo({ id: 74, description: 'Another persisted task', isCompleted: false, createdAt: '2026-03-06T10:30:00.000Z' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryDefaults(TODOS_QUERY_KEY, {
+      queryFn: async () => authoritativeTodos,
+    })
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 73, description: 'Client toggled state', isCompleted: false }),
+    ])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 73, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.pendingTodoIds.has(73)).toBe(false)
+    })
+
+    await waitFor(() => {
+      expect(queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)).toEqual(authoritativeTodos)
+    })
+  })
+
+  it('reconciles mixed failure then retry success to persisted backend truth', async () => {
+    let attempt = 0
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      attempt += 1
+
+      if (attempt === 1) {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({
+            error: {
+              code: 'TODO_UPDATE_FAILED',
+              message: 'toggle failed once',
+              details: [],
+              request_id: 'req-reconcile-retry-1',
+            },
+          }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            id: 91,
+            description: 'Client retry success',
+            is_completed: true,
+            created_at: '2026-03-06T10:00:00.000Z',
+          },
+        }),
+      } as Response
+    })
+
+    const authoritativeTodos: Todo[] = [
+      seedTodo({ id: 91, description: 'Persisted backend truth', isCompleted: true, createdAt: '2026-03-06T12:00:00.000Z' }),
+      seedTodo({ id: 92, description: 'Persisted sibling', isCompleted: false, createdAt: '2026-03-06T11:00:00.000Z' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryDefaults(TODOS_QUERY_KEY, {
+      queryFn: async () => authoritativeTodos,
+    })
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 91, description: 'Initial client state', isCompleted: false }),
+    ])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 91, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedToggleTodoIds.has(91)).toBe(true)
+    })
+
+    act(() => {
+      result.current.mutate({ todoId: 91, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedToggleTodoIds.has(91)).toBe(false)
+    })
+
+    await waitFor(() => {
+      expect(queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)).toEqual(authoritativeTodos)
+    })
+  })
 })

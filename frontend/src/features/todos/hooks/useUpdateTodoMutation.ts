@@ -139,7 +139,10 @@ export function useUpdateTodoMutation() {
         next.delete(variables.todoId)
         return next
       })
-      await queryClient.invalidateQueries({ queryKey: TODOS_QUERY_KEY })
+      await queryClient.invalidateQueries({
+        queryKey: TODOS_QUERY_KEY,
+        refetchType: 'all',
+      })
     },
   })
 

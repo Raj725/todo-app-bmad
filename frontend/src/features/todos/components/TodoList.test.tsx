@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { TodoList } from './TodoList'
@@ -77,5 +77,94 @@ describe('TodoList', () => {
 
     expect(screen.getByText('Optimistic task')).toBeInTheDocument()
     expect(screen.getByText('Pending')).toBeInTheDocument()
+  })
+
+  it('shows scoped toggle retry control with explicit accessible label when toggle fails', () => {
+    const onToggleTodo = vi.fn()
+    render(
+      <TodoList
+        todos={[todo({ id: 44, description: 'Toggle retry item', isCompleted: false })]}
+        {...baseProps}
+        onToggleTodo={onToggleTodo}
+        failedToggleTodoIds={new Set([44])}
+        failedToggleErrorMessages={new Map([[44, 'Toggle failed for selected task.']])}
+      />,
+    )
+
+    expect(screen.getByText('Toggle failed for selected task.')).toBeInTheDocument()
+    const retryButton = screen.getByRole('button', { name: 'Retry toggle task "Toggle retry item"' })
+    expect(retryButton).toBeVisible()
+    fireEvent.click(retryButton)
+    expect(onToggleTodo).toHaveBeenCalledWith(expect.objectContaining({ id: 44, description: 'Toggle retry item' }))
+  })
+
+  it('keeps unrelated task actions usable when another task has a toggle failure', () => {
+    render(
+      <TodoList
+        todos={[
+          todo({ id: 51, description: 'Failed toggle task', isCompleted: false }),
+          todo({ id: 52, description: 'Unaffected task', isCompleted: false }),
+        ]}
+        {...baseProps}
+        failedToggleTodoIds={new Set([51])}
+        failedToggleErrorMessages={new Map([[51, 'Toggle failed for first task.']])}
+      />,
+    )
+
+    expect(screen.getByText('Toggle failed for first task.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry toggle task "Failed toggle task"' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Mark task "Unaffected task" as complete' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Edit task "Unaffected task"' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Delete task "Unaffected task"' })).toBeEnabled()
+  })
+
+  it('quick-add failure isolation: TodoList row actions remain enabled with no pending or failed state (component boundary contract)', () => {
+    // TodoList receives no createTodo-related props — isolation is enforced by the component boundary.
+    // This test documents that contract: with all pending/failed sets empty all row controls are enabled.
+    render(
+      <TodoList
+        todos={[todo({ id: 99, description: 'Any task', isCompleted: false })]}
+        {...baseProps}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Mark task "Any task" as complete' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Edit task "Any task"' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Delete task "Any task"' })).toBeEnabled()
+  })
+
+  it('shows scoped edit retry control and dispatches retry call when edit fails after a prior save attempt', () => {
+    const onEditTodo = vi.fn()
+    const { rerender } = render(
+      <TodoList
+        todos={[todo({ id: 55, description: 'Edit retry item', isCompleted: false })]}
+        {...baseProps}
+        onEditTodo={onEditTodo}
+      />,
+    )
+
+    // Enter edit mode, type a new description, and save — sets lastSubmittedEdits[55]
+    fireEvent.click(screen.getByRole('button', { name: 'Edit task "Edit retry item"' }))
+    fireEvent.change(screen.getByLabelText('Edit description for task "Edit retry item"'), {
+      target: { value: 'Updated description' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(onEditTodo).toHaveBeenCalledWith(expect.objectContaining({ id: 55 }), 'Updated description')
+
+    // Simulate the mutation reporting failure via updated props
+    rerender(
+      <TodoList
+        todos={[todo({ id: 55, description: 'Edit retry item', isCompleted: false })]}
+        {...baseProps}
+        onEditTodo={onEditTodo}
+        failedEditTodoIds={new Set([55])}
+        failedEditErrorMessages={new Map([[55, 'Edit failed.']])}
+      />,
+    )
+
+    const retryButton = screen.getByRole('button', { name: 'Retry edit task "Edit retry item"' })
+    expect(retryButton).toBeVisible()
+    fireEvent.click(retryButton)
+    expect(onEditTodo).toHaveBeenLastCalledWith(expect.objectContaining({ id: 55 }), 'Updated description')
   })
 })

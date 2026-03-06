@@ -3,24 +3,23 @@
 ## Generated Tests
 
 ### API Tests
-- [x] `backend/tests/test_api_error_responses.py` - Added `PATCH /todos/{id}` empty-payload validation test (400 envelope + request-id propagation)
+- [x] `backend/tests/test_api_error_responses.py` - Added `PATCH /todos/{id}` internal-error test (500 envelope + request-id propagation + no internal leakage)
 
 ### E2E Tests
-- [x] `frontend/tests/e2e/todo-smoke.spec.ts` - Added delete workflow coverage for cancel, failed confirm, scoped error, and retry success
+- [x] `frontend/tests/e2e/todo-smoke.spec.ts` - Added inline edit workflow coverage for failed save, scoped retry affordance, retry success, and persisted state after reload
 
 ## Coverage
-- API endpoints covered by generated tests in this run: 1 endpoint (`PATCH /todos/{id}` validation path)
-- API status/error coverage added in this run: 400 `VALIDATION_ERROR` for empty payload
-- Browser E2E workflows covered by generated tests in this run: 1 workflow (delete cancel + failure + retry)
-- Current full-suite status: backend 22 tests (+5 subtests), frontend 61 tests, Playwright 4 E2E workflows
+- API endpoints covered by generated tests in this run: 1 endpoint (`PATCH /todos/{id}` internal-error path)
+- API status/error coverage added in this run: 500 `INTERNAL_SERVER_ERROR` with standardized envelope guarantees
+- Browser E2E workflows covered by generated tests in this run: 1 workflow (inline edit failure + scoped retry + reload reconciliation)
+- Current full-suite status: backend 23 tests (+5 subtests), Playwright 6 E2E workflows
 
 ## Verification
-- Targeted backend: `python3 -m pytest -q tests/test_api_error_responses.py` → 8 passed
-- Targeted E2E: `npm run test:e2e -- -g "delete workflow supports cancel, scoped error, and retry success"` → 1 passed
-- Full backend: `python3 -m pytest -q` → 22 passed, 5 subtests passed
-- Full frontend unit/integration: `npm run test` → 61 passed
-- Full frontend E2E: `npm run test:e2e` → 4 passed
+- Targeted backend: `python3 -m pytest -q tests/test_api_error_responses.py` → 9 passed
+- Targeted E2E: `npm run test:e2e -- -g "inline edit failure is scoped and retry persists updated description"` → 1 passed
+- Full backend: `python3 -m pytest -q` → 23 passed, 5 subtests passed
+- Full frontend E2E: `npm run test:e2e` → 6 passed
 
 ## Next Steps
-- Run full backend suite (`python3 -m pytest -q`) and full frontend E2E suite (`npm run test:e2e`) in CI
-- Add Playwright coverage for inline edit save/cancel/retry to complement existing component-level tests
+- Run backend and frontend E2E suites in CI to validate on clean runners
+- Add one E2E path for inline edit cancel behavior to complete edit interaction coverage

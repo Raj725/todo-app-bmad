@@ -155,4 +155,98 @@ describe('useCreateTodoMutation', () => {
       expect(todos.filter((todo) => todo.id === 999)).toHaveLength(1)
     })
   })
+
+  it('clears create error and succeeds on retry without leaving stale optimistic rows', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({
+          error: {
+            code: 'TODO_CREATE_FAILED',
+            message: 'create failed',
+            details: [],
+            request_id: 'req-create-retry-1',
+          },
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          data: {
+            id: 77,
+            description: 'Retry created task',
+            is_completed: false,
+            created_at: '2026-03-06T10:00:00.000Z',
+          },
+        }),
+      } as Response)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [seedTodo({ id: 31, description: 'Stable task' })])
+
+    const { result } = renderHook(() => useCreateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate('Retry created task')
+    })
+
+    await waitFor(() => {
+      expect(result.current.createErrorMessage).toBe('create failed')
+    })
+
+    act(() => {
+      result.current.mutate('Retry created task')
+    })
+
+    await waitFor(() => {
+      expect(result.current.createErrorMessage).toBeNull()
+    })
+
+    await waitFor(() => {
+      const todos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      expect(todos.filter((todo) => todo.description === 'Retry created task')).toHaveLength(1)
+      expect(todos.find((todo) => todo.description === 'Retry created task')?.id).toBe(77)
+    })
+  })
+
+  it('reconciles to authoritative backend list on settle even when todos query is inactive', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        data: {
+          id: 500,
+          description: 'Client optimistic create',
+          is_completed: false,
+          created_at: '2026-03-06T10:20:00.000Z',
+        },
+      }),
+    } as Response)
+
+    const authoritativeTodos: Todo[] = [
+      seedTodo({ id: 601, description: 'Persisted backend task', createdAt: '2026-03-06T10:30:00.000Z' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryDefaults(TODOS_QUERY_KEY, {
+      queryFn: async () => authoritativeTodos,
+    })
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [seedTodo({ id: 1, description: 'Initial cache task' })])
+
+    const { result } = renderHook(() => useCreateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate('Client optimistic create')
+    })
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true)
+    })
+
+    await waitFor(() => {
+      expect(queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY)).toEqual(authoritativeTodos)
+    })
+  })
 })

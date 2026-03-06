@@ -63,7 +63,10 @@ export function useCreateTodoMutation() {
       })
     },
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: TODOS_QUERY_KEY })
+      await queryClient.invalidateQueries({
+        queryKey: TODOS_QUERY_KEY,
+        refetchType: 'all',
+      })
     },
   })
 
