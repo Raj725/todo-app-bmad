@@ -28,3 +28,12 @@ class TodoRepository:
         self.session.commit()
         self.session.refresh(todo)
         return todo
+
+    def delete(self, todo_id: int) -> bool | None:
+        """Delete a todo by id. Returns True if deleted, None if not found."""
+        todo = self.session.query(Todo).filter(Todo.id == todo_id).one_or_none()
+        if todo is None:
+            return None
+        self.session.delete(todo)
+        self.session.commit()
+        return True

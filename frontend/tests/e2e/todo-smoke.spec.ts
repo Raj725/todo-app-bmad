@@ -11,7 +11,7 @@ test('quick add and toggle complete in browser', async ({ page }) => {
   const todos: TodoApiItem[] = []
   let nextId = 1
 
-  await page.route('**/todos', async (route) => {
+  await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
         status: 200,

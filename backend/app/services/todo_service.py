@@ -23,3 +23,8 @@ class TodoService:
         if updated_todo is None:
             raise TodoNotFoundError(todo_id)
         return updated_todo
+
+    def delete_todo(self, todo_id: int) -> None:
+        result = self.repository.delete(todo_id=todo_id)
+        if result is None:
+            raise TodoNotFoundError(todo_id)
