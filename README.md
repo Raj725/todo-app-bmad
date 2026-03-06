@@ -115,6 +115,7 @@ echo "VITE_API_BASE_URL=http://127.0.0.1:8000" > .env.local
 ### Backend
 
 - `DATABASE_URL` (default: `sqlite:///./todo.db`)
+- `CORS_ALLOW_ORIGINS` (default: `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173`)
 
 Configured via:
 
@@ -132,6 +133,7 @@ cp .env.example .env
 - If frontend cannot reach backend:
   - confirm backend is running on `127.0.0.1:8000`
   - check `VITE_API_BASE_URL` in `frontend/.env.local`
+  - if browser reports CORS blocked, verify backend `CORS_ALLOW_ORIGINS` includes frontend origin and restart backend
 
 ## Service Docs
 

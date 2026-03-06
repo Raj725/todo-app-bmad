@@ -67,6 +67,9 @@ The backend reads environment variables from the runtime environment.
 	- Default: sqlite:///./todo.db
 	- Example (SQLite): sqlite:///./todo.db
 	- Example (PostgreSQL): postgresql+psycopg://user:password@localhost:5432/todo
+- CORS_ALLOW_ORIGINS
+	- Default: http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
+	- Purpose: allowed browser origins for cross-origin requests to backend API
 
 Bootstrap local env file:
 
@@ -128,6 +131,15 @@ Interactive API docs:
 - PATCH /todos/{todo_id}
 - DELETE /todos/{todo_id}
 
+## CORS
+
+- The backend enables CORS for local frontend dev origins by default:
+	- http://localhost:5173
+	- http://127.0.0.1:5173
+	- http://localhost:4173
+	- http://127.0.0.1:4173
+- Override via `CORS_ALLOW_ORIGINS` (comma-separated list) for custom environments.
+
 Response pattern:
 
 - Success envelope: { "data": ... }
@@ -159,6 +171,13 @@ From repository root:
 ```bash
 cd backend && python3 tests/test_health_readiness.py && python3 tests/test_todo_create.py
 ```
+
+## Troubleshooting
+
+- If browser shows CORS policy errors from frontend origin `http://localhost:5173`:
+	- ensure backend is running with current code and environment
+	- verify `CORS_ALLOW_ORIGINS` includes the frontend origin
+	- restart backend after changing environment variables
 
 ## CI (Pull Requests)
 

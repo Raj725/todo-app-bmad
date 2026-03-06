@@ -155,6 +155,9 @@ Run browser E2E tests:
 npm run test:e2e
 ```
 
+Playwright E2E starts both frontend (`127.0.0.1:4173`) and backend (`127.0.0.1:8000`) web servers.
+This includes a non-mocked integration check that validates real browser-to-backend CORS behavior.
+
 From repository root:
 
 ```bash
@@ -196,6 +199,8 @@ If the E2E job fails in CI, open the failed GitHub Actions run and download the 
 ## Troubleshooting
 
 - If API calls fail locally, verify backend is running and `VITE_API_BASE_URL` is correct.
+- If `npm run test:e2e` fails to start backend, install backend dependencies:
+  - `cd backend && python3 -m pip install -r requirements.txt`
 - If port 5173 is busy, Vite will prompt for another port.
 - If tests fail after dependency changes, reinstall with `npm install`.
 

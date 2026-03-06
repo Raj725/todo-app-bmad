@@ -10,9 +10,16 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  webServer: {
-    command: 'npm run dev -- --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: true,
-  },
+  webServer: [
+    {
+      command: 'npm run dev -- --host 127.0.0.1 --port 4173',
+      url: 'http://127.0.0.1:4173',
+      reuseExistingServer: true,
+    },
+    {
+      command: 'cd ../backend && python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000',
+      url: 'http://127.0.0.1:8000/health',
+      reuseExistingServer: true,
+    },
+  ],
 })
