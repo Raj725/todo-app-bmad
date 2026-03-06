@@ -1,6 +1,6 @@
 # Story 2.4: Enforce Actionable Ordering and Status Clarity
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -36,6 +36,12 @@ so that I can focus on what to do next.
 - [x] Run focused quality gates for touched scope (AC: 1, 2)
   - [x] `frontend`: `npm run test -- src/features/todos/components/TodoList.test.tsx src/app/App.test.tsx src/features/todos/hooks/useUpdateTodoMutation.test.ts`
   - [x] `frontend`: `npm run lint`
+
+### Review Follow-ups (AI)
+
+- [x] [AI-Review][HIGH] Rollback path for failed toggle now re-applies actionable ordering after restoring previous todo, preserving immediate active-first consistency [frontend/src/features/todos/hooks/useUpdateTodoMutation.ts]
+- [x] [AI-Review][MEDIUM] Toggle failure tracking now uses per-item set state, preventing concurrent failures from overwriting each other [frontend/src/features/todos/hooks/useUpdateTodoMutation.ts, frontend/src/features/todos/components/TodoList.tsx, frontend/src/app/App.tsx]
+- [x] [AI-Review][MEDIUM] Story traceability updated with explicit branch-scope note and file list corrections for touched files in this story fix pass [this story record]
 
 ## Dev Notes
 
@@ -166,6 +172,9 @@ GPT-5.3-Codex
 - ✅ Verified immediate optimistic reposition and consistent settled ordering without manual refresh for toggle mutations.
 - ✅ Added component, app, and hook test coverage for mixed ordering, explicit status labels, and complete↔active reposition flows.
 - ✅ Ran full frontend regression and lint checks: all tests passing, no lint errors.
+- ✅ Resolved review findings by enforcing sorted rollback on toggle failure and replacing single-id toggle failure state with per-item set tracking.
+- ✅ Added focused regression tests for rollback ordering and concurrent toggle-failure visibility.
+- ℹ️ Branch-level diff includes prior story work; File List below reflects files touched by Story 2.4 implementation and fix pass.
 - ℹ️ README impact: none. Changes are internal frontend behavior/test updates and do not alter setup, commands, or API usage.
 
 ### File List
@@ -175,6 +184,7 @@ GPT-5.3-Codex
 - frontend/src/features/todos/components/TodoList.test.tsx
 - frontend/src/features/todos/hooks/useUpdateTodoMutation.ts
 - frontend/src/features/todos/hooks/useUpdateTodoMutation.test.ts
+- frontend/src/app/App.tsx
 - frontend/src/app/App.test.tsx
 - _bmad-output/implementation-artifacts/2-4-enforce-actionable-ordering-and-status-clarity.md
 - _bmad-output/implementation-artifacts/sprint-status.yaml
@@ -183,3 +193,40 @@ GPT-5.3-Codex
 
 - 2026-03-06: Story created and prepared for implementation handoff.
 - 2026-03-06: Implemented canonical actionable ordering in shared utility, applied comparator to list render and update mutation cache paths, and added frontend ordering/status clarity tests; story moved to review.
+- 2026-03-06: Senior Developer Review (AI) completed; issues recorded as follow-up tasks and story returned to in-progress.
+- 2026-03-06: Applied auto-fix pass for review findings (sorted rollback + per-item toggle failure tracking), updated tests, and completed focused quality gates; story moved to done.
+
+## Senior Developer Review (AI)
+
+Reviewer: Raj
+Date: 2026-03-06
+Outcome: Approved after fixes
+
+### Summary
+
+- Acceptance Criteria 1 and 2 are largely implemented for happy paths and covered by focused tests.
+- One high-severity correctness gap exists in failed toggle rollback ordering behavior.
+- Additional medium issues were identified in per-item failure tracking and review traceability.
+
+### Findings
+
+1. [HIGH] Failed toggle rollback does not restore canonical order immediately
+  - Evidence: `onError` restores only the previous todo object by id but does not sort the resulting list, so list order can remain inconsistent until refetch settles.
+  - Location: `frontend/src/features/todos/hooks/useUpdateTodoMutation.ts` (`onError` cache write)
+  - Impact: Violates immediate ordering consistency expectations after failed optimistic toggle.
+
+2. [MEDIUM] Toggle failure state tracks only one id
+  - Evidence: `failedTodoId: number | null` in mutation hook and `failedTodoId === todo.id` rendering check in list.
+  - Location: `frontend/src/features/todos/hooks/useUpdateTodoMutation.ts`, `frontend/src/features/todos/components/TodoList.tsx`
+  - Impact: Concurrent failed toggles can overwrite each other and hide one task’s error state.
+
+3. [MEDIUM] Story file-list traceability mismatch against branch changes
+  - Evidence: branch diff includes multiple additional changed files beyond this story file list (`git diff --name-only main...HEAD`).
+  - Location: review metadata process
+  - Impact: Reduces auditability and can mask cross-story impact during review.
+
+### Resolution
+
+- [Resolved] High and medium code findings were fixed in `useUpdateTodoMutation`, `TodoList`, and app wiring.
+- [Resolved] Added regression coverage for rollback ordering correctness and concurrent toggle-failure visibility.
+- [Resolved] Story traceability updated with explicit note on branch scope and corrected touched-file list for this story.

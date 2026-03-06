@@ -8,7 +8,7 @@ const noop = vi.fn()
 
 const baseProps = {
   pendingTodoIds: new Set<number>(),
-  failedTodoId: null,
+  failedToggleTodoIds: new Set<number>(),
   failedEditTodoIds: new Set<number>(),
   onToggleTodo: noop,
   onEditTodo: noop,

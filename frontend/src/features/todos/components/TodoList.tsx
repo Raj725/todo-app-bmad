@@ -5,7 +5,7 @@ import type { Todo } from '../types'
 type TodoListProps = {
   todos: Todo[]
   pendingTodoIds: Set<number>
-  failedTodoId: number | null
+  failedToggleTodoIds: Set<number>
   failedEditTodoIds: Set<number>
   onToggleTodo: (todo: Todo) => void
   onEditTodo: (todo: Todo, description: string) => void
@@ -17,7 +17,7 @@ type TodoListProps = {
 export function TodoList({
   todos,
   pendingTodoIds,
-  failedTodoId,
+  failedToggleTodoIds,
   failedEditTodoIds,
   onToggleTodo,
   onEditTodo,
@@ -70,6 +70,7 @@ export function TodoList({
         const hasEditError = failedEditTodoIds.has(todo.id)
         const isEditing = editTodoId === todo.id
         const canRetryEdit = Boolean(lastSubmittedEdits[todo.id])
+        const hasToggleError = failedToggleTodoIds.has(todo.id)
 
         return (
           <li key={todo.id}>
@@ -126,7 +127,7 @@ export function TodoList({
                   ? 'Mark active'
                   : 'Mark complete'}
             </button>
-            {failedTodoId === todo.id && <p role="alert">Unable to update task status.</p>}
+            {hasToggleError && <p role="alert">Unable to update task status.</p>}
 
             {!isEditing && (
               <button

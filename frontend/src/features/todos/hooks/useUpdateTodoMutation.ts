@@ -13,7 +13,7 @@ type UpdateTodoContext = {
 export function useUpdateTodoMutation() {
   const queryClient = useQueryClient()
   const [pendingTodoIds, setPendingTodoIds] = useState<Set<number>>(() => new Set())
-  const [failedTodoId, setFailedTodoId] = useState<number | null>(null)
+  const [failedToggleTodoIds, setFailedToggleTodoIds] = useState<Set<number>>(() => new Set())
   const [failedDescriptionTodoIds, setFailedDescriptionTodoIds] = useState<Set<number>>(() => new Set())
 
   const mutation = useMutation({
@@ -33,7 +33,11 @@ export function useUpdateTodoMutation() {
         })
       }
       if (typeof variables.isCompleted === 'boolean') {
-        setFailedTodoId((current) => (current === variables.todoId ? null : current))
+        setFailedToggleTodoIds((current) => {
+          const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
 
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
@@ -57,7 +61,9 @@ export function useUpdateTodoMutation() {
     onError: (_error, variables, context) => {
       if (context?.previousTodo) {
         queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
-          currentTodos.map((todo) => (todo.id === context.previousTodo?.id ? context.previousTodo : todo)),
+          sortTodosByActionableOrder(
+            currentTodos.map((todo) => (todo.id === context.previousTodo?.id ? context.previousTodo : todo)),
+          ),
         )
       }
 
@@ -65,7 +71,7 @@ export function useUpdateTodoMutation() {
         setFailedDescriptionTodoIds((current) => new Set([...current, variables.todoId]))
       }
       if (typeof variables.isCompleted === 'boolean') {
-        setFailedTodoId(variables.todoId)
+        setFailedToggleTodoIds((current) => new Set([...current, variables.todoId]))
       }
     },
     onSuccess: (updatedTodo, variables) => {
@@ -77,7 +83,11 @@ export function useUpdateTodoMutation() {
         })
       }
       if (typeof variables.isCompleted === 'boolean') {
-        setFailedTodoId((current) => (current === variables.todoId ? null : current))
+        setFailedToggleTodoIds((current) => {
+          const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
         sortTodosByActionableOrder(
@@ -98,7 +108,7 @@ export function useUpdateTodoMutation() {
   return {
     ...mutation,
     pendingTodoIds,
-    failedTodoId,
+    failedToggleTodoIds,
     failedDescriptionTodoIds,
   }
 }
