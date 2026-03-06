@@ -1,14 +1,22 @@
 import { TodoList } from '../features/todos/components/TodoList'
 import { TodoListEmptyState } from '../features/todos/components/TodoListEmptyState'
 import { TodoListLoadingState } from '../features/todos/components/TodoListLoadingState'
+import { TodoQuickAdd } from '../features/todos/components/TodoQuickAdd'
+import { useCreateTodoMutation } from '../features/todos/hooks/useCreateTodoMutation'
 import { useTodosQuery } from '../features/todos/hooks/useTodosQuery'
 
 function App() {
   const todosQuery = useTodosQuery()
+  const createTodoMutation = useCreateTodoMutation()
 
   return (
     <main>
       <h1>Todo App</h1>
+      <TodoQuickAdd
+        isPending={createTodoMutation.isPending}
+        isError={createTodoMutation.isError}
+        onSubmit={(description) => createTodoMutation.mutate(description)}
+      />
       {todosQuery.isPending && <TodoListLoadingState />}
       {!todosQuery.isPending && todosQuery.isError && <p>Unable to load tasks.</p>}
       {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length === 0 && (

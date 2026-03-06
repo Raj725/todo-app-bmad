@@ -1,6 +1,6 @@
 # Story 1.4: Quick-Add Task Flow with Immediate Feedback
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -17,20 +17,20 @@ so that I can capture work with minimal interaction cost.
 
 ## Tasks / Subtasks
 
-- [ ] Add frontend create API adapter and mutation hook using existing API/error conventions (AC: 1, 2)
-  - [ ] Add `createTodo` API function in `frontend/src/features/todos/api/` that calls `POST /todos` and validates `{ data: { ... } }` envelope shape
-  - [ ] Reuse existing snake_case → camelCase mapping conventions from list adapter (`created_at` → `createdAt`, `is_completed` → `isCompleted`)
-  - [ ] Add `useCreateTodoMutation` hook with TanStack Query mutation lifecycle and list query invalidation
-- [ ] Implement quick-add UI in primary list view with scoped pending/error behavior (AC: 1, 2)
-  - [ ] Add always-visible quick-add control in `frontend/src/app/App.tsx` (or feature component extracted under `frontend/src/features/todos/components/`)
-  - [ ] Disable only quick-add submit action while create is pending; do not block list rendering or unrelated controls
-  - [ ] Show explicit inline error on failure with a clear retry action that reuses last attempted task description
-- [ ] Implement immediate visible feedback path for successful creates (AC: 1)
-  - [ ] Update UI state within 500 ms target under normal conditions by using mutation pending/success transitions
-  - [ ] Ensure newly created todo appears in the primary list without requiring manual refresh
-- [ ] Add tests for create success/failure and retry behavior (AC: 1, 2)
-  - [ ] Frontend tests: pending state on quick-add submit, success path list update, failure path inline error, retry success
-  - [ ] Backend contract verification remains via existing `POST /todos` integration tests; extend only if response contract changes
+- [x] Add frontend create API adapter and mutation hook using existing API/error conventions (AC: 1, 2)
+  - [x] Add `createTodo` API function in `frontend/src/features/todos/api/` that calls `POST /todos` and validates `{ data: { ... } }` envelope shape
+  - [x] Reuse existing snake_case → camelCase mapping conventions from list adapter (`created_at` → `createdAt`, `is_completed` → `isCompleted`)
+  - [x] Add `useCreateTodoMutation` hook with TanStack Query mutation lifecycle and list query invalidation
+- [x] Implement quick-add UI in primary list view with scoped pending/error behavior (AC: 1, 2)
+  - [x] Add always-visible quick-add control in `frontend/src/app/App.tsx` (or feature component extracted under `frontend/src/features/todos/components/`)
+  - [x] Disable only quick-add submit action while create is pending; do not block list rendering or unrelated controls
+  - [x] Show explicit inline error on failure with a clear retry action that reuses last attempted task description
+- [x] Implement immediate visible feedback path for successful creates (AC: 1)
+  - [x] Update UI state within 500 ms target under normal conditions by using mutation pending/success transitions
+  - [x] Ensure newly created todo appears in the primary list without requiring manual refresh
+- [x] Add tests for create success/failure and retry behavior (AC: 1, 2)
+  - [x] Frontend tests: pending state on quick-add submit, success path list update, failure path inline error, retry success
+  - [x] Backend contract verification remains via existing `POST /todos` integration tests; extend only if response contract changes
 
 ## Dev Notes
 
@@ -132,18 +132,32 @@ GPT-5.3-Codex
 - Story auto-selected from first backlog item in `sprint-status.yaml`: `1-4-quick-add-task-flow-with-immediate-feedback`.
 - Loaded and analyzed epics, architecture, UX spec, and previous story artifact.
 - Reviewed current repository code layout and recent git commits for pattern consistency.
+- Implemented create adapter, create mutation hook, and quick-add component integrated in `App.tsx`.
+- Executed validations: `npm run lint`, `npm run test`, `python3 tests/test_health_readiness.py`, `python3 tests/test_todo_create.py`.
 
 ### Completion Notes List
 
-- Created comprehensive implementation-ready story guidance for Story 1.4.
-- Included architecture, testing, and anti-regression guardrails based on completed Story 1.3 learnings.
-- Prepared status transition to `ready-for-dev` in sprint tracking.
+- Added `createTodo` API adapter with runtime envelope validation and snake_case → camelCase mapping.
+- Added `useCreateTodoMutation` with TanStack Query invalidation against the todos query key.
+- Implemented always-visible quick-add form with action-scoped pending state, inline error feedback, and retry of last attempted description.
+- Ensured successful create invalidates and refreshes the list so new todos appear without manual refresh.
+- Added tests covering create adapter envelope handling plus quick-add pending, success list update, failure feedback, and retry success.
+- Removed redundant empty-state quick-add placeholder button to keep a single authoritative quick-add control.
 
 ### File List
 
 - _bmad-output/implementation-artifacts/1-4-quick-add-task-flow-with-immediate-feedback.md
 - _bmad-output/implementation-artifacts/sprint-status.yaml
+- frontend/src/app/App.tsx
+- frontend/src/app/App.test.tsx
+- frontend/src/features/todos/api/createTodo.ts
+- frontend/src/features/todos/api/createTodo.test.ts
+- frontend/src/features/todos/components/TodoListEmptyState.tsx
+- frontend/src/features/todos/components/TodoQuickAdd.tsx
+- frontend/src/features/todos/hooks/useCreateTodoMutation.ts
+- frontend/src/features/todos/hooks/useTodosQuery.ts
 
 ## Change Log
 
 - 2026-03-06: Story created and status set to `ready-for-dev` with comprehensive dev context.
+- 2026-03-06: Implemented Story 1.4 quick-add create flow with scoped mutation UX, retry feedback path, and frontend test coverage; moved status to `review`.
