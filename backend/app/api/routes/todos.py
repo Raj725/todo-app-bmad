@@ -36,3 +36,13 @@ def update_todo(
     service = TodoService(repository)
     todo = service.update_todo_is_completed(todo_id=todo_id, is_completed=payload.is_completed)
     return SuccessResponse(data=TodoResponse.model_validate(todo))
+
+
+@router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_todo(
+    todo_id: int,
+    session: Session = Depends(get_session),
+) -> None:
+    repository = TodoRepository(session)
+    service = TodoService(repository)
+    service.delete_todo(todo_id=todo_id)

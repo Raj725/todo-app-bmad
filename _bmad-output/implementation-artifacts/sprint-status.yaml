@@ -49,7 +49,7 @@ development_status:
 
   epic-2: in-progress
   2-1-toggle-task-complete-and-incomplete-from-list: done
-  2-2-delete-task-with-lightweight-confirmation: backlog
+  2-2-delete-task-with-lightweight-confirmation: review
   2-3-edit-task-description-in-context: backlog
   2-4-enforce-actionable-ordering-and-status-clarity: backlog
   epic-2-retrospective: optional

@@ -3,6 +3,7 @@ import { TodoListEmptyState } from '../features/todos/components/TodoListEmptySt
 import { TodoListLoadingState } from '../features/todos/components/TodoListLoadingState'
 import { TodoQuickAdd } from '../features/todos/components/TodoQuickAdd'
 import { useCreateTodoMutation } from '../features/todos/hooks/useCreateTodoMutation'
+import { useDeleteTodoMutation } from '../features/todos/hooks/useDeleteTodoMutation'
 import { useUpdateTodoMutation } from '../features/todos/hooks/useUpdateTodoMutation'
 import { useTodosQuery } from '../features/todos/hooks/useTodosQuery'
 
@@ -10,6 +11,7 @@ function App() {
   const todosQuery = useTodosQuery()
   const createTodoMutation = useCreateTodoMutation()
   const updateTodoMutation = useUpdateTodoMutation()
+  const deleteTodoMutation = useDeleteTodoMutation()
 
   return (
     <main>
@@ -34,6 +36,11 @@ function App() {
               todoId: todo.id,
               isCompleted: !todo.isCompleted,
             })
+          }}
+          pendingDeleteIds={deleteTodoMutation.pendingDeleteIds}
+          failedDeleteTodoId={deleteTodoMutation.failedDeleteTodoId}
+          onDeleteTodo={(todo) => {
+            deleteTodoMutation.mutate({ todoId: todo.id })
           }}
         />
       )}
