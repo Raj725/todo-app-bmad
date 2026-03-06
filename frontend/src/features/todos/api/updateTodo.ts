@@ -12,12 +12,14 @@ type SuccessResponse<TPayload> = {
 }
 
 type UpdateTodoPayload = {
-  is_completed: boolean
+  is_completed?: boolean
+  description?: string
 }
 
 export type UpdateTodoInput = {
   todoId: number
-  isCompleted: boolean
+  isCompleted?: boolean
+  description?: string
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
@@ -55,8 +57,18 @@ const isSuccessUpdateTodoResponse = (value: unknown): value is SuccessResponse<T
 }
 
 export async function updateTodo(input: UpdateTodoInput): Promise<Todo> {
-  const payload: UpdateTodoPayload = {
-    is_completed: input.isCompleted,
+  const payload: UpdateTodoPayload = {}
+
+  if (typeof input.isCompleted === 'boolean') {
+    payload.is_completed = input.isCompleted
+  }
+
+  if (typeof input.description === 'string') {
+    payload.description = input.description
+  }
+
+  if (payload.is_completed === undefined && payload.description === undefined) {
+    throw new Error('No todo fields provided for update')
   }
 
   const response = await fetch(`${API_BASE_URL}/todos/${input.todoId}`, {

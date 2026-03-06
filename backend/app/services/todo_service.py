@@ -18,8 +18,8 @@ class TodoService:
     def list_todos(self) -> list[Todo]:
         return self.repository.list()
 
-    def update_todo_is_completed(self, todo_id: int, is_completed: bool) -> Todo:
-        updated_todo = self.repository.update_is_completed(todo_id=todo_id, is_completed=is_completed)
+    def update_todo(self, todo_id: int, is_completed: bool | None = None, description: str | None = None) -> Todo:
+        updated_todo = self.repository.update(todo_id=todo_id, is_completed=is_completed, description=description)
         if updated_todo is None:
             raise TodoNotFoundError(todo_id)
         return updated_todo

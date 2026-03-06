@@ -7,6 +7,39 @@ afterEach(() => {
 })
 
 describe('updateTodo', () => {
+  it('sends description payload updates and maps response envelope', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: {
+          id: 22,
+          description: 'Edited task',
+          is_completed: false,
+          created_at: '2026-03-06T15:20:00.000Z',
+        },
+      }),
+    } as Response)
+
+    await expect(updateTodo({ todoId: 22, description: 'Edited task' })).resolves.toEqual({
+      id: 22,
+      description: 'Edited task',
+      isCompleted: false,
+      createdAt: '2026-03-06T15:20:00.000Z',
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('/todos/22'),
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ description: 'Edited task' }),
+      }),
+    )
+  })
+
+  it('throws when no updatable fields are provided', async () => {
+    await expect(updateTodo({ todoId: 22 })).rejects.toThrow('No todo fields provided for update')
+  })
+
   it('rejects when backend returns a non-success status code', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,

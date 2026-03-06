@@ -180,4 +180,93 @@ describe('useUpdateTodoMutation', () => {
       expect(result.current.failedTodoId).toBeNull()
     })
   })
+
+  it('optimistically updates description and rolls back only failed item on error', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos/7') && init?.method === 'PATCH') {
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({ error: { message: 'server error' } }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({
+          data: {
+            id: 8,
+            description: 'Second task',
+            is_completed: false,
+            created_at: '2026-03-06T10:00:00.000Z',
+          },
+        }),
+      } as Response
+    })
+
+    const todos: Todo[] = [
+      seedTodo({ id: 7, description: 'Original first task' }),
+      seedTodo({ id: 8, description: 'Second task' }),
+    ]
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, todos)
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 7, description: 'Edited first task' })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedDescriptionTodoId).toBe(7)
+    })
+
+    const nextTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+    expect(nextTodos.find((todo) => todo.id === 7)?.description).toBe('Original first task')
+    expect(nextTodos.find((todo) => todo.id === 8)?.description).toBe('Second task')
+  })
+
+  it('clears failedDescriptionTodoId on successful retry of description update', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ error: { message: 'server error' } }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: {
+            id: 14,
+            description: 'Edited task',
+            is_completed: false,
+            created_at: '2026-03-06T10:00:00.000Z',
+          },
+        }),
+      } as Response)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [seedTodo({ id: 14, description: 'Original task' })])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 14, description: 'Edited task' })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedDescriptionTodoId).toBe(14)
+    })
+
+    act(() => {
+      result.current.mutate({ todoId: 14, description: 'Edited task' })
+    })
+
+    await waitFor(() => {
+      expect(result.current.failedDescriptionTodoId).toBeNull()
+    })
+  })
 })

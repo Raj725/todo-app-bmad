@@ -31,10 +31,17 @@ function App() {
           todos={todosQuery.data}
           pendingTodoIds={updateTodoMutation.pendingTodoIds}
           failedTodoId={updateTodoMutation.failedTodoId}
+          failedEditTodoId={updateTodoMutation.failedDescriptionTodoId}
           onToggleTodo={(todo) => {
             updateTodoMutation.mutate({
               todoId: todo.id,
               isCompleted: !todo.isCompleted,
+            })
+          }}
+          onEditTodo={(todo, description) => {
+            updateTodoMutation.mutate({
+              todoId: todo.id,
+              description,
             })
           }}
           pendingDeleteIds={deleteTodoMutation.pendingDeleteIds}

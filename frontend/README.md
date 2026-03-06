@@ -12,6 +12,7 @@ It is built with React + TypeScript + Vite and uses TanStack Query for server st
 - Immediate feedback for task creation (optimistic UI)
 - Inline error and retry affordance on create failures
 - In-list complete/incomplete toggle with optimistic updates and rollback on failure
+- In-list description edit flow with save/cancel controls, keyboard support, optimistic update, rollback, and retry on failure
 - In-list delete flow with lightweight confirmation, optimistic removal, and retry on failure
 - Active-first deterministic ordering with clear active/completed status labels
 - API envelope validation at the client boundary

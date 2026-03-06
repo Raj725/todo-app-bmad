@@ -19,12 +19,17 @@ class TodoRepository:
         query = self.session.query(Todo).order_by(desc(Todo.created_at), desc(Todo.id))
         return list(query.all())
 
-    def update_is_completed(self, todo_id: int, is_completed: bool) -> Todo | None:
+    def update(self, todo_id: int, is_completed: bool | None = None, description: str | None = None) -> Todo | None:
         todo = self.session.query(Todo).filter(Todo.id == todo_id).one_or_none()
         if todo is None:
             return None
 
-        todo.is_completed = is_completed
+        if is_completed is not None:
+            todo.is_completed = is_completed
+
+        if description is not None:
+            todo.description = description
+
         self.session.commit()
         self.session.refresh(todo)
         return todo

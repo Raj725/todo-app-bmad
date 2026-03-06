@@ -6,13 +6,14 @@ import type { Todo } from '../types'
 import { TODOS_QUERY_KEY } from './useTodosQuery'
 
 type UpdateTodoContext = {
-  previousTodos: Todo[]
+  previousTodo: Todo | null
 }
 
 export function useUpdateTodoMutation() {
   const queryClient = useQueryClient()
   const [pendingTodoIds, setPendingTodoIds] = useState<Set<number>>(() => new Set())
   const [failedTodoId, setFailedTodoId] = useState<number | null>(null)
+  const [failedDescriptionTodoId, setFailedDescriptionTodoId] = useState<number | null>(null)
 
   const mutation = useMutation({
     mutationFn: updateTodo,
@@ -20,31 +21,53 @@ export function useUpdateTodoMutation() {
       await queryClient.cancelQueries({ queryKey: TODOS_QUERY_KEY })
 
       const previousTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+      const previousTodo = previousTodos.find((todo) => todo.id === variables.todoId) ?? null
 
       setPendingTodoIds((prev) => new Set([...prev, variables.todoId]))
-      setFailedTodoId((current) => (current === variables.todoId ? null : current))
+      if (typeof variables.description === 'string') {
+        setFailedDescriptionTodoId((current) => (current === variables.todoId ? null : current))
+      }
+      if (typeof variables.isCompleted === 'boolean') {
+        setFailedTodoId((current) => (current === variables.todoId ? null : current))
+      }
 
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
         currentTodos.map((todo) =>
           todo.id === variables.todoId
             ? {
                 ...todo,
-                isCompleted: variables.isCompleted,
+                isCompleted:
+                  typeof variables.isCompleted === 'boolean' ? variables.isCompleted : todo.isCompleted,
+                description:
+                  typeof variables.description === 'string' ? variables.description : todo.description,
               }
             : todo,
         ),
       )
 
-      return { previousTodos }
+      return { previousTodo }
     },
     onError: (_error, variables, context) => {
-      if (context?.previousTodos) {
-        queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, context.previousTodos)
+      if (context?.previousTodo) {
+        queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
+          currentTodos.map((todo) => (todo.id === context.previousTodo?.id ? context.previousTodo : todo)),
+        )
       }
-      setFailedTodoId(variables.todoId)
+
+      if (typeof variables.description === 'string') {
+        setFailedDescriptionTodoId(variables.todoId)
+      }
+      if (typeof variables.isCompleted === 'boolean') {
+        setFailedTodoId(variables.todoId)
+      }
     },
     onSuccess: (updatedTodo, variables) => {
-      setFailedTodoId((current) => (current === variables.todoId ? null : current))
+      if (typeof variables.description === 'string') {
+        setFailedDescriptionTodoId((current) => (current === variables.todoId ? null : current))
+      }
+      if (typeof variables.isCompleted === 'boolean') {
+        setFailedTodoId((current) => (current === variables.todoId ? null : current))
+      }
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
         currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
       )
@@ -63,5 +86,6 @@ export function useUpdateTodoMutation() {
     ...mutation,
     pendingTodoIds,
     failedTodoId,
+    failedDescriptionTodoId,
   }
 }
