@@ -1,6 +1,6 @@
 # Story 3.3: Retry Flows and Failure Isolation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -17,35 +17,35 @@ so that I can recover quickly and keep working.
 
 ## Tasks / Subtasks
 
-- [ ] Implement deterministic retry affordances for all failed mutation scopes (AC: 1)
-  - [ ] Ensure retry entry points exist for create, toggle/update, edit, and delete failures in the same UI context where failure is shown.
-  - [ ] Reuse existing mutation pathways (`mutate` calls), never duplicate network logic or bypass adapter-level normalization.
-  - [ ] Clear scoped failure state on successful retry and preserve clear failure state when retry fails again.
+- [x] Implement deterministic retry affordances for all failed mutation scopes (AC: 1)
+  - [x] Ensure retry entry points exist for create, toggle/update, edit, and delete failures in the same UI context where failure is shown.
+  - [x] Reuse existing mutation pathways (`mutate` calls), never duplicate network logic or bypass adapter-level normalization.
+  - [x] Clear scoped failure state on successful retry and preserve clear failure state when retry fails again.
 
-- [ ] Enforce failure isolation across concurrent actions (AC: 2)
-  - [ ] Keep pending/error state scoped by task/action identity (per-id sets/maps) so one failed action does not disable unrelated rows.
-  - [ ] Ensure quick-add failures do not block list-row toggle/edit/delete actions and vice versa.
-  - [ ] Prevent introduction of list-level/global mutation locks for single-item failures.
+- [x] Enforce failure isolation across concurrent actions (AC: 2)
+  - [x] Keep pending/error state scoped by task/action identity (per-id sets/maps) so one failed action does not disable unrelated rows.
+  - [x] Ensure quick-add failures do not block list-row toggle/edit/delete actions and vice versa.
+  - [x] Prevent introduction of list-level/global mutation locks for single-item failures.
 
-- [ ] Preserve optimistic lifecycle contract during retries (AC: 1, 2)
-  - [ ] Keep lifecycle order: optimistic apply → rollback on failure → scoped inline error → retry → authoritative refetch on settle.
-  - [ ] Ensure retries remain deterministic with existing rollback context semantics from Story 3.2.
-  - [ ] Verify active-first ordering and status clarity remain stable before and after retry attempts.
+- [x] Preserve optimistic lifecycle contract during retries (AC: 1, 2)
+  - [x] Keep lifecycle order: optimistic apply → rollback on failure → scoped inline error → retry → authoritative refetch on settle.
+  - [x] Ensure retries remain deterministic with existing rollback context semantics from Story 3.2.
+  - [x] Verify active-first ordering and status clarity remain stable before and after retry attempts.
 
-- [ ] Keep UX and accessibility behavior aligned for failure/retry paths (AC: 1, 2)
-  - [ ] Keep retry controls keyboard-operable with clear accessible labels in the affected control scope.
-  - [ ] Keep user feedback explicit and local (no ambiguity about which action failed or retried).
-  - [ ] Preserve predictable focus behavior after failed actions and retry invocation.
+- [x] Keep UX and accessibility behavior aligned for failure/retry paths (AC: 1, 2)
+  - [x] Keep retry controls keyboard-operable with clear accessible labels in the affected control scope.
+  - [x] Keep user feedback explicit and local (no ambiguity about which action failed or retried).
+  - [x] Preserve predictable focus behavior after failed actions and retry invocation.
 
-- [ ] Add focused test coverage for retry and isolation outcomes (AC: 1, 2)
-  - [ ] Hook/component tests for failed-then-successful retry per action type.
-  - [ ] Hook/component tests proving failure in one task/action does not disable unrelated actions.
-  - [ ] E2E regression scenario covering mixed outcomes (one action fails and retries while another task action succeeds).
+- [x] Add focused test coverage for retry and isolation outcomes (AC: 1, 2)
+  - [x] Hook/component tests for failed-then-successful retry per action type.
+  - [x] Hook/component tests proving failure in one task/action does not disable unrelated actions.
+  - [x] E2E regression scenario covering mixed outcomes (one action fails and retries while another task action succeeds).
 
-- [ ] Run quality gates (AC: 1, 2)
-  - [ ] `frontend`: `npm run test -- src/features/todos`
-  - [ ] `frontend`: `npm run lint`
-  - [ ] `backend`: `python3 -m pytest -q`
+- [x] Run quality gates (AC: 1, 2)
+  - [x] `frontend`: `npm run test -- src/features/todos`
+  - [x] `frontend`: `npm run lint`
+  - [x] `backend`: `python3 -m pytest -q`
 
 ## Dev Notes
 
@@ -185,19 +185,35 @@ GPT-5.3-Codex
 - Analyzed core planning artifacts: `epics.md`, `prd.md`, `architecture.md`, `ux-design-specification.md`.
 - Analyzed previous story intelligence from `3-2-implement-optimistic-mutation-lifecycle-with-deterministic-rollback.md`.
 - Reviewed recent git commits for implementation and testing pattern continuity.
+- Switched to story branch `feat/3-3-retry-flows-and-failure-isolation` before code changes.
+- Added failing tests first for scoped toggle retry UX and create retry lifecycle handling.
+- Implemented scoped toggle retry control in `TodoList` using existing `onToggleTodo` mutation pathway.
+- Extended E2E mixed-outcome scenario to verify failed action retry success while unrelated task remains interactive.
+- Executed story quality gates and regression suites:
+  - `frontend`: `npm run test -- src/features/todos`
+  - `frontend`: `npm run lint`
+  - `backend`: `python3 -m pytest -q`
+  - `frontend`: `npm run test`
 
 ### Completion Notes List
 
-- ✅ Story 3.3 context file created with implementation-ready requirements, guardrails, and test expectations.
-- ✅ Prior-story and git intelligence incorporated for continuity and regression prevention.
-- ✅ Sprint status updated from `backlog` to `ready-for-dev` for `3-3-retry-flows-and-failure-isolation`.
-- ✅ Completion note applied: Ultimate context engine analysis completed - comprehensive developer guide created.
+- ✅ Added scoped toggle retry affordance with explicit accessible labeling and local inline error context.
+- ✅ Preserved deterministic mutation lifecycle by reusing existing mutation hooks and cache rollback/refetch behavior.
+- ✅ Added focused test coverage for create retry success, toggle retry UX, and failure isolation for unaffected task controls.
+- ✅ Extended Playwright mixed outcome scenario to assert one failed action can be retried successfully while another task action succeeds.
+- ✅ Quality gates passed (`frontend` tests + lint, `backend` pytest, full frontend regression).
+- ✅ No README impact: implementation is internal retry/isolation behavior only, with no setup, command, API, or deployment contract changes.
 
 ### File List
 
 - _bmad-output/implementation-artifacts/3-3-retry-flows-and-failure-isolation.md
 - _bmad-output/implementation-artifacts/sprint-status.yaml
+- frontend/src/features/todos/components/TodoList.tsx
+- frontend/src/features/todos/components/TodoList.test.tsx
+- frontend/src/features/todos/hooks/useCreateTodoMutation.test.ts
+- frontend/tests/e2e/todo-smoke.spec.ts
 
 ### Change Log
 
 - 2026-03-06: Story created and prepared for implementation handoff (`ready-for-dev`).
+- 2026-03-06: Implemented retry/failure-isolation completion for Story 3.3 and advanced story status to `review` after passing quality gates.

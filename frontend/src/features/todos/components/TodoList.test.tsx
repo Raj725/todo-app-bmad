@@ -78,4 +78,38 @@ describe('TodoList', () => {
     expect(screen.getByText('Optimistic task')).toBeInTheDocument()
     expect(screen.getByText('Pending')).toBeInTheDocument()
   })
+
+  it('shows scoped toggle retry control with explicit accessible label when toggle fails', () => {
+    render(
+      <TodoList
+        todos={[todo({ id: 44, description: 'Toggle retry item', isCompleted: false })]}
+        {...baseProps}
+        failedToggleTodoIds={new Set([44])}
+        failedToggleErrorMessages={new Map([[44, 'Toggle failed for selected task.']])}
+      />,
+    )
+
+    expect(screen.getByText('Toggle failed for selected task.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry toggle task "Toggle retry item"' })).toBeVisible()
+  })
+
+  it('keeps unrelated task actions usable when another task has a toggle failure', () => {
+    render(
+      <TodoList
+        todos={[
+          todo({ id: 51, description: 'Failed toggle task', isCompleted: false }),
+          todo({ id: 52, description: 'Unaffected task', isCompleted: false }),
+        ]}
+        {...baseProps}
+        failedToggleTodoIds={new Set([51])}
+        failedToggleErrorMessages={new Map([[51, 'Toggle failed for first task.']])}
+      />,
+    )
+
+    expect(screen.getByText('Toggle failed for first task.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retry toggle task "Failed toggle task"' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Mark task "Unaffected task" as complete' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Edit task "Unaffected task"' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Delete task "Unaffected task"' })).toBeEnabled()
+  })
 })

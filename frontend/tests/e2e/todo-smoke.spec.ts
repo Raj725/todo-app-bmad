@@ -100,6 +100,7 @@ test('failed mutation remains scoped and does not block unrelated task actions',
       created_at: '2026-03-06T15:00:02.000Z',
     },
   ]
+  let failedToggleAttempts = 0
 
   await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
     if (route.request().method() === 'GET') {
@@ -116,17 +117,47 @@ test('failed mutation remains scoped and does not block unrelated task actions',
       const updateBody = route.request().postDataJSON() as { is_completed: boolean }
 
       if (todoId === 1) {
+        failedToggleAttempts += 1
+
+        if (failedToggleAttempts === 1) {
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: {
+                code: 'TODO_UPDATE_FAILED',
+                message: 'Toggle failed for first task.',
+                details: [],
+                request_id: 'req-toggle-fail-1',
+              },
+            }),
+          })
+          return
+        }
+
+        const todo = todos.find((item) => item.id === todoId)
+        if (!todo) {
+          await route.fulfill({
+            status: 404,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: {
+                code: 'TODO_NOT_FOUND',
+                message: 'Todo not found',
+                details: [],
+                request_id: 'req-not-found',
+              },
+            }),
+          })
+          return
+        }
+
+        todo.is_completed = updateBody.is_completed
+
         await route.fulfill({
-          status: 500,
+          status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({
-            error: {
-              code: 'TODO_UPDATE_FAILED',
-              message: 'Toggle failed for first task.',
-              details: [],
-              request_id: 'req-toggle-fail-1',
-            },
-          }),
+          body: JSON.stringify({ data: todo }),
         })
         return
       }
@@ -168,9 +199,14 @@ test('failed mutation remains scoped and does not block unrelated task actions',
 
   await page.getByRole('button', { name: 'Mark task "Will fail toggle" as complete' }).click()
   await expect(page.getByText('Toggle failed for first task.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retry toggle task "Will fail toggle"' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Mark task "Should still work" as complete' }).click()
   await expect(page.getByRole('button', { name: 'Mark task "Should still work" as active' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Retry toggle task "Will fail toggle"' }).click()
+  await expect(page.getByRole('button', { name: 'Mark task "Will fail toggle" as active' })).toBeVisible()
+  await expect(page.getByText('Toggle failed for first task.')).not.toBeVisible()
 })
 
 test('real backend integration works without CORS errors', async ({ page }) => {

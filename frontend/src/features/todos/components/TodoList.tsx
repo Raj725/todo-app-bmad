@@ -139,7 +139,18 @@ export function TodoList({
                   ? 'Mark active'
                   : 'Mark complete'}
             </button>
-            {hasToggleError && <p role="alert">{toggleErrorMessage}</p>}
+            {hasToggleError && !isTogglePending && (
+              <p role="alert">
+                {toggleErrorMessage}{' '}
+                <button
+                  type="button"
+                  onClick={() => onToggleTodo(todo)}
+                  aria-label={`Retry toggle task "${todo.description}"`}
+                >
+                  Retry
+                </button>
+              </p>
+            )}
 
             {!isEditing && (
               <button
