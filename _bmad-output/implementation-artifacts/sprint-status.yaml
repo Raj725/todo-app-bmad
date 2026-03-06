@@ -47,8 +47,8 @@ development_status:
   1-4-quick-add-task-flow-with-immediate-feedback: done
   epic-1-retrospective: done
 
-  epic-2: backlog
-  2-1-toggle-task-complete-and-incomplete-from-list: backlog
+  epic-2: in-progress
+  2-1-toggle-task-complete-and-incomplete-from-list: ready-for-dev
   2-2-delete-task-with-lightweight-confirmation: backlog
   2-3-edit-task-description-in-context: backlog
   2-4-enforce-actionable-ordering-and-status-clarity: backlog
