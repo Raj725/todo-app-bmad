@@ -11,8 +11,27 @@ describe('createTodo', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 500,
-      json: async () => ({ error: { message: 'server error' } }),
+      json: async () => ({
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'server error',
+          details: [],
+          request_id: 'create-req-1',
+        },
+      }),
     } as Response)
+
+    await expect(createTodo('Add tests')).rejects.toThrow('server error')
+  })
+
+  it('rejects with generic message when error response body cannot be parsed', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => {
+        throw new Error('not json')
+      },
+    } as unknown as Response)
 
     await expect(createTodo('Add tests')).rejects.toThrow('Failed to create todo')
   })

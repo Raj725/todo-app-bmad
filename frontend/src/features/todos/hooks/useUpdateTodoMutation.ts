@@ -15,6 +15,12 @@ export function useUpdateTodoMutation() {
   const [pendingTodoIds, setPendingTodoIds] = useState<Set<number>>(() => new Set())
   const [failedToggleTodoIds, setFailedToggleTodoIds] = useState<Set<number>>(() => new Set())
   const [failedDescriptionTodoIds, setFailedDescriptionTodoIds] = useState<Set<number>>(() => new Set())
+  const [failedToggleErrorMessages, setFailedToggleErrorMessages] = useState<Map<number, string>>(
+    () => new Map(),
+  )
+  const [failedDescriptionErrorMessages, setFailedDescriptionErrorMessages] = useState<Map<number, string>>(
+    () => new Map(),
+  )
 
   const mutation = useMutation({
     mutationFn: updateTodo,
@@ -31,10 +37,20 @@ export function useUpdateTodoMutation() {
           next.delete(variables.todoId)
           return next
         })
+        setFailedDescriptionErrorMessages((current) => {
+          const next = new Map(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
       if (typeof variables.isCompleted === 'boolean') {
         setFailedToggleTodoIds((current) => {
           const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
+        setFailedToggleErrorMessages((current) => {
+          const next = new Map(current)
           next.delete(variables.todoId)
           return next
         })
@@ -58,7 +74,7 @@ export function useUpdateTodoMutation() {
 
       return { previousTodo }
     },
-    onError: (_error, variables, context) => {
+    onError: (error, variables, context) => {
       if (context?.previousTodo) {
         queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
           sortTodosByActionableOrder(
@@ -67,11 +83,23 @@ export function useUpdateTodoMutation() {
         )
       }
 
+      const errorMessage = error instanceof Error ? error.message : 'Unable to update task.'
+
       if (typeof variables.description === 'string') {
         setFailedDescriptionTodoIds((current) => new Set([...current, variables.todoId]))
+        setFailedDescriptionErrorMessages((current) => {
+          const next = new Map(current)
+          next.set(variables.todoId, errorMessage)
+          return next
+        })
       }
       if (typeof variables.isCompleted === 'boolean') {
         setFailedToggleTodoIds((current) => new Set([...current, variables.todoId]))
+        setFailedToggleErrorMessages((current) => {
+          const next = new Map(current)
+          next.set(variables.todoId, errorMessage)
+          return next
+        })
       }
     },
     onSuccess: (updatedTodo, variables) => {
@@ -81,10 +109,20 @@ export function useUpdateTodoMutation() {
           next.delete(variables.todoId)
           return next
         })
+        setFailedDescriptionErrorMessages((current) => {
+          const next = new Map(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
       if (typeof variables.isCompleted === 'boolean') {
         setFailedToggleTodoIds((current) => {
           const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
+        setFailedToggleErrorMessages((current) => {
+          const next = new Map(current)
           next.delete(variables.todoId)
           return next
         })
@@ -110,5 +148,7 @@ export function useUpdateTodoMutation() {
     pendingTodoIds,
     failedToggleTodoIds,
     failedDescriptionTodoIds,
+    failedToggleErrorMessages,
+    failedDescriptionErrorMessages,
   }
 }

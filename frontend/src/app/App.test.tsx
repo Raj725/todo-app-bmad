@@ -58,7 +58,14 @@ describe('Task list and quick-add flows', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 500,
-      json: async () => ({ error: { message: 'server error' } }),
+      json: async () => ({
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'server error',
+          details: [],
+          request_id: 'list-err-1',
+        },
+      }),
     } as Response)
 
     renderWithQueryClient()
@@ -125,7 +132,14 @@ describe('Task list and quick-add flows', () => {
           return {
             ok: false,
             status: 400,
-            json: async () => ({ error: { message: 'validation failed' } }),
+            json: async () => ({
+              error: {
+                code: 'VALIDATION_ERROR',
+                message: 'validation failed',
+                details: [],
+                request_id: 'create-err-1',
+              },
+            }),
           } as Response
         }
 
@@ -173,7 +187,7 @@ describe('Task list and quick-add flows', () => {
     })
     fireEvent.click(within(getQuickAddSection()).getByRole('button', { name: 'Quick add task' }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to create task.')
+    expect(await screen.findByRole('alert')).toHaveTextContent('validation failed')
 
     fireEvent.click(screen.getByRole('button', { name: 'Retry quick add' }))
 
@@ -348,7 +362,14 @@ describe('Task list and quick-add flows', () => {
         return {
           ok: false,
           status: 500,
-          json: async () => ({ error: { message: 'update failed' } }),
+          json: async () => ({
+            error: {
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'update failed',
+              details: [],
+              request_id: 'toggle-err-1',
+            },
+          }),
         } as Response
       }
 
@@ -365,7 +386,7 @@ describe('Task list and quick-add flows', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Mark task "Fail toggle task" as complete' })).toBeInTheDocument()
-      expect(screen.getByRole('alert')).toHaveTextContent('Unable to update task status.')
+      expect(screen.getByRole('alert')).toHaveTextContent('update failed')
     })
 
     expect(screen.getByRole('button', { name: 'Mark task "Stable task" as complete' })).toBeInTheDocument()
@@ -636,7 +657,14 @@ describe('Task list and quick-add flows', () => {
           return {
             ok: false,
             status: 500,
-            json: async () => ({ error: { message: 'update failed' } }),
+            json: async () => ({
+              error: {
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'update failed',
+                details: [],
+                request_id: 'edit-err-1',
+              },
+            }),
           } as Response
         }
 
@@ -668,7 +696,7 @@ describe('Task list and quick-add flows', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Unable to update task description.')
+      expect(screen.getByRole('alert')).toHaveTextContent('update failed')
       expect(screen.getByText('Retry edit task')).toBeInTheDocument()
     })
 
@@ -747,7 +775,14 @@ describe('Task list and quick-add flows', () => {
           return {
             ok: false,
             status: 500,
-            json: async () => ({ error: { message: 'delete failed' } }),
+            json: async () => ({
+              error: {
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'delete failed',
+                details: [],
+                request_id: 'delete-err-1',
+              },
+            }),
           } as Response
         }
 

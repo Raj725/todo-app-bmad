@@ -1,3 +1,5 @@
+import { normalizeTodoApiError } from './normalizeTodoApiError'
+
 export type DeleteTodoInput = {
   todoId: number
 }
@@ -13,17 +15,7 @@ export async function deleteTodo(input: DeleteTodoInput): Promise<void> {
     let errorMessage = 'Failed to delete todo'
     try {
       const errorBody = (await response.json()) as unknown
-      if (
-        typeof errorBody === 'object' &&
-        errorBody !== null &&
-        'error' in errorBody &&
-        typeof (errorBody as { error: unknown }).error === 'object' &&
-        (errorBody as { error: unknown }).error !== null &&
-        'message' in (errorBody as { error: { message: unknown } }).error &&
-        typeof (errorBody as { error: { message: unknown } }).error.message === 'string'
-      ) {
-        errorMessage = (errorBody as { error: { message: string } }).error.message
-      }
+      errorMessage = normalizeTodoApiError(errorBody, errorMessage)
     } catch {
       // ignore parse errors, use default message
     }

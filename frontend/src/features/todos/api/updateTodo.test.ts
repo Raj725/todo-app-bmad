@@ -44,7 +44,14 @@ describe('updateTodo', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 404,
-      json: async () => ({ error: { message: 'not found' } }),
+      json: async () => ({
+        error: {
+          code: 'NOT_FOUND',
+          message: 'not found',
+          details: [],
+          request_id: 'update-req-1',
+        },
+      }),
     } as Response)
 
     await expect(updateTodo({ todoId: 22, isCompleted: true })).rejects.toThrow('not found')

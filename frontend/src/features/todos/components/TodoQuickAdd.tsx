@@ -3,10 +3,11 @@ import { FormEvent, useState } from 'react'
 type TodoQuickAddProps = {
   isPending: boolean
   isError: boolean
+  errorMessage: string | null
   onSubmit: (description: string) => void
 }
 
-export function TodoQuickAdd({ isPending, isError, onSubmit }: TodoQuickAddProps) {
+export function TodoQuickAdd({ isPending, isError, errorMessage, onSubmit }: TodoQuickAddProps) {
   const [description, setDescription] = useState('')
   const [lastAttemptedDescription, setLastAttemptedDescription] = useState('')
 
@@ -48,7 +49,7 @@ export function TodoQuickAdd({ isPending, isError, onSubmit }: TodoQuickAddProps
       </form>
       {isError && (
         <div role="alert">
-          <span>Unable to create task.</span>
+          <span>{errorMessage ?? 'Unable to create task.'}</span>
           <button type="button" onClick={handleRetry} disabled={isPending}>
             Retry quick add
           </button>

@@ -19,6 +19,7 @@ function App() {
       <TodoQuickAdd
         isPending={createTodoMutation.isPending}
         isError={createTodoMutation.isError}
+        errorMessage={createTodoMutation.createErrorMessage}
         onSubmit={(description) => createTodoMutation.mutate(description)}
       />
       {todosQuery.isPending && <TodoListLoadingState />}
@@ -31,7 +32,9 @@ function App() {
           todos={todosQuery.data}
           pendingTodoIds={updateTodoMutation.pendingTodoIds}
           failedToggleTodoIds={updateTodoMutation.failedToggleTodoIds}
+          failedToggleErrorMessages={updateTodoMutation.failedToggleErrorMessages}
           failedEditTodoIds={updateTodoMutation.failedDescriptionTodoIds}
+          failedEditErrorMessages={updateTodoMutation.failedDescriptionErrorMessages}
           onToggleTodo={(todo) => {
             updateTodoMutation.mutate({
               todoId: todo.id,
@@ -46,6 +49,7 @@ function App() {
           }}
           pendingDeleteIds={deleteTodoMutation.pendingDeleteIds}
           failedDeleteTodoIds={deleteTodoMutation.failedDeleteTodoIds}
+          failedDeleteErrorMessages={deleteTodoMutation.failedDeleteErrorMessages}
           onDeleteTodo={(todo) => {
             deleteTodoMutation.mutate({ todoId: todo.id })
           }}

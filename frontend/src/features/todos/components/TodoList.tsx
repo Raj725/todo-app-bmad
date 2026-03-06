@@ -6,11 +6,14 @@ type TodoListProps = {
   todos: Todo[]
   pendingTodoIds: Set<number>
   failedToggleTodoIds: Set<number>
+  failedToggleErrorMessages: Map<number, string>
   failedEditTodoIds: Set<number>
+  failedEditErrorMessages: Map<number, string>
   onToggleTodo: (todo: Todo) => void
   onEditTodo: (todo: Todo, description: string) => void
   pendingDeleteIds: Set<number>
   failedDeleteTodoIds: Set<number>
+  failedDeleteErrorMessages: Map<number, string>
   onDeleteTodo: (todo: Todo) => void
 }
 
@@ -18,11 +21,14 @@ export function TodoList({
   todos,
   pendingTodoIds,
   failedToggleTodoIds,
+  failedToggleErrorMessages,
   failedEditTodoIds,
+  failedEditErrorMessages,
   onToggleTodo,
   onEditTodo,
   pendingDeleteIds,
   failedDeleteTodoIds,
+  failedDeleteErrorMessages,
   onDeleteTodo,
 }: TodoListProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
@@ -71,6 +77,10 @@ export function TodoList({
         const isEditing = editTodoId === todo.id
         const canRetryEdit = Boolean(lastSubmittedEdits[todo.id])
         const hasToggleError = failedToggleTodoIds.has(todo.id)
+        const toggleErrorMessage = failedToggleErrorMessages.get(todo.id) ?? 'Unable to update task status.'
+        const editErrorMessage =
+          failedEditErrorMessages.get(todo.id) ?? 'Unable to update task description.'
+        const deleteErrorMessage = failedDeleteErrorMessages.get(todo.id) ?? 'Unable to delete task.'
 
         return (
           <li key={todo.id}>
@@ -127,7 +137,7 @@ export function TodoList({
                   ? 'Mark active'
                   : 'Mark complete'}
             </button>
-            {hasToggleError && <p role="alert">Unable to update task status.</p>}
+            {hasToggleError && <p role="alert">{toggleErrorMessage}</p>}
 
             {!isEditing && (
               <button
@@ -142,7 +152,7 @@ export function TodoList({
 
             {hasEditError && !isEditPending && canRetryEdit && (
               <p role="alert">
-                Unable to update task description.{' '}
+                {editErrorMessage}{' '}
                 <button
                   type="button"
                   onClick={() => onEditTodo(todo, lastSubmittedEdits[todo.id])}
@@ -192,7 +202,7 @@ export function TodoList({
             {/* Scoped delete error with retry */}
             {hasDeleteError && !isDeletePending && (
               <p role="alert">
-                Unable to delete task.{' '}
+                {deleteErrorMessage}{' '}
                 <button
                   type="button"
                   onClick={() => onDeleteTodo(todo)}

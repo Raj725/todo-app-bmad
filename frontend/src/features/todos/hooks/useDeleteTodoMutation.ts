@@ -13,6 +13,9 @@ export function useDeleteTodoMutation() {
   const queryClient = useQueryClient()
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<number>>(() => new Set())
   const [failedDeleteTodoIds, setFailedDeleteTodoIds] = useState<Set<number>>(() => new Set())
+  const [failedDeleteErrorMessages, setFailedDeleteErrorMessages] = useState<Map<number, string>>(
+    () => new Map(),
+  )
 
   const mutation = useMutation({
     mutationFn: deleteTodo,
@@ -28,6 +31,11 @@ export function useDeleteTodoMutation() {
         next.delete(variables.todoId)
         return next
       })
+      setFailedDeleteErrorMessages((current) => {
+        const next = new Map(current)
+        next.delete(variables.todoId)
+        return next
+      })
 
       // Optimistically remove the todo from cache
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
@@ -36,7 +44,7 @@ export function useDeleteTodoMutation() {
 
       return { deletedTodo }
     },
-    onError: (_error, variables, context) => {
+    onError: (error, variables, context) => {
       // Rollback only the failed item to avoid stale overwrite during concurrent deletes.
       if (context?.deletedTodo) {
         const deletedTodo = context.deletedTodo
@@ -49,10 +57,21 @@ export function useDeleteTodoMutation() {
         })
       }
       setFailedDeleteTodoIds((current) => new Set([...current, variables.todoId]))
+      const errorMessage = error instanceof Error ? error.message : 'Unable to delete task.'
+      setFailedDeleteErrorMessages((current) => {
+        const next = new Map(current)
+        next.set(variables.todoId, errorMessage)
+        return next
+      })
     },
     onSuccess: (_data, variables) => {
       setFailedDeleteTodoIds((current) => {
         const next = new Set(current)
+        next.delete(variables.todoId)
+        return next
+      })
+      setFailedDeleteErrorMessages((current) => {
+        const next = new Map(current)
         next.delete(variables.todoId)
         return next
       })
@@ -71,5 +90,6 @@ export function useDeleteTodoMutation() {
     ...mutation,
     pendingDeleteIds,
     failedDeleteTodoIds,
+    failedDeleteErrorMessages,
   }
 }
