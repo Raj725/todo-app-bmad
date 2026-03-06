@@ -436,3 +436,112 @@ test('mutation failure then retry success reconciles after reload to persisted b
   await expect(page.getByRole('button', { name: 'Mark task "Retry then reload task" as active' })).toBeVisible()
   await expect(page.getByText('Toggle failed once.')).not.toBeVisible()
 })
+
+test('inline edit failure is scoped and retry persists updated description', async ({ page }) => {
+  const todos: TodoApiItem[] = [
+    {
+      id: 1,
+      description: 'Edit retry target',
+      is_completed: false,
+      created_at: '2026-03-06T16:00:01.000Z',
+    },
+    {
+      id: 2,
+      description: 'Unrelated task',
+      is_completed: false,
+      created_at: '2026-03-06T16:00:02.000Z',
+    },
+  ]
+  let editAttemptCount = 0
+
+  await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todos }),
+      })
+      return
+    }
+
+    if (route.request().method() === 'PATCH') {
+      const todoId = Number(route.request().url().split('/').pop())
+      const updateBody = route.request().postDataJSON() as { description?: string; is_completed?: boolean }
+      const todo = todos.find((item) => item.id === todoId)
+
+      if (!todo) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            error: {
+              code: 'TODO_NOT_FOUND',
+              message: 'Todo not found',
+              details: [],
+              request_id: 'req-edit-not-found',
+            },
+          }),
+        })
+        return
+      }
+
+      if (todoId === 1 && typeof updateBody.description === 'string') {
+        editAttemptCount += 1
+        if (editAttemptCount === 1) {
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: {
+                code: 'TODO_UPDATE_FAILED',
+                message: 'Edit failed once.',
+                details: [],
+                request_id: 'req-edit-fail-1',
+              },
+            }),
+          })
+          return
+        }
+
+        todo.description = updateBody.description
+      }
+
+      if (typeof updateBody.is_completed === 'boolean') {
+        todo.is_completed = updateBody.is_completed
+      }
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todo }),
+      })
+      return
+    }
+
+    await route.fallback()
+  })
+
+  await page.goto('/')
+
+  await expect(page.getByText('Edit retry target')).toBeVisible()
+  await expect(page.getByText('Unrelated task')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Edit task "Edit retry target"' }).click()
+  await page.getByLabel('Edit description for task "Edit retry target"').fill('Edited successfully after retry')
+  await page.getByRole('button', { name: 'Save' }).click()
+
+  await expect(page.getByText('Edit failed once.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retry edit task "Edit retry target"' })).toBeVisible()
+  await expect(page.getByText('Unrelated task')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Retry edit task "Edit retry target"' }).click()
+
+  await expect(page.getByText('Edited successfully after retry')).toBeVisible()
+  await expect(page.getByText('Edit failed once.')).not.toBeVisible()
+
+  await page.reload()
+
+  await expect(page.getByText('Edited successfully after retry')).toBeVisible()
+  await expect(page.getByText('Unrelated task')).toBeVisible()
+  await expect(page.getByText('Edit failed once.')).not.toBeVisible()
+})

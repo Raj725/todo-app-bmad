@@ -293,6 +293,33 @@ class ApiUnhandledExceptionErrorTests(_BaseApiIntegrationTest):
         self.assertNotIn("traceback", serialized_payload)
         self.assertNotIn("sqlite", serialized_payload)
 
+    def test_update_todo_returns_500_envelope_when_storage_unavailable(self) -> None:
+        request = urllib.request.Request(
+            f"{self.base_url}/todos/1",
+            data=json.dumps({"is_completed": True}).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "x-request-id": "qa-update-internal-error",
+            },
+            method="PATCH",
+        )
+
+        with self.assertRaises(urllib.error.HTTPError) as context:
+            urllib.request.urlopen(request)
+
+        self.assertEqual(context.exception.code, 500)
+        payload = json.loads(context.exception.read().decode("utf-8"))
+
+        self.assertIn("error", payload)
+        self.assertEqual(payload["error"]["code"], "INTERNAL_SERVER_ERROR")
+        self.assertEqual(payload["error"]["message"], "An unexpected error occurred")
+        self.assertEqual(payload["error"]["details"], [])
+        self.assertEqual(payload["error"]["request_id"], "qa-update-internal-error")
+
+        serialized_payload = json.dumps(payload).lower()
+        self.assertNotIn("traceback", serialized_payload)
+        self.assertNotIn("sqlite", serialized_payload)
+
 
 if __name__ == "__main__":
     unittest.main()
