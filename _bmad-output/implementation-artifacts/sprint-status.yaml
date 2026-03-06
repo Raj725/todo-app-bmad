@@ -58,7 +58,7 @@ development_status:
   3-1-standardized-error-envelope-and-client-error-normalization: done
   3-2-implement-optimistic-mutation-lifecycle-with-deterministic-rollback: done
   3-3-retry-flows-and-failure-isolation: done
-  3-4-reconciliation-to-persisted-backend-truth: review
+  3-4-reconciliation-to-persisted-backend-truth: done
   epic-3-retrospective: optional
 
   epic-4: backlog

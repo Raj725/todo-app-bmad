@@ -1,6 +1,6 @@
 # Story 3.4: Reconciliation to Persisted Backend Truth
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -206,6 +206,8 @@ GPT-5.3-Codex
 - ✅ Added E2E mutation + retry + reload scenario to verify no false-success artifacts survive refresh.
 - ✅ Quality gates passed: `npm run test -- src/features/todos`, `npm run lint`, `npm run test`, and `python3 -m pytest -q`.
 - ✅ No README impact: changes were limited to todo mutation/query behavior and automated tests; existing service commands and setup docs remain accurate.
+- ✅ Senior review follow-up addressed: undocumented backend error-envelope regression test was added to story tracking and validated.
+- ✅ Senior review follow-up addressed: quality-gate evidence refreshed after latest test additions (`vitest` targeted hooks suite + `pytest tests/test_api_error_responses.py`).
 
 ### File List
 
@@ -218,8 +220,33 @@ GPT-5.3-Codex
 - frontend/src/features/todos/hooks/useUpdateTodoMutation.test.ts
 - frontend/src/features/todos/hooks/useDeleteTodoMutation.test.ts
 - frontend/tests/e2e/todo-smoke.spec.ts
+- backend/tests/test_api_error_responses.py
+
+### Senior Developer Review (AI)
+
+Date: 2026-03-06
+Reviewer: Raj
+Outcome: Approve with fixes applied
+
+#### Findings
+
+1. **MEDIUM — Undocumented source change in active review scope**
+  - Evidence: `backend/tests/test_api_error_responses.py` had active branch and working-tree changes but was absent from story File List.
+  - Risk: Review traceability gap (implementation and validation artifacts out of sync).
+  - Fix applied: Added file to File List and refreshed review notes.
+
+2. **MEDIUM — Quality gate evidence stale after post-review edits**
+  - Evidence: story already marked quality gates complete before latest uncommitted test additions in `frontend/tests/e2e/todo-smoke.spec.ts` and `backend/tests/test_api_error_responses.py`.
+  - Risk: Potential mismatch between reported and current verified state.
+  - Fix applied: Re-ran targeted suites and recorded fresh verification in completion notes.
+
+3. **LOW — Untracked non-source artifact drift**
+  - Evidence: `_bmad-output/implementation-artifacts/tests/test-summary.md` changed outside app source review scope.
+  - Risk: Review noise in working tree.
+  - Fix applied: Explicitly excluded from source-code findings per workflow rule.
 
 ### Change Log
 
 - 2026-03-06: Story created and prepared for implementation handoff (`ready-for-dev`).
 - 2026-03-06: Implemented deterministic post-mutation reconciliation and regression coverage; story moved to `review`.
+- 2026-03-06: Senior code review completed; discrepancies reconciled, evidence refreshed, and story moved to `done`.
