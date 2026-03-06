@@ -34,7 +34,7 @@ def update_todo(
 ) -> SuccessResponse[TodoResponse]:
     repository = TodoRepository(session)
     service = TodoService(repository)
-    todo = service.update_todo_is_completed(todo_id=todo_id, is_completed=payload.is_completed)
+    todo = service.update_todo(todo_id=todo_id, is_completed=payload.is_completed, description=payload.description)
     return SuccessResponse(data=TodoResponse.model_validate(todo))
 
 

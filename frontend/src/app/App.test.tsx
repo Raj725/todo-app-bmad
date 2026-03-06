@@ -371,6 +371,228 @@ describe('Task list and quick-add flows', () => {
     expect(screen.getByRole('button', { name: 'Mark task "Stable task" as complete' })).toBeInTheDocument()
   })
 
+  it('supports inline edit save and persists updated description through PATCH', async () => {
+    let serverTodos = [
+      {
+        id: 71,
+        description: 'Editable task',
+        is_completed: false,
+        created_at: '2026-03-06T12:10:00.000Z',
+      },
+    ]
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({ data: serverTodos }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/71') && init?.method === 'PATCH') {
+        expect(init.body).toBe(JSON.stringify({ description: 'Updated editable task' }))
+
+        serverTodos = [
+          {
+            ...serverTodos[0],
+            description: 'Updated editable task',
+          },
+        ]
+
+        return {
+          ok: true,
+          json: async () => ({ data: serverTodos[0] }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Editable task')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit task "Editable task"' }))
+    const editInput = screen.getByRole('textbox', { name: 'Edit description for task "Editable task"' })
+    fireEvent.change(editInput, { target: { value: 'Updated editable task' } })
+    fireEvent.keyDown(editInput, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(screen.getByText('Updated editable task')).toBeInTheDocument()
+    })
+  })
+
+  it('cancels inline edit without sending PATCH mutation', async () => {
+    let patchCalls = 0
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: [
+              {
+                id: 72,
+                description: 'Cancel edit task',
+                is_completed: false,
+                created_at: '2026-03-06T12:20:00.000Z',
+              },
+            ],
+          }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/72') && init?.method === 'PATCH') {
+        patchCalls += 1
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Cancel edit task')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit task "Cancel edit task"' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Edit description for task "Cancel edit task"' }), {
+      target: { value: 'Should not persist' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancel edit task')).toBeInTheDocument()
+    })
+    expect(patchCalls).toBe(0)
+  })
+
+  it('shows inline validation feedback for invalid edit input and prevents PATCH request', async () => {
+    let patchCalls = 0
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: [
+              {
+                id: 73,
+                description: 'Validate edit task',
+                is_completed: false,
+                created_at: '2026-03-06T12:30:00.000Z',
+              },
+            ],
+          }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/73') && init?.method === 'PATCH') {
+        patchCalls += 1
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Validate edit task')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Edit task "Validate edit task"' }))
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'Edit description for task "Validate edit task"' }), {
+      target: { value: '   ' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Task description is required.')
+    expect(patchCalls).toBe(0)
+  })
+
+  it('rolls back failed inline edit and supports scoped retry', async () => {
+    let patchAttempts = 0
+    let serverTodos = [
+      {
+        id: 74,
+        description: 'Retry edit task',
+        is_completed: false,
+        created_at: '2026-03-06T12:40:00.000Z',
+      },
+    ]
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && !init?.method) {
+        return {
+          ok: true,
+          json: async () => ({ data: serverTodos }),
+        } as Response
+      }
+
+      if (url.endsWith('/todos/74') && init?.method === 'PATCH') {
+        patchAttempts += 1
+
+        if (patchAttempts === 1) {
+          return {
+            ok: false,
+            status: 500,
+            json: async () => ({ error: { message: 'update failed' } }),
+          } as Response
+        }
+
+        serverTodos = [
+          {
+            ...serverTodos[0],
+            description: 'Retry edit task updated',
+          },
+        ]
+        return {
+          ok: true,
+          json: async () => ({ data: serverTodos[0] }),
+        } as Response
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Retry edit task')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Edit task "Retry edit task"' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Edit description for task "Retry edit task"' }), {
+      target: { value: 'Retry edit task updated' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Unable to update task description.')
+      expect(screen.getByText('Retry edit task')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry edit task "Retry edit task"' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Retry edit task updated')).toBeInTheDocument()
+      expect(patchAttempts).toBe(2)
+    })
+  })
+
   it('supports delete confirm then cancel without removing the task', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = String(input)

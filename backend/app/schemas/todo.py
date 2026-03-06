@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class TodoCreateRequest(BaseModel):
@@ -27,4 +27,22 @@ class TodoResponse(BaseModel):
 class TodoUpdateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    is_completed: bool
+    is_completed: bool | None = None
+    description: str | None = Field(default=None, min_length=1, max_length=280)
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("description must not be empty")
+        return normalized
+
+    @model_validator(mode="after")
+    def validate_at_least_one_field(self) -> "TodoUpdateRequest":
+        if self.is_completed is None and self.description is None:
+            raise ValueError("at least one field must be provided")
+        return self

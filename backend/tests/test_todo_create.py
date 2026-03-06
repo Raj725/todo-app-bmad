@@ -214,10 +214,51 @@ class TodoCreateIntegrationTests(unittest.TestCase):
             ).fetchone()
             self.assertEqual(row[0], 1)
 
+    def test_patch_todo_updates_description_and_returns_success_envelope(self) -> None:
+        create_request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            data=json.dumps({"description": "Original description"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(create_request) as create_response:
+            created = json.loads(create_response.read().decode("utf-8"))["data"]
+
+        patch_request = urllib.request.Request(
+            f"{self.base_url}/todos/{created['id']}",
+            data=json.dumps({"description": "Updated description"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="PATCH",
+        )
+        with urllib.request.urlopen(patch_request) as patch_response:
+            payload = json.loads(patch_response.read().decode("utf-8"))
+            status_code = patch_response.status
+
+        self.assertEqual(status_code, 200)
+        self.assertIn("data", payload)
+        self.assertEqual(payload["data"]["id"], created["id"])
+        self.assertEqual(payload["data"]["description"], "Updated description")
+
+        with sqlite3.connect(self.test_db_path) as connection:
+            row = connection.execute(
+                "SELECT description FROM todos WHERE id = ?",
+                (created["id"],),
+            ).fetchone()
+            self.assertEqual(row[0], "Updated description")
+
     def test_patch_todo_validation_and_not_found_errors_return_error_envelope(self) -> None:
+        create_request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            data=json.dumps({"description": "Still original"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(create_request) as create_response:
+            created = json.loads(create_response.read().decode("utf-8"))["data"]
+
         invalid_payload_request = urllib.request.Request(
-            f"{self.base_url}/todos/99999",
-            data=json.dumps({"description": "no updates allowed"}).encode("utf-8"),
+            f"{self.base_url}/todos/{created['id']}",
+            data=json.dumps({"description": "   "}).encode("utf-8"),
             headers={"Content-Type": "application/json"},
             method="PATCH",
         )
@@ -231,6 +272,13 @@ class TodoCreateIntegrationTests(unittest.TestCase):
         self.assertEqual(invalid_payload_response["error"]["message"], "Request validation failed")
         self.assertIsInstance(invalid_payload_response["error"]["details"], list)
         self.assertTrue(invalid_payload_response["error"]["request_id"])
+
+        with sqlite3.connect(self.test_db_path) as connection:
+            row = connection.execute(
+                "SELECT description FROM todos WHERE id = ?",
+                (created["id"],),
+            ).fetchone()
+            self.assertEqual(row[0], "Still original")
 
         not_found_request = urllib.request.Request(
             f"{self.base_url}/todos/99999",

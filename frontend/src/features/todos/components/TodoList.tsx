@@ -5,7 +5,9 @@ type TodoListProps = {
   todos: Todo[]
   pendingTodoIds: Set<number>
   failedTodoId: number | null
+  failedEditTodoId: number | null
   onToggleTodo: (todo: Todo) => void
+  onEditTodo: (todo: Todo, description: string) => void
   pendingDeleteIds: Set<number>
   failedDeleteTodoId: number | null
   onDeleteTodo: (todo: Todo) => void
@@ -38,29 +40,99 @@ export function TodoList({
   todos,
   pendingTodoIds,
   failedTodoId,
+  failedEditTodoId,
   onToggleTodo,
+  onEditTodo,
   pendingDeleteIds,
   failedDeleteTodoId,
   onDeleteTodo,
 }: TodoListProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+  const [editTodoId, setEditTodoId] = useState<number | null>(null)
+  const [editDraft, setEditDraft] = useState('')
+  const [editValidationError, setEditValidationError] = useState<string | null>(null)
+  const [lastSubmittedEdits, setLastSubmittedEdits] = useState<Record<number, string>>({})
   const sortedTodos = sortTodos(todos)
+
+  const startEditing = (todo: Todo) => {
+    setEditTodoId(todo.id)
+    setEditDraft(todo.description)
+    setEditValidationError(null)
+  }
+
+  const cancelEditing = () => {
+    setEditTodoId(null)
+    setEditDraft('')
+    setEditValidationError(null)
+  }
+
+  const saveEdit = (todo: Todo) => {
+    const nextDescription = editDraft.trim()
+    if (!nextDescription) {
+      setEditValidationError('Task description is required.')
+      return
+    }
+
+    setLastSubmittedEdits((current) => ({ ...current, [todo.id]: nextDescription }))
+    setEditValidationError(null)
+    setEditTodoId(null)
+    onEditTodo(todo, nextDescription)
+  }
 
   return (
     <ul>
       {sortedTodos.map((todo) => {
         const isTogglePending = pendingTodoIds.has(todo.id)
+        const isEditPending = pendingTodoIds.has(todo.id)
         const isDeletePending = pendingDeleteIds.has(todo.id)
         // Disable all controls while either operation is in-flight
-        const isAnyPending = isTogglePending || isDeletePending
+        const isAnyPending = isTogglePending || isEditPending || isDeletePending
         const isConfirmingDelete = confirmDeleteId === todo.id
         const hasDeleteError = failedDeleteTodoId === todo.id
+        const hasEditError = failedEditTodoId === todo.id
+        const isEditing = editTodoId === todo.id
+        const canRetryEdit = Boolean(lastSubmittedEdits[todo.id])
 
         return (
           <li key={todo.id}>
-            <p>
-              {todo.description} {todo.isCompleted ? <strong>Completed</strong> : <strong>Active</strong>}
-            </p>
+            {isEditing ? (
+              <>
+                <label htmlFor={`edit-todo-${todo.id}`}>Edit task description</label>
+                <input
+                  id={`edit-todo-${todo.id}`}
+                  value={editDraft}
+                  onChange={(event) => {
+                    setEditDraft(event.target.value)
+                    if (editValidationError) {
+                      setEditValidationError(null)
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      saveEdit(todo)
+                    }
+                    if (event.key === 'Escape') {
+                      event.preventDefault()
+                      cancelEditing()
+                    }
+                  }}
+                  aria-label={`Edit description for task "${todo.description}"`}
+                  disabled={isEditPending}
+                />
+                <button type="button" onClick={() => saveEdit(todo)} disabled={isEditPending}>
+                  {isEditPending ? 'Saving…' : 'Save'}
+                </button>
+                <button type="button" onClick={cancelEditing} disabled={isEditPending}>
+                  Cancel
+                </button>
+                {editValidationError && <p role="alert">{editValidationError}</p>}
+              </>
+            ) : (
+              <p>
+                {todo.description} {todo.isCompleted ? <strong>Completed</strong> : <strong>Active</strong>}
+              </p>
+            )}
             <p>Created: {formatCreatedAt(todo.createdAt)}</p>
 
             {/* Toggle button */}
@@ -77,6 +149,30 @@ export function TodoList({
                   : 'Mark complete'}
             </button>
             {failedTodoId === todo.id && <p role="alert">Unable to update task status.</p>}
+
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={() => startEditing(todo)}
+                disabled={isAnyPending}
+                aria-label={`Edit task "${todo.description}"`}
+              >
+                Edit
+              </button>
+            )}
+
+            {hasEditError && !isEditPending && canRetryEdit && (
+              <p role="alert">
+                Unable to update task description.{' '}
+                <button
+                  type="button"
+                  onClick={() => onEditTodo(todo, lastSubmittedEdits[todo.id])}
+                  aria-label={`Retry edit task "${todo.description}"`}
+                >
+                  Retry
+                </button>
+              </p>
+            )}
 
             {/* Delete controls */}
             {isDeletePending ? (
