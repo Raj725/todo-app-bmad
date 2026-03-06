@@ -147,6 +147,39 @@ class ApiValidationAndRoutingErrorTests(_BaseApiIntegrationTest):
         self.assertIsInstance(payload["error"]["details"], list)
         self.assertEqual(payload["error"]["request_id"], "qa-update-invalid-id")
 
+    def test_update_todo_empty_payload_returns_validation_envelope_and_request_id(self) -> None:
+        create_request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            data=json.dumps({"description": "Needs update validation"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(create_request) as create_response:
+            created_payload = json.loads(create_response.read().decode("utf-8"))
+
+        todo_id = created_payload["data"]["id"]
+        request = urllib.request.Request(
+            f"{self.base_url}/todos/{todo_id}",
+            data=json.dumps({}).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "x-request-id": "qa-update-empty-payload",
+            },
+            method="PATCH",
+        )
+
+        with self.assertRaises(urllib.error.HTTPError) as context:
+            urllib.request.urlopen(request)
+
+        self.assertEqual(context.exception.code, 400)
+        payload = json.loads(context.exception.read().decode("utf-8"))
+
+        self.assertIn("error", payload)
+        self.assertEqual(payload["error"]["code"], "VALIDATION_ERROR")
+        self.assertEqual(payload["error"]["message"], "Request validation failed")
+        self.assertIsInstance(payload["error"]["details"], list)
+        self.assertEqual(payload["error"]["request_id"], "qa-update-empty-payload")
+
     def test_delete_missing_todo_returns_not_found_envelope_and_request_id(self) -> None:
         request = urllib.request.Request(
             f"{self.base_url}/todos/999999",

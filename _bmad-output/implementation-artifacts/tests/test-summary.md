@@ -3,28 +3,24 @@
 ## Generated Tests
 
 ### API Tests
-- [x] `backend/tests/test_health_readiness.py` - Health and readiness endpoint verification (`/health`, `/ready`)
-- [x] `backend/tests/test_todo_create.py` - Todo create/list/toggle integration coverage (success + validation + not found)
-- [x] `backend/tests/test_api_error_responses.py` - API routing/validation/internal-error envelope coverage (404, 400, 500)
-- [x] `frontend/src/features/todos/api/createTodo.test.ts` - Create API mapping and failure handling
-- [x] `frontend/src/features/todos/api/listTodos.test.ts` - List API mapping and failure handling
-- [x] `frontend/src/features/todos/api/updateTodo.test.ts` - Toggle API mapping and failure handling
+- [x] `backend/tests/test_api_error_responses.py` - Added `PATCH /todos/{id}` empty-payload validation test (400 envelope + request-id propagation)
 
 ### E2E Tests
-- [x] `frontend/src/app/App.test.tsx` - User workflow coverage for loading, empty, error, quick-add, retry, and toggle flows
-- [x] `frontend/tests/e2e/todo-smoke.spec.ts` - Browser-level Playwright smoke flow for quick-add and toggle-to-completed
+- [x] `frontend/tests/e2e/todo-smoke.spec.ts` - Added delete workflow coverage for cancel, failed confirm, scoped error, and retry success
 
 ## Coverage
-- API endpoints covered: 5/5 implemented endpoints (`/health`, `/ready`, `POST /todos`, `GET /todos`, `PATCH /todos/{id}`)
-- API error envelopes covered: 3/3 critical classes (validation 400, route 404, unhandled 500)
-- UI workflow scenarios covered: 9/9 app-level flows in `App.test.tsx`
-- Browser E2E workflows covered: 1/1 smoke flow in Playwright (`tests/e2e/todo-smoke.spec.ts`)
+- API endpoints covered by generated tests in this run: 1 endpoint (`PATCH /todos/{id}` validation path)
+- API status/error coverage added in this run: 400 `VALIDATION_ERROR` for empty payload
+- Browser E2E workflows covered by generated tests in this run: 1 workflow (delete cancel + failure + retry)
+- Current full-suite status: backend 22 tests (+5 subtests), frontend 61 tests, Playwright 4 E2E workflows
 
 ## Verification
-- Backend: `python3 -m pytest -q` → 11 passed, 5 subtests passed
-- Frontend: `npm run test` → 18 passed
-- Frontend E2E: `npm run test:e2e` → 1 passed
+- Targeted backend: `python3 -m pytest -q tests/test_api_error_responses.py` → 8 passed
+- Targeted E2E: `npm run test:e2e -- -g "delete workflow supports cancel, scoped error, and retry success"` → 1 passed
+- Full backend: `python3 -m pytest -q` → 22 passed, 5 subtests passed
+- Full frontend unit/integration: `npm run test` → 61 passed
+- Full frontend E2E: `npm run test:e2e` → 4 passed
 
 ## Next Steps
-- Run backend and frontend tests in CI for every PR
-- Expand Playwright suite with additional failure-state coverage as E2E environment matures
+- Run full backend suite (`python3 -m pytest -q`) and full frontend E2E suite (`npm run test:e2e`) in CI
+- Add Playwright coverage for inline edit save/cancel/retry to complement existing component-level tests

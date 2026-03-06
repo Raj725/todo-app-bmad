@@ -186,3 +186,109 @@ test('real backend integration works without CORS errors', async ({ page }) => {
 
   await expect(page.getByText(description)).toBeVisible()
 })
+
+test('delete workflow supports cancel, scoped error, and retry success', async ({ page }) => {
+  const todos: TodoApiItem[] = [
+    {
+      id: 1,
+      description: 'Retry delete task',
+      is_completed: false,
+      created_at: '2026-03-06T15:10:01.000Z',
+    },
+    {
+      id: 2,
+      description: 'Keep task',
+      is_completed: false,
+      created_at: '2026-03-06T15:10:02.000Z',
+    },
+  ]
+  let deleteAttemptCount = 0
+
+  await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todos }),
+      })
+      return
+    }
+
+    if (route.request().method() === 'DELETE') {
+      const todoId = Number(route.request().url().split('/').pop())
+
+      if (todoId === 1) {
+        deleteAttemptCount += 1
+
+        if (deleteAttemptCount === 1) {
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: {
+                code: 'TODO_DELETE_FAILED',
+                message: 'Delete failed for selected task.',
+                details: [],
+                request_id: 'req-delete-1',
+              },
+            }),
+          })
+          return
+        }
+
+        const todoIndex = todos.findIndex((item) => item.id === todoId)
+        if (todoIndex >= 0) {
+          todos.splice(todoIndex, 1)
+        }
+
+        await route.fulfill({
+          status: 204,
+          body: '',
+        })
+        return
+      }
+
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: {
+            code: 'TODO_NOT_FOUND',
+            message: 'Todo not found',
+            details: [],
+            request_id: 'req-delete-not-found',
+          },
+        }),
+      })
+      return
+    }
+
+    await route.fallback()
+  })
+
+  await page.goto('/')
+
+  await expect(page.getByText('Retry delete task')).toBeVisible()
+  await expect(page.getByText('Keep task')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete task "Retry delete task"' }).click()
+  await page.getByRole('button', { name: 'Cancel delete task "Retry delete task"' }).click()
+
+  await expect(page.getByRole('button', { name: 'Delete task "Retry delete task"' })).toBeVisible()
+  await expect(page.getByText('Retry delete task')).toBeVisible()
+  await expect(page.getByText('Keep task')).toBeVisible()
+  await expect(page.getByText('Delete failed for selected task.')).not.toBeVisible()
+
+  await page.getByRole('button', { name: 'Delete task "Retry delete task"' }).click()
+  await page.getByRole('button', { name: 'Confirm delete task "Retry delete task"' }).click()
+
+  await expect(page.getByText('Delete failed for selected task.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retry delete task "Retry delete task"' })).toBeVisible()
+  await expect(page.getByText('Retry delete task')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Retry delete task "Retry delete task"' }).click()
+
+  await expect(page.getByText('Retry delete task')).not.toBeVisible()
+  await expect(page.getByText('Keep task')).toBeVisible()
+  await expect(page.getByText('Delete failed for selected task.')).not.toBeVisible()
+})
