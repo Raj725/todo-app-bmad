@@ -195,16 +195,41 @@ test('failed mutation remains scoped and does not block unrelated task actions',
 
 test('real backend integration works without CORS errors', async ({ page }) => {
   const description = `CORS integration task ${Date.now()}`
+  const corsFailureMessages: string[] = []
+
+  page.on('requestfailed', (request) => {
+    if (!request.url().includes('127.0.0.1:8000')) {
+      return
+    }
+
+    const errorText = request.failure()?.errorText ?? ''
+    if (/cors|cross-origin|blocked by client/i.test(errorText)) {
+      corsFailureMessages.push(errorText)
+    }
+  })
+
+  const initialLoadResponsePromise = page.waitForResponse((response) => {
+    return response.url().endsWith('/todos') && response.request().method() === 'GET'
+  })
 
   await page.goto('/')
+  const initialLoadResponse = await initialLoadResponsePromise
 
   await expect(page.getByRole('heading', { name: 'Todo App' })).toBeVisible()
+  expect(initialLoadResponse.ok()).toBeTruthy()
   await expect(page.getByText('Unable to load tasks.')).not.toBeVisible()
+
+  const createResponsePromise = page.waitForResponse((response) => {
+    return response.url().endsWith('/todos') && response.request().method() === 'POST'
+  })
 
   await page.getByLabel('Task description').fill(description)
   await page.getByRole('button', { name: 'Quick add task' }).click()
+  const createResponse = await createResponsePromise
 
+  expect(createResponse.ok()).toBeTruthy()
   await expect(page.getByText(description)).toBeVisible()
+  expect(corsFailureMessages).toEqual([])
 })
 
 test('delete workflow supports cancel, scoped error, and retry success', async ({ page }) => {
