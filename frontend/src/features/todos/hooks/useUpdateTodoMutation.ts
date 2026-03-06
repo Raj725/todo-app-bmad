@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { updateTodo, type UpdateTodoInput } from '../api/updateTodo'
+import { sortTodosByActionableOrder } from '../orderTodos'
 import type { Todo } from '../types'
 import { TODOS_QUERY_KEY } from './useTodosQuery'
 
@@ -36,16 +37,18 @@ export function useUpdateTodoMutation() {
       }
 
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
-        currentTodos.map((todo) =>
-          todo.id === variables.todoId
-            ? {
-                ...todo,
-                isCompleted:
-                  typeof variables.isCompleted === 'boolean' ? variables.isCompleted : todo.isCompleted,
-                description:
-                  typeof variables.description === 'string' ? variables.description : todo.description,
-              }
-            : todo,
+        sortTodosByActionableOrder(
+          currentTodos.map((todo) =>
+            todo.id === variables.todoId
+              ? {
+                  ...todo,
+                  isCompleted:
+                    typeof variables.isCompleted === 'boolean' ? variables.isCompleted : todo.isCompleted,
+                  description:
+                    typeof variables.description === 'string' ? variables.description : todo.description,
+                }
+              : todo,
+          ),
         ),
       )
 
@@ -77,7 +80,9 @@ export function useUpdateTodoMutation() {
         setFailedTodoId((current) => (current === variables.todoId ? null : current))
       }
       queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, (currentTodos = []) =>
-        currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
+        sortTodosByActionableOrder(
+          currentTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)),
+        ),
       )
     },
     onSettled: async (_data, _error, variables) => {

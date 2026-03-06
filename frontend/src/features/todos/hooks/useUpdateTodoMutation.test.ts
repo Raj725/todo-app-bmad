@@ -269,4 +269,30 @@ describe('useUpdateTodoMutation', () => {
       expect(result.current.failedDescriptionTodoIds.has(14)).toBe(false)
     })
   })
+
+  it('reorders cached todos immediately on optimistic toggle using active-first policy', async () => {
+    const deferredResponse = new Promise<Response>(() => undefined)
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => deferredResponse)
+
+    const { wrapper, queryClient } = makeWrapper()
+    queryClient.setQueryData<Todo[]>(TODOS_QUERY_KEY, [
+      seedTodo({ id: 21, description: 'Will complete', isCompleted: false, createdAt: '2026-03-06T10:00:00.000Z' }),
+      seedTodo({ id: 20, description: 'Older active', isCompleted: false, createdAt: '2026-03-06T08:00:00.000Z' }),
+      seedTodo({ id: 22, description: 'Existing completed', isCompleted: true, createdAt: '2026-03-06T09:00:00.000Z' }),
+    ])
+
+    const { result } = renderHook(() => useUpdateTodoMutation(), { wrapper })
+
+    act(() => {
+      result.current.mutate({ todoId: 21, isCompleted: true })
+    })
+
+    await waitFor(() => {
+      expect(result.current.pendingTodoIds.has(21)).toBe(true)
+    })
+
+    const optimisticallyOrderedTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
+    expect(optimisticallyOrderedTodos.map((todo) => todo.id)).toEqual([20, 21, 22])
+  })
 })

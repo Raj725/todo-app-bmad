@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { sortTodosByActionableOrder } from '../orderTodos'
 import type { Todo } from '../types'
 
 type TodoListProps = {
@@ -11,21 +12,6 @@ type TodoListProps = {
   pendingDeleteIds: Set<number>
   failedDeleteTodoIds: Set<number>
   onDeleteTodo: (todo: Todo) => void
-}
-
-const sortTodos = (todos: Todo[]): Todo[] => {
-  return [...todos].sort((left, right) => {
-    if (left.isCompleted !== right.isCompleted) {
-      return left.isCompleted ? 1 : -1
-    }
-
-    const createdAtDiff = new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-    if (!Number.isNaN(createdAtDiff) && createdAtDiff !== 0) {
-      return createdAtDiff
-    }
-
-    return right.id - left.id
-  })
 }
 
 export function TodoList({
@@ -44,7 +30,7 @@ export function TodoList({
   const [editDraft, setEditDraft] = useState('')
   const [editValidationError, setEditValidationError] = useState<string | null>(null)
   const [lastSubmittedEdits, setLastSubmittedEdits] = useState<Record<number, string>>({})
-  const sortedTodos = sortTodos(todos)
+  const sortedTodos = sortTodosByActionableOrder(todos)
 
   const startEditing = (todo: Todo) => {
     setEditTodoId(todo.id)
