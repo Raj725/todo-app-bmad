@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 
 from app.api.error_handlers import (
-	todo_not_found_exception_handler,
-	unhandled_exception_handler,
-	validation_exception_handler,
+    todo_not_found_exception_handler,
+    unhandled_exception_handler,
+    validation_exception_handler,
 )
 from app.api.routes.health import router as health_router
 from app.api.routes.readiness import router as readiness_router
