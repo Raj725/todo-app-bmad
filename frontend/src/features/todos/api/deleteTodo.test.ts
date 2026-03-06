@@ -20,7 +20,14 @@ describe('deleteTodo', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 404,
-      json: async () => ({ error: { message: 'Todo with id 42 not found' } }),
+      json: async () => ({
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Todo with id 42 not found',
+          details: [],
+          request_id: 'delete-req-1',
+        },
+      }),
     } as Response)
 
     await expect(deleteTodo({ todoId: 42 })).rejects.toThrow('Todo with id 42 not found')

@@ -1,4 +1,5 @@
 import type { Todo } from '../types'
+import { normalizeTodoApiError } from './normalizeTodoApiError'
 
 type TodoApiResponse = {
   id: number
@@ -61,7 +62,14 @@ export async function createTodo(description: string): Promise<Todo> {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to create todo')
+    let errorMessage = 'Failed to create todo'
+    try {
+      const errorBody = (await response.json()) as unknown
+      errorMessage = normalizeTodoApiError(errorBody, errorMessage)
+    } catch {
+      // ignore parse errors, use default message
+    }
+    throw new Error(errorMessage)
   }
 
   const parsed = await response.json()

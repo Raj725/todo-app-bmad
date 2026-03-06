@@ -105,6 +105,25 @@ class ApiValidationAndRoutingErrorTests(_BaseApiIntegrationTest):
         self.assertIsInstance(payload["error"]["details"], list)
         self.assertEqual(payload["error"]["request_id"], "qa-e2e-invalid-json")
 
+    def test_delete_todo_invalid_id_returns_validation_envelope_and_request_id(self) -> None:
+        request = urllib.request.Request(
+            f"{self.base_url}/todos/not-an-int",
+            headers={"x-request-id": "qa-delete-invalid-id"},
+            method="DELETE",
+        )
+
+        with self.assertRaises(urllib.error.HTTPError) as context:
+            urllib.request.urlopen(request)
+
+        self.assertEqual(context.exception.code, 400)
+        payload = json.loads(context.exception.read().decode("utf-8"))
+
+        self.assertIn("error", payload)
+        self.assertEqual(payload["error"]["code"], "VALIDATION_ERROR")
+        self.assertEqual(payload["error"]["message"], "Request validation failed")
+        self.assertIsInstance(payload["error"]["details"], list)
+        self.assertEqual(payload["error"]["request_id"], "qa-delete-invalid-id")
+
 
 class ApiUnhandledExceptionErrorTests(_BaseApiIntegrationTest):
     @classmethod
@@ -171,6 +190,33 @@ class ApiUnhandledExceptionErrorTests(_BaseApiIntegrationTest):
         self.assertEqual(payload["error"]["message"], "An unexpected error occurred")
         self.assertEqual(payload["error"]["details"], [])
         self.assertEqual(payload["error"]["request_id"], "qa-e2e-internal-error")
+
+    def test_create_todo_returns_500_envelope_without_internal_details_when_storage_unavailable(self) -> None:
+        request = urllib.request.Request(
+            f"{self.base_url}/todos",
+            data=json.dumps({"description": "Write tests"}).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "x-request-id": "qa-create-internal-error",
+            },
+            method="POST",
+        )
+
+        with self.assertRaises(urllib.error.HTTPError) as context:
+            urllib.request.urlopen(request)
+
+        self.assertEqual(context.exception.code, 500)
+        payload = json.loads(context.exception.read().decode("utf-8"))
+
+        self.assertIn("error", payload)
+        self.assertEqual(payload["error"]["code"], "INTERNAL_SERVER_ERROR")
+        self.assertEqual(payload["error"]["message"], "An unexpected error occurred")
+        self.assertEqual(payload["error"]["details"], [])
+        self.assertEqual(payload["error"]["request_id"], "qa-create-internal-error")
+
+        serialized_payload = json.dumps(payload).lower()
+        self.assertNotIn("traceback", serialized_payload)
+        self.assertNotIn("sqlite", serialized_payload)
 
 
 if __name__ == "__main__":
