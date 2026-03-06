@@ -67,11 +67,10 @@ export function TodoList({
     <ul>
       {sortedTodos.map((todo) => {
         const isOptimisticCreate = todo.id < 0
-        const isTogglePending = pendingTodoIds.has(todo.id)
-        const isEditPending = pendingTodoIds.has(todo.id)
+        const isUpdatePending = pendingTodoIds.has(todo.id)
         const isDeletePending = pendingDeleteIds.has(todo.id)
         // Disable all controls while either operation is in-flight
-        const isAnyPending = isTogglePending || isEditPending || isDeletePending
+        const isAnyPending = isUpdatePending || isDeletePending
         const isConfirmingDelete = confirmDeleteId === todo.id
         const hasDeleteError = failedDeleteTodoIds.has(todo.id)
         const hasEditError = failedEditTodoIds.has(todo.id)
@@ -108,12 +107,12 @@ export function TodoList({
                     }
                   }}
                   aria-label={`Edit description for task "${todo.description}"`}
-                  disabled={isEditPending}
+                  disabled={isUpdatePending}
                 />
-                <button type="button" onClick={() => saveEdit(todo)} disabled={isEditPending}>
-                  {isEditPending ? 'Saving…' : 'Save'}
+                <button type="button" onClick={() => saveEdit(todo)} disabled={isUpdatePending}>
+                  {isUpdatePending ? 'Saving…' : 'Save'}
                 </button>
-                <button type="button" onClick={cancelEditing} disabled={isEditPending}>
+                <button type="button" onClick={cancelEditing} disabled={isUpdatePending}>
                   Cancel
                 </button>
                 {editValidationError && <p role="alert">{editValidationError}</p>}
@@ -133,13 +132,13 @@ export function TodoList({
               disabled={isAnyPending}
               aria-label={`Mark task "${todo.description}" as ${todo.isCompleted ? 'active' : 'complete'}`}
             >
-              {isTogglePending
+              {isUpdatePending
                 ? 'Updating task...'
                 : todo.isCompleted
                   ? 'Mark active'
                   : 'Mark complete'}
             </button>
-            {hasToggleError && !isTogglePending && (
+            {hasToggleError && !isUpdatePending && (
               <p role="alert">
                 {toggleErrorMessage}{' '}
                 <button
@@ -163,7 +162,7 @@ export function TodoList({
               </button>
             )}
 
-            {hasEditError && !isEditPending && canRetryEdit && (
+            {hasEditError && !isUpdatePending && canRetryEdit && (
               <p role="alert">
                 {editErrorMessage}{' '}
                 <button
@@ -190,6 +189,7 @@ export function TodoList({
                     onDeleteTodo(todo)
                   }}
                   aria-label={`Confirm delete task "${todo.description}"`}
+                  disabled={isAnyPending}
                 >
                   Confirm?
                 </button>
@@ -197,6 +197,7 @@ export function TodoList({
                   type="button"
                   onClick={() => setConfirmDeleteId(null)}
                   aria-label={`Cancel delete task "${todo.description}"`}
+                  disabled={isAnyPending}
                 >
                   Cancel
                 </button>

@@ -1,6 +1,6 @@
 # Story 3.3: Retry Flows and Failure Isolation
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -207,6 +207,7 @@ GPT-5.3-Codex
 ### File List
 
 - _bmad-output/implementation-artifacts/3-3-retry-flows-and-failure-isolation.md
+- _bmad-output/implementation-artifacts/pr-body-story-3-3.md
 - _bmad-output/implementation-artifacts/sprint-status.yaml
 - frontend/src/features/todos/components/TodoList.tsx
 - frontend/src/features/todos/components/TodoList.test.tsx
@@ -217,3 +218,4 @@ GPT-5.3-Codex
 
 - 2026-03-06: Story created and prepared for implementation handoff (`ready-for-dev`).
 - 2026-03-06: Implemented retry/failure-isolation completion for Story 3.3 and advanced story status to `review` after passing quality gates.
+- 2026-03-06: Code review applied — disabled Confirm/Cancel delete buttons during concurrent pending mutations (H1); deduplicated isUpdatePending variable (M2); added retry-click dispatch assertions and edit retry component test (M1, L1); added quick-add isolation contract test (M3); added missing pr-body file to File List (M4); removed unreachable 404 guard in E2E isolation test (L2).

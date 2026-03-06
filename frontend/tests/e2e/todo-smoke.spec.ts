@@ -135,23 +135,7 @@ test('failed mutation remains scoped and does not block unrelated task actions',
           return
         }
 
-        const todo = todos.find((item) => item.id === todoId)
-        if (!todo) {
-          await route.fulfill({
-            status: 404,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              error: {
-                code: 'TODO_NOT_FOUND',
-                message: 'Todo not found',
-                details: [],
-                request_id: 'req-not-found',
-              },
-            }),
-          })
-          return
-        }
-
+        const todo = todos.find((item) => item.id === todoId)!
         todo.is_completed = updateBody.is_completed
 
         await route.fulfill({
