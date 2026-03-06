@@ -13,7 +13,7 @@ export function useUpdateTodoMutation() {
   const queryClient = useQueryClient()
   const [pendingTodoIds, setPendingTodoIds] = useState<Set<number>>(() => new Set())
   const [failedTodoId, setFailedTodoId] = useState<number | null>(null)
-  const [failedDescriptionTodoId, setFailedDescriptionTodoId] = useState<number | null>(null)
+  const [failedDescriptionTodoIds, setFailedDescriptionTodoIds] = useState<Set<number>>(() => new Set())
 
   const mutation = useMutation({
     mutationFn: updateTodo,
@@ -25,7 +25,11 @@ export function useUpdateTodoMutation() {
 
       setPendingTodoIds((prev) => new Set([...prev, variables.todoId]))
       if (typeof variables.description === 'string') {
-        setFailedDescriptionTodoId((current) => (current === variables.todoId ? null : current))
+        setFailedDescriptionTodoIds((current) => {
+          const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
       if (typeof variables.isCompleted === 'boolean') {
         setFailedTodoId((current) => (current === variables.todoId ? null : current))
@@ -55,7 +59,7 @@ export function useUpdateTodoMutation() {
       }
 
       if (typeof variables.description === 'string') {
-        setFailedDescriptionTodoId(variables.todoId)
+        setFailedDescriptionTodoIds((current) => new Set([...current, variables.todoId]))
       }
       if (typeof variables.isCompleted === 'boolean') {
         setFailedTodoId(variables.todoId)
@@ -63,7 +67,11 @@ export function useUpdateTodoMutation() {
     },
     onSuccess: (updatedTodo, variables) => {
       if (typeof variables.description === 'string') {
-        setFailedDescriptionTodoId((current) => (current === variables.todoId ? null : current))
+        setFailedDescriptionTodoIds((current) => {
+          const next = new Set(current)
+          next.delete(variables.todoId)
+          return next
+        })
       }
       if (typeof variables.isCompleted === 'boolean') {
         setFailedTodoId((current) => (current === variables.todoId ? null : current))
@@ -86,6 +94,6 @@ export function useUpdateTodoMutation() {
     ...mutation,
     pendingTodoIds,
     failedTodoId,
-    failedDescriptionTodoId,
+    failedDescriptionTodoIds,
   }
 }

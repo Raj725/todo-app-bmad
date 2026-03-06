@@ -31,7 +31,7 @@ function App() {
           todos={todosQuery.data}
           pendingTodoIds={updateTodoMutation.pendingTodoIds}
           failedTodoId={updateTodoMutation.failedTodoId}
-          failedEditTodoId={updateTodoMutation.failedDescriptionTodoId}
+          failedEditTodoIds={updateTodoMutation.failedDescriptionTodoIds}
           onToggleTodo={(todo) => {
             updateTodoMutation.mutate({
               todoId: todo.id,
@@ -45,7 +45,7 @@ function App() {
             })
           }}
           pendingDeleteIds={deleteTodoMutation.pendingDeleteIds}
-          failedDeleteTodoId={deleteTodoMutation.failedDeleteTodoId}
+          failedDeleteTodoIds={deleteTodoMutation.failedDeleteTodoIds}
           onDeleteTodo={(todo) => {
             deleteTodoMutation.mutate({ todoId: todo.id })
           }}

@@ -1,6 +1,6 @@
 # Story 2.3: Edit Task Description In-Context
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -39,6 +39,13 @@ so that I can correct typos or clarify intent.
   - [x] Wire edit handlers/props in `frontend/src/app/App.tsx`
   - [x] Add/extend UI tests for inline edit save/cancel/validation/error-retry flows
   - [x] Add/extend backend tests for successful description patch and invalid payload behavior
+
+### Review Follow-ups (AI)
+
+- [x] [AI-Review][HIGH] Story Dev Agent Record File List alignment restored by applying remediation changes and updating the recorded file list for this review/fix pass.
+- [x] [AI-Review][MEDIUM] Replace single-value edit failure tracking with per-item tracking to preserve scoped retry feedback for multiple concurrent edit failures (`frontend/src/features/todos/hooks/useUpdateTodoMutation.ts`).
+- [x] [AI-Review][MEDIUM] Align component API with per-item failure tracking for edit/delete errors instead of single `number | null` ids (`frontend/src/features/todos/components/TodoList.tsx`, `frontend/src/app/App.tsx`).
+- [x] [AI-Review][LOW] Simplify or implement `formatCreatedAt` behavior; dead parsing logic removed and created timestamp now rendered directly (`frontend/src/features/todos/components/TodoList.tsx`).
 
 ## Dev Notes
 
@@ -187,6 +194,8 @@ GPT-5.3-Codex
 - Extended backend PATCH contract to accept `description` and/or `is_completed`, including validation for non-empty trimmed description and at-least-one-field updates.
 - Added backend integration coverage for successful description PATCH, invalid description validation envelope behavior, and no-persistence-change guarantee on invalid update.
 - Updated frontend/backend READMEs to document edit behavior and expanded PATCH contract.
+- Resolved review High/Medium findings by converting edit/delete failed-state handling to per-item `Set<number>` tracking and aligning `TodoList`/`App` interfaces with the new model.
+- Re-validated frontend quality gates after remediation: `npm run lint` and `npm run test` passing.
 
 ### File List
 
@@ -197,6 +206,8 @@ GPT-5.3-Codex
 - frontend/src/features/todos/api/updateTodo.test.ts
 - frontend/src/features/todos/hooks/useUpdateTodoMutation.ts
 - frontend/src/features/todos/hooks/useUpdateTodoMutation.test.ts
+- frontend/src/features/todos/hooks/useDeleteTodoMutation.ts
+- frontend/src/features/todos/hooks/useDeleteTodoMutation.test.ts
 - frontend/src/app/App.tsx
 - frontend/src/app/App.test.tsx
 - backend/app/schemas/todo.py
@@ -211,3 +222,48 @@ GPT-5.3-Codex
 
 - 2026-03-06: Story created and prepared for implementation handoff.
 - 2026-03-06: Implemented Story 2.3 inline edit flow across frontend/backend with optimistic update safety, scoped retry handling, and expanded test coverage.
+- 2026-03-06: Senior Developer Review (AI) completed; findings recorded and follow-up action items added. Story moved to `in-progress`.
+- 2026-03-06: Implemented code-review option 1 remediation for High/Medium findings; per-item edit/delete failure tracking updated and story moved to `done`.
+- 2026-03-06: Closed Low follow-up by removing dead `formatCreatedAt` parsing logic in `TodoList`.
+
+## Senior Developer Review (AI)
+
+### Reviewer
+
+Raj
+
+### Date
+
+2026-03-06
+
+### Outcome
+
+Approved with low-priority follow-up
+
+### Summary
+
+- Acceptance Criteria 1 and 2 are functionally implemented for happy path and invalid edit handling.
+- Story-to-git traceability is currently inconsistent because the story claims broad file changes while the working tree has no staged/unstaged changes to validate against.
+- Current edit/delete error state shape supports one failed row at a time and should be evolved to true per-item failure sets/maps to preserve scoped recovery under concurrent failures.
+
+### Findings
+
+1. **[HIGH] Story File List vs git reality mismatch**
+  - The Dev Agent Record lists many changed files, but current git porcelain/diff shows no staged or unstaged changes, making this review round non-reproducible from working-tree evidence.
+
+2. **[MEDIUM] Edit failure state is not per-item scalable**
+  - `useUpdateTodoMutation` stores failed description state in a single `number | null` (`failedDescriptionTodoId`), which cannot represent multiple simultaneous failed edits.
+
+3. **[MEDIUM] `TodoList` props constrain scoped error UX to one row per failure type**
+  - `failedEditTodoId` and `failedDeleteTodoId` are single ids, preventing concurrent failed-row error visibility and retry affordances from being fully scoped by item.
+
+4. **[LOW] `formatCreatedAt` contains dead parsing logic**
+  - The helper parses and validates timestamps but always returns the original value; either remove parsing or implement formatted output intentionally.
+
+### Remediation Applied (Option 1)
+
+- Implemented per-item failed edit tracking via `Set<number>` in `useUpdateTodoMutation`.
+- Implemented per-item failed delete tracking via `Set<number>` in `useDeleteTodoMutation`.
+- Updated `TodoList` and `App` wiring to consume set-based failure state for scoped retry rendering.
+- Updated hook unit tests to validate set-based failure behavior and retry-clearing semantics.
+- Removed dead `formatCreatedAt` parsing logic in `TodoList` and rendered persisted timestamp directly.

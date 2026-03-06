@@ -221,7 +221,7 @@ describe('useUpdateTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedDescriptionTodoId).toBe(7)
+      expect(result.current.failedDescriptionTodoIds.has(7)).toBe(true)
     })
 
     const nextTodos = queryClient.getQueryData<Todo[]>(TODOS_QUERY_KEY) ?? []
@@ -229,7 +229,7 @@ describe('useUpdateTodoMutation', () => {
     expect(nextTodos.find((todo) => todo.id === 8)?.description).toBe('Second task')
   })
 
-  it('clears failedDescriptionTodoId on successful retry of description update', async () => {
+  it('clears failedDescriptionTodoIds entry on successful retry of description update', async () => {
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce({
         ok: false,
@@ -258,7 +258,7 @@ describe('useUpdateTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedDescriptionTodoId).toBe(14)
+      expect(result.current.failedDescriptionTodoIds.has(14)).toBe(true)
     })
 
     act(() => {
@@ -266,7 +266,7 @@ describe('useUpdateTodoMutation', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.failedDescriptionTodoId).toBeNull()
+      expect(result.current.failedDescriptionTodoIds.has(14)).toBe(false)
     })
   })
 })
