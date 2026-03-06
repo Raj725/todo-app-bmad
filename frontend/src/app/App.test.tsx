@@ -170,4 +170,51 @@ describe('Task list and quick-add flows', () => {
 
     expect(createAttemptCount).toBe(2)
   })
+
+  it('shows newly submitted task immediately before create response resolves', async () => {
+    let resolveCreate: ((value: Response) => void) | undefined
+    const createResponse = new Promise<Response>((resolve) => {
+      resolveCreate = resolve
+    })
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+
+      if (url.endsWith('/todos') && init?.method === 'POST') {
+        return createResponse
+      }
+
+      return {
+        ok: true,
+        json: async () => ({ data: [] }),
+      } as Response
+    })
+
+    renderWithQueryClient()
+
+    await screen.findByText('No tasks yet.')
+
+    fireEvent.change(screen.getByLabelText('Task description'), {
+      target: { value: 'Immediate task' },
+    })
+    fireEvent.click(within(getQuickAddSection()).getByRole('button', { name: 'Quick add task' }))
+
+    expect(await screen.findByText('Immediate task')).toBeInTheDocument()
+
+    resolveCreate?.({
+      ok: true,
+      json: async () => ({
+        data: {
+          id: 9,
+          description: 'Immediate task',
+          is_completed: false,
+          created_at: '2026-03-06T14:00:00.000Z',
+        },
+      }),
+    } as Response)
+
+    await waitFor(() => {
+      expect(screen.getByText('Immediate task')).toBeInTheDocument()
+    })
+  })
 })

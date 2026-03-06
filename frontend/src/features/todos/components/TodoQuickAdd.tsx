@@ -47,12 +47,12 @@ export function TodoQuickAdd({ isPending, isError, onSubmit }: TodoQuickAddProps
         </button>
       </form>
       {isError && (
-        <p role="alert">
-          Unable to create task.
+        <div role="alert">
+          <span>Unable to create task.</span>
           <button type="button" onClick={handleRetry} disabled={isPending}>
             Retry quick add
           </button>
-        </p>
+        </div>
       )}
     </section>
   )

@@ -1,6 +1,6 @@
 # Story 1.4: Quick-Add Task Flow with Immediate Feedback
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -157,7 +157,29 @@ GPT-5.3-Codex
 - frontend/src/features/todos/hooks/useCreateTodoMutation.ts
 - frontend/src/features/todos/hooks/useTodosQuery.ts
 
+## Senior Developer Review (AI)
+
+### Reviewer
+
+- Raj (GPT-5.3-Codex)
+- Date: 2026-03-06
+
+### Outcome
+
+- Approved after fixes
+
+### Findings and Resolutions
+
+- [HIGH] AC1 immediacy risk: create flow relied on invalidate/refetch only, so visible add feedback could be delayed by network round-trip. Resolved by adding optimistic cache insertion in `useCreateTodoMutation` with rollback on error and replacement on success.
+- [MEDIUM] Accessibility semantics issue: retry button was nested inside paragraph alert markup. Resolved by switching to a `div` alert container with separate text and button elements.
+- [MEDIUM] Test gap: no direct assertion that create success is visible before server response resolves. Resolved by adding a deferred-response test proving immediate optimistic rendering.
+
+### Validation
+
+- Targeted frontend test suite updated for quick-add immediate feedback behavior.
+
 ## Change Log
 
 - 2026-03-06: Story created and status set to `ready-for-dev` with comprehensive dev context.
 - 2026-03-06: Implemented Story 1.4 quick-add create flow with scoped mutation UX, retry feedback path, and frontend test coverage; moved status to `review`.
+- 2026-03-06: Completed adversarial code review fixes (optimistic create feedback, alert semantics hardening, immediate-feedback test); moved status to `done`.
