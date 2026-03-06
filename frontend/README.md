@@ -153,6 +153,22 @@ From repository root:
 cd frontend && npm run lint
 ```
 
+## CI (Pull Requests)
+
+PR checks are configured in `.github/workflows/tests.yml`.
+
+Frontend-related checks:
+
+- Frontend tests: `npm run test`
+- Frontend lint: `npm run lint`
+
+Run both locally before opening or updating a PR:
+
+```bash
+npm run test
+npm run lint
+```
+
 ## Troubleshooting
 
 - If API calls fail locally, verify backend is running and `VITE_API_BASE_URL` is correct.

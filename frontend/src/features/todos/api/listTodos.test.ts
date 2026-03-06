@@ -7,6 +7,16 @@ afterEach(() => {
 })
 
 describe('listTodos', () => {
+  it('rejects when backend returns a non-success status code', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { message: 'server error' } }),
+    } as Response)
+
+    await expect(listTodos()).rejects.toThrow('Failed to load todos')
+  })
+
   it('maps a valid success envelope from snake_case to camelCase', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,

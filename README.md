@@ -83,6 +83,22 @@ python3 tests/test_health_readiness.py
 python3 tests/test_todo_create.py
 ```
 
+## CI (Pull Requests)
+
+PR checks are defined in `.github/workflows/tests.yml` and run:
+
+- Backend tests
+- Frontend tests
+- Frontend lint
+
+Run the same checks locally before opening or updating a PR:
+
+```bash
+cd backend && python3 -m pytest -q
+cd frontend && npm run test
+cd frontend && npm run lint
+```
+
 ## Environment Variables
 
 ### Frontend

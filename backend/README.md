@@ -156,6 +156,20 @@ From repository root:
 cd backend && python3 tests/test_health_readiness.py && python3 tests/test_todo_create.py
 ```
 
+## CI (Pull Requests)
+
+PR checks are configured in `.github/workflows/tests.yml`.
+
+Backend-related check:
+
+- Backend tests: `python3 -m pytest -q`
+
+Run it locally before opening or updating a PR:
+
+```bash
+python3 -m pytest -q
+```
+
 ## Troubleshooting
 
 - If pytest is missing, install dependencies again:

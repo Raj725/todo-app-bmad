@@ -54,6 +54,19 @@ describe('Task list and quick-add flows', () => {
     expect(within(getQuickAddSection()).getByRole('button', { name: 'Quick add task' })).toBeInTheDocument()
   })
 
+  it('renders explicit list load failure state while keeping quick-add visible', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { message: 'server error' } }),
+    } as Response)
+
+    renderWithQueryClient()
+
+    expect(await screen.findByText('Unable to load tasks.')).toBeInTheDocument()
+    expect(within(getQuickAddSection()).getByRole('button', { name: 'Quick add task' })).toBeInTheDocument()
+  })
+
   it('renders populated list with deterministic created timestamp', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
