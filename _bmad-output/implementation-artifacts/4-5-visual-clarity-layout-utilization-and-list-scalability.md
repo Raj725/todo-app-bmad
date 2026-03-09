@@ -1,6 +1,6 @@
 # Story 4.5: Visual Clarity, Layout Utilization, and List Scalability
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -129,3 +129,5 @@ GPT-5.3-Codex
 - 2026-03-09: Implemented Story 4.5 UI/layout refresh, semantic action styling, and client-side pagination with deterministic ordering.
 - 2026-03-09: Added pagination unit and E2E tests, updated CRUD E2E for paginated lists, and passed frontend quality gates.
 - 2026-03-09: Added post-review mobile responsiveness patch for iPhone-width viewports (stacked table rows + mobile toolbar/pagination adjustments), re-ran frontend lint/tests, and retained story status as `review`.
+- 2026-03-09: Fixed review regression where desktop list header was removed after table-to-list conversion; restored visible desktop column headers while preserving mobile stacked layout.
+- 2026-03-09: Re-ran frontend validation gates after header regression fix: `npm run lint` passed, `npm run test` passed (72/72), `npm run test:e2e` passed (52 passed, 3 skipped).

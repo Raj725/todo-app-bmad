@@ -141,6 +141,13 @@ export function TodoList({
     <>
       {hasAnyRows && renderPaginationControls('top')}
       <div className="todo-table-wrap">
+        <div className="todo-list-header" aria-hidden="true">
+          <span className="todo-list-header-id">#</span>
+          <span>Task</span>
+          <span>Status</span>
+          <span>Created</span>
+          <span className="todo-list-header-actions">Actions</span>
+        </div>
         <ul className="todo-list" aria-label="Tasks">
         {visibleTodos.map((todo) => {
         const isOptimisticCreate = todo.id < 0
