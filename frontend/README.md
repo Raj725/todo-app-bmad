@@ -134,6 +134,7 @@ requests to the backend service through Nginx.
 - `npm run build` - type-check and build
 - `npm run typecheck` - run TypeScript static type checks (`tsc --noEmit`)
 - `npm run test` - run Vitest suite
+- `npm run test:coverage` - run Vitest suite with coverage reporting and threshold enforcement (`>=70%`)
 - `npm run test:e2e` - run Playwright browser E2E tests
 - `npm run test:e2e:ui` - run Playwright in interactive UI mode
 - `npm run perf:budget` - build and enforce the main bundle size budget
@@ -162,10 +163,22 @@ Run all frontend tests:
 npm run test
 ```
 
+Run frontend tests with coverage gate (`>=70%`):
+
+```bash
+npm run test:coverage
+```
+
 From repository root:
 
 ```bash
 cd frontend && npm run test
+```
+
+From repository root with coverage gate:
+
+```bash
+cd frontend && npm run test:coverage
 ```
 
 Run browser E2E tests:
@@ -231,7 +244,7 @@ PR checks are configured in `.github/workflows/tests.yml`.
 
 Frontend-related checks:
 
-- Frontend tests: `npm run test`
+- Frontend tests with coverage gate: `npm run test:coverage`
 - Frontend lint: `npm run lint`
 - Frontend typecheck: `npm run typecheck`
 - Frontend E2E: `npm run test:e2e`
@@ -241,7 +254,7 @@ Run all locally before opening or updating a PR:
 
 ```bash
 npm run typecheck
-npm run test
+npm run test:coverage
 npm run lint
 npm run test:e2e
 npm run perf:budget

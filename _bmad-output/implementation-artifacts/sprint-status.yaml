@@ -72,5 +72,5 @@ development_status:
   epic-5: in-progress
   5-1-project-brief-and-prd-refinement: done
   5-2-containerization-and-deployment: done
-  5-3-qa-infrastructure-and-coverage: backlog
+  5-3-qa-infrastructure-and-coverage: done
   epic-5-retrospective: backlog

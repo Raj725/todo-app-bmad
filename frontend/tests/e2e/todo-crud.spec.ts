@@ -1,4 +1,6 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, request, test, type Page } from '@playwright/test'
+
+const API_BASE = 'http://127.0.0.1:8000'
 
 async function goToFirstPage(page: Page) {
   const previousButton = page.getByRole('button', { name: 'Previous page' }).first()
@@ -26,6 +28,20 @@ async function ensureTaskVisible(page: Page, taskText: string) {
 }
 
 test.describe('Todo CRUD Operations', () => {
+  // Clean up any leftover todos so pagination doesn't push the test
+  // task out of view and cause flaky assertions.
+  test.beforeAll(async () => {
+    const api = await request.newContext({ baseURL: API_BASE })
+    const res = await api.get('/todos')
+    if (res.ok()) {
+      const body = (await res.json()) as { data: { id: number }[] }
+      for (const todo of body.data) {
+        await api.delete(`/todos/${todo.id}`)
+      }
+    }
+    await api.dispose()
+  })
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
   })
@@ -73,6 +89,8 @@ test.describe('Todo CRUD Operations', () => {
       await expect(markCompleteButton).toBeEnabled()
       await markCompleteButton.click()
 
+      // After toggle, completed task may move to a later page due to
+      // active-first sort, so navigate to it before asserting.
       await ensureTaskVisible(page, updatedText)
       
       // Verify button changes to "Mark active"

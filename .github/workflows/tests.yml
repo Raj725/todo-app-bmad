@@ -22,8 +22,8 @@ jobs:
       - name: Install backend dependencies
         run: pip install -r requirements-dev.txt
 
-      - name: Run backend behavior and contract regression tests
-        run: python -m pytest -q
+      - name: Run backend behavior and contract regression tests with coverage gate
+        run: python -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
 
   frontend-tests:
     name: Frontend tests
@@ -45,8 +45,8 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Run frontend tests
-        run: npm run test
+      - name: Run frontend tests with coverage gate
+        run: npm run test:coverage
 
   frontend-lint:
     name: Frontend lint

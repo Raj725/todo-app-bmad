@@ -87,7 +87,10 @@ docker compose down
 cd frontend
 npm run dev
 npm run test
+npm run test:coverage
+npm run test:e2e
 npm run lint
+npm run typecheck
 npm run build
 npm run preview
 ```
@@ -98,6 +101,7 @@ npm run preview
 cd backend
 python3 -m alembic upgrade head
 python3 -m pytest -q
+python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
 python3 tests/test_health_readiness.py
 python3 tests/test_todo_create.py
 ```
@@ -106,16 +110,20 @@ python3 tests/test_todo_create.py
 
 PR checks are defined in `.github/workflows/tests.yml` and run:
 
-- Backend tests
-- Frontend tests
+- Backend tests with coverage gate (`>=70%`)
+- Frontend tests with coverage gate (`>=70%`)
 - Frontend lint
+- Frontend typecheck
+- Frontend E2E
+- Frontend performance budget
 
 Run the same checks locally before opening or updating a PR:
 
 ```bash
-cd backend && python3 -m pytest -q
-cd frontend && npm run test
-cd frontend && npm run lint
+cd backend && python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
+cd frontend && npm run test:coverage
+cd frontend && npm run lint && npm run typecheck
+cd frontend && npm run test:e2e
 ```
 
 ## Environment Variables
