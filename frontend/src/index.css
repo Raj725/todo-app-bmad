@@ -369,25 +369,102 @@ p[role='alert'] {
     justify-content: space-between;
   }
 
+  .todo-table-toolbar {
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .todo-page-summary {
+    width: 100%;
+  }
+
+  .todo-table-wrap {
+    border: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .todo-table {
+    display: block;
+    width: 100%;
+  }
+
+  .todo-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  .todo-table tbody {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .todo-table tr {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.7rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+
+  .todo-table td {
+    display: block;
+    border-bottom: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .todo-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.18rem;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .todo-cell-id {
+    font-size: 0.95rem;
+  }
+
+  .todo-meta {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .todo-actions {
+    gap: 0.45rem;
+  }
+
   .todo-table th,
   .todo-table td {
-    padding: 0.62rem;
+    padding: 0;
   }
 
   .todo-description {
     white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .todo-col-actions {
-    width: 9rem;
+    width: auto;
   }
 
   .todo-page-size {
-    width: 100%;
+    width: auto;
   }
 
   .todo-page-size-select {
-    width: 7rem;
+    width: 6rem;
   }
 
   .todo-page-indicator {

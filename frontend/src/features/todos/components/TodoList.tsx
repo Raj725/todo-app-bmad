@@ -172,8 +172,8 @@ export function TodoList({
 
           return (
             <tr key={todo.id} className="todo-row">
-              <td className="todo-cell-id">{todo.id > 0 ? todo.id : 'new'}</td>
-              <td className="todo-cell-task">
+              <td className="todo-cell-id" data-label="ID">{todo.id > 0 ? todo.id : 'new'}</td>
+              <td className="todo-cell-task" data-label="Task">
                 {isEditing ? (
                   <div className="todo-edit-panel">
                     <label htmlFor={`edit-todo-${todo.id}`}>Edit task description</label>
@@ -268,14 +268,14 @@ export function TodoList({
                   </p>
                 )}
               </td>
-              <td>
+              <td data-label="Status">
                 <strong className={`todo-status ${todo.isCompleted ? 'todo-status-completed' : 'todo-status-active'}`}>
                   {statusLabel}
                 </strong>
                 {isOptimisticCreate ? <strong className="todo-status todo-status-pending">Pending</strong> : null}
               </td>
-              <td className="todo-meta">{todo.createdAt}</td>
-              <td className="todo-actions">
+              <td className="todo-meta" data-label="Created">{todo.createdAt}</td>
+              <td className="todo-actions" data-label="Actions">
                 <button
                   type="button"
                   className="btn btn-icon btn-primary"

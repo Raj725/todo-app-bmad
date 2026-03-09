@@ -85,6 +85,8 @@ GPT-5.3-Codex
 - Added Story 4.5 to planning artifacts from user feedback.
 - Updated sprint tracking to mark Story 4.5 as `ready-for-dev` and next target.
 - Created implementation artifact for Story 4.5.
+- Post-review user feedback identified mobile viewport issues in iPhone 12 Pro dimensions after initial desktop-first table update.
+- Implemented mobile stacked-row fallback for the task table and revalidated frontend checks.
 
 ### Implementation Plan
 
@@ -104,6 +106,9 @@ GPT-5.3-Codex
 - Added component tests validating pagination controls/page transitions and deterministic ordering across pages.
 - Added E2E pagination coverage and updated CRUD E2E flow to be pagination-aware.
 - Validation run results: `npm run lint` passed, `npm run test` passed (72/72), `npm run test:e2e` passed (52 passed, 3 skipped).
+- Follow-up mobile fix: converted narrow-screen table view into stacked task cards with labeled fields using `data-label` attributes while preserving desktop table semantics.
+- Follow-up mobile fix: improved toolbar wrapping and pagination control layout for constrained widths to avoid clipped/overlapping controls.
+- Follow-up validation: `npm run test -- --run` passed (72/72), `npm run lint` passed.
 
 ### File List
 
@@ -111,7 +116,9 @@ GPT-5.3-Codex
 - _bmad-output/implementation-artifacts/sprint-status.yaml
 - frontend/src/app/App.tsx
 - frontend/src/features/todos/components/TodoList.tsx
+- frontend/src/features/todos/components/TodoQuickAdd.tsx
 - frontend/src/features/todos/components/TodoList.test.tsx
+- frontend/src/app/App.test.tsx
 - frontend/src/index.css
 - frontend/tests/e2e/todo-crud.spec.ts
 - frontend/tests/e2e/todo-smoke.spec.ts
@@ -121,3 +128,4 @@ GPT-5.3-Codex
 - 2026-03-09: Added Story 4.5 for UI/UX clarity and pagination improvements; set status to `ready-for-dev`.
 - 2026-03-09: Implemented Story 4.5 UI/layout refresh, semantic action styling, and client-side pagination with deterministic ordering.
 - 2026-03-09: Added pagination unit and E2E tests, updated CRUD E2E for paginated lists, and passed frontend quality gates.
+- 2026-03-09: Added post-review mobile responsiveness patch for iPhone-width viewports (stacked table rows + mobile toolbar/pagination adjustments), re-ran frontend lint/tests, and retained story status as `review`.
