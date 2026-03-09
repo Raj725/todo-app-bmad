@@ -196,6 +196,12 @@ Run the performance budget guardrail:
 npm run perf:budget
 ```
 
+If the budget check fails, verify if recent dependencies or large assets caused the increase.
+To resolve:
+- Optimize imports (use tree-shakable imports)
+- Lazy load heavy components
+- Or increase the limit in `scripts/check-bundle-size.mjs` if the growth is justified.
+
 From repository root:
 
 ```bash

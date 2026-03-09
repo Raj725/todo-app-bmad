@@ -12,7 +12,7 @@ router = APIRouter()
 def readiness() -> JSONResponse:
     try:
         with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
+            connection.execution_options(timeout=2).execute(text("SELECT 1"))
     except SQLAlchemyError:
         return JSONResponse(
             status_code=503,

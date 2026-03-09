@@ -6,17 +6,20 @@ const MAX_MAIN_BUNDLE_BYTES = 350 * 1024;
 
 function findMainBundleSizeBytes() {
   const files = readdirSync(DIST_ASSETS_DIR);
-  const candidate = files.find((file) => /^index-.*\.js$/.test(file));
+  // Find the largest JS file starting with "index-", assuming it's the main entry bundle
+  const candidates = files
+    .filter((file) => /^index-.*\.js$/.test(file))
+    .map((file) => ({
+      file,
+      size: statSync(join(DIST_ASSETS_DIR, file)).size,
+    }))
+    .sort((a, b) => b.size - a.size);
 
-  if (!candidate) {
+  if (candidates.length === 0) {
     throw new Error(`No main JS bundle found in ${DIST_ASSETS_DIR}`);
   }
 
-  const fullPath = join(DIST_ASSETS_DIR, candidate);
-  return {
-    file: candidate,
-    size: statSync(fullPath).size,
-  };
+  return candidates[0];
 }
 
 const { file, size } = findMainBundleSizeBytes();
