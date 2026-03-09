@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -24,15 +28,47 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+}
+
+main {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: left;
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+label,
+p,
+h1 {
+  overflow-wrap: anywhere;
+}
+
+input {
+  min-height: 44px;
+  min-width: 0;
+  width: min(100%, 24rem);
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  margin: 0 0 1rem;
 }
 
 button {
@@ -45,6 +81,9 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  min-height: 44px;
+  min-width: 44px;
+  max-width: 100%;
 }
 button:hover {
   border-color: #646cff;
@@ -52,6 +91,35 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+li {
+  padding: 0.75rem;
+}
+
+li > button,
+li > p > button {
+  margin: 0.25rem 0.5rem 0.25rem 0;
+}
+
+@media (max-width: 640px) {
+  main {
+    padding: 0.75rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  input {
+    width: 100%;
+  }
 }
 
 @media (prefers-color-scheme: light) {

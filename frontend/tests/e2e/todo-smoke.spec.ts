@@ -74,7 +74,11 @@ test('quick add and toggle complete in browser', async ({ page }) => {
   await expect(page.getByText('No tasks yet.')).toBeVisible()
 
   await page.getByLabel('Task description').fill('Playwright smoke task')
+  const createPromise = page.waitForResponse(
+    (resp) => resp.url().includes('/todos') && resp.request().method() === 'POST' && resp.status() === 201,
+  )
   await page.getByRole('button', { name: 'Quick add task' }).click()
+  await createPromise
 
   await expect(page.getByText('Playwright smoke task')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Mark task "Playwright smoke task" as complete' })).toBeVisible()
@@ -185,6 +189,7 @@ test('failed mutation remains scoped and does not block unrelated task actions',
   await expect(page.getByText('Toggle failed for first task.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Retry toggle task "Will fail toggle"' })).toBeVisible()
 
+  await page.waitForTimeout(100)
   await page.getByRole('button', { name: 'Mark task "Should still work" as complete' }).click()
   await expect(page.getByRole('button', { name: 'Mark task "Should still work" as active' })).toBeVisible()
 
@@ -325,6 +330,7 @@ test('delete workflow supports cancel, scoped error, and retry success', async (
   await expect(page.getByText('Delete failed for selected task.')).not.toBeVisible()
 
   await page.getByRole('button', { name: 'Delete task "Retry delete task"' }).click()
+  await page.waitForTimeout(100)
   await page.getByRole('button', { name: 'Confirm delete task "Retry delete task"' }).click()
 
   await expect(page.getByText('Delete failed for selected task.')).toBeVisible()
