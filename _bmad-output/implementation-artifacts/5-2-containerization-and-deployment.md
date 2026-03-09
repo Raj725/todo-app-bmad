@@ -3,7 +3,7 @@
 ## Story Context
 **Epic:** 5 - Production Readiness & Quality Gates
 **Story:** 5.2 - Containerization and Deployment
-**Status:** review
+**Status:** done
 
 ## User Story
 **As a** DevOps Engineer / Developer
@@ -154,7 +154,7 @@ CMD ["nginx", "-g", "daemon off;"]
     - `cd /Users/raj/VSCodeProjects/todo-app-bmad-agile/backend && python3 -m pytest -q` (PASS: 30 passed, 5 subtests)
 - Docker runtime verification commands (PASS):
     - `docker compose up --build -d` (initially exposed migration incompatibility, fixed in this story)
-    - `docker compose ps` (`db` and `backend` healthy; `frontend` running)
+    - `docker compose ps` (`db` and `backend` healthy; `frontend` running — healthcheck added in review)
     - `curl -sSf http://localhost:8080` (PASS)
     - `curl -sSf http://localhost:8000/docs` (PASS)
     - `curl -sSf http://localhost:8080/api/health` (PASS)
@@ -166,15 +166,18 @@ CMD ["nginx", "-g", "daemon off;"]
 - `backend/README.md`
 - `backend/alembic/versions/20260305_000001_create_todos_table.py`
 - `backend/requirements.txt`
+- `backend/requirements-dev.txt`
 - `backend/Dockerfile`
 - `backend/.dockerignore`
 - `frontend/README.md`
 - `frontend/Dockerfile`
 - `frontend/.dockerignore`
 - `frontend/nginx.conf`
+- `.github/workflows/tests.yml`
 - `docker-compose.yml`
 
 ## Change Log
 - Initial creation of story file.
 - 2026-03-09: Added Docker and Compose implementation artifacts, updated service documentation, executed FE/BE quality gates, and marked runtime container verification as blocked pending Docker availability.
 - 2026-03-09: Resumed workflow after Docker availability, fixed PostgreSQL migration default compatibility, verified Compose health/endpoints, and completed story for review.
+- 2026-03-09: Code review — fixed 5 MEDIUM issues: (M1) split pytest out of production requirements into requirements-dev.txt, updated CI; (M2) added `exec` to backend CMD for proper SIGTERM handling; (M3) added `restart: unless-stopped` to all Compose services; (M4) added X-Content-Type-Options and X-Frame-Options security headers to nginx.conf; (M5) added frontend healthcheck to docker-compose.yml so all services report healthy.

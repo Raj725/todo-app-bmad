@@ -53,6 +53,12 @@ Install dependencies:
 python3 -m pip install -r requirements.txt
 ```
 
+Install with test/dev tools:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+```
+
 From repository root:
 
 ```bash
