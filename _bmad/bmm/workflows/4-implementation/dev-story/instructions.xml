@@ -275,12 +275,20 @@
 
   <step n="7" goal="Run validations and tests">
     <action>Determine how to run tests for this repo (infer test framework from project structure)</action>
+    <action>Build a deterministic service test matrix from changed file paths before running tests:</action>
+    <action>- If any changed path starts with "frontend/", mark frontend_touched = true</action>
+    <action>- If any changed path starts with "backend/", mark backend_touched = true</action>
+    <action>- If neither service path is touched, still run project-level tests required by story scope</action>
     <action>Run all existing tests to ensure no regressions</action>
     <action>Run the new tests to verify implementation correctness</action>
     <action>Run linting and code quality checks if configured in project</action>
+    <action if="frontend_touched == true">Run frontend quality gates in this order from frontend/: `npm run lint`, `npm run test`, `npm run test:e2e`</action>
+    <action if="frontend_touched == true AND test:e2e script is missing">HALT: "frontend/ changed but npm script 'test:e2e' is not configured"</action>
+    <action if="backend_touched == true">Run backend quality gates defined by backend tooling for this repository</action>
     <action>Validate implementation meets ALL story acceptance criteria; enforce quantitative thresholds explicitly</action>
     <action if="regression tests fail">STOP and fix before continuing - identify breaking changes immediately</action>
     <action if="new tests fail">STOP and fix before continuing - ensure implementation correctness</action>
+    <action if="frontend_touched == true AND frontend e2e fails">STOP and fix before continuing - do not continue with failing frontend Playwright tests</action>
   </step>
 
   <step n="8" goal="Validate and mark task complete ONLY when fully done">
@@ -291,6 +299,7 @@
     <action>Confirm implementation matches EXACTLY what the task/subtask specifies - no extra features</action>
     <action>Validate that ALL acceptance criteria related to this task are satisfied</action>
     <action>Run full test suite to ensure NO regressions introduced</action>
+    <action if="frontend_touched == true">Verify `npm run test:e2e` was executed in this run and passed</action>
 
     <!-- REVIEW FOLLOW-UP HANDLING -->
     <check if="task is review follow-up (has [AI-Review] prefix)">
@@ -337,6 +346,8 @@
   <step n="9" goal="Story completion and mark for review" tag="sprint-status">
     <action>Verify ALL tasks and subtasks are marked [x] (re-scan the story document now)</action>
     <action>Run the full regression suite (do not skip)</action>
+    <action>Re-run service-level quality gates for all touched services before marking review</action>
+    <action if="frontend_touched == true">Require a passing `npm run test:e2e` result from frontend/ in the completion run</action>
     <action>Confirm File List includes every changed file</action>
     <action>Execute enhanced definition-of-done validation</action>
     <action>Update the story Status to: "review"</action>
@@ -349,6 +360,7 @@
       - Integration tests for component interactions added when required
       - End-to-end tests for critical flows added when story demands them
       - All tests pass (no regressions, new tests successful)
+      - If frontend/ changed: frontend lint, unit tests, and Playwright E2E (`npm run test:e2e`) all pass
       - Code quality checks pass (linting, static analysis if configured)
       - File List includes every new/modified/deleted file (relative paths)
       - Dev Agent Record contains implementation notes

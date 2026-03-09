@@ -46,6 +46,9 @@ validation-rules:
 - [ ] **Regression Prevention:** ALL existing tests pass (no regressions introduced)
 - [ ] **Code Quality:** Linting and static checks pass when configured in project
 - [ ] **Test Framework Compliance:** Tests use project's testing frameworks and patterns from Dev Notes
+- [ ] **Frontend Gate (Conditional):** If any `frontend/` files changed, `npm run lint` passed in `frontend/`
+- [ ] **Frontend Unit Gate (Conditional):** If any `frontend/` files changed, `npm run test` passed in `frontend/`
+- [ ] **Frontend E2E Gate (Conditional):** If any `frontend/` files changed, `npm run test:e2e` passed in `frontend/`
 
 ## 📝 Documentation & Tracking
 
