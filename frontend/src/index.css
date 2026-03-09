@@ -1,11 +1,10 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', 'Avenir Next', Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #111827;
+  background-color: #f3f4f6;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,11 +18,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #1d4ed8;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #1e40af;
 }
 
 body {
@@ -44,6 +43,9 @@ main {
   margin: 0 auto;
   padding: 1rem;
   text-align: left;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
 }
 
 form {
@@ -63,6 +65,11 @@ input {
   min-height: 44px;
   min-width: 0;
   width: min(100%, 24rem);
+  border: 1px solid #6b7280;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: #111827;
+  background-color: #ffffff;
 }
 
 h1 {
@@ -73,24 +80,26 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid #0f172a;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  color: #ffffff;
+  background-color: #0f172a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.2s;
   min-height: 44px;
   min-width: 44px;
   max-width: 100%;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: #1e293b;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
 }
 
 ul {
@@ -108,9 +117,32 @@ li > p > button {
   margin: 0.25rem 0.5rem 0.25rem 0;
 }
 
+p[role='alert'] {
+  color: #991b1b;
+}
+
+.todo-alert {
+  color: #991b1b;
+}
+
+.todo-status-active {
+  color: #0f766e;
+}
+
+.todo-status-completed {
+  color: #14532d;
+}
+
+.todo-status-pending {
+  color: #9a3412;
+}
+
 @media (max-width: 640px) {
   main {
     padding: 0.75rem;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
   }
 
   h1 {
@@ -119,18 +151,5 @@ li > p > button {
 
   input {
     width: 100%;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
