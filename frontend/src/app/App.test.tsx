@@ -328,7 +328,7 @@ describe('Task list and quick-add flows', () => {
       expect(screen.getByText('Completed')).toBeInTheDocument()
     })
 
-    const items = screen.getAllByRole('row').slice(1)
+    const items = screen.getAllByRole('listitem')
     expect(within(items[0]).getByText('Beta active')).toBeInTheDocument()
     expect(within(items[1]).getByText('Alpha active')).toBeInTheDocument()
   })
@@ -475,7 +475,7 @@ describe('Task list and quick-add flows', () => {
       expect(screen.getAllByText('Active').length).toBeGreaterThan(0)
     })
 
-    const items = screen.getAllByRole('row').slice(1)
+    const items = screen.getAllByRole('listitem')
     expect(within(items[0]).getByText('Alpha completed')).toBeInTheDocument()
     expect(within(items[1]).getByText('Beta active')).toBeInTheDocument()
   })

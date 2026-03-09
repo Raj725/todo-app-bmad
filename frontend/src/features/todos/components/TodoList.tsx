@@ -92,7 +92,7 @@ export function TodoList({
         Showing {currentRangeStart}-{currentRangeEnd} of {sortedTodos.length} tasks
       </p>
       <label className="todo-page-size" htmlFor={`todo-page-size-${labelSuffix}`}>
-        Rows per page
+        Items per page
       </label>
       <select
         id={`todo-page-size-${labelSuffix}`}
@@ -141,17 +141,7 @@ export function TodoList({
     <>
       {hasAnyRows && renderPaginationControls('top')}
       <div className="todo-table-wrap">
-        <table className="todo-table">
-          <thead>
-            <tr>
-              <th scope="col" className="todo-col-id">#</th>
-              <th scope="col">Task</th>
-              <th scope="col">Status</th>
-              <th scope="col">Created</th>
-              <th scope="col" className="todo-col-actions">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <ul className="todo-list" aria-label="Tasks">
         {visibleTodos.map((todo) => {
         const isOptimisticCreate = todo.id < 0
         const isUpdatePending = pendingTodoIds.has(todo.id)
@@ -171,9 +161,13 @@ export function TodoList({
         const statusLabel = todo.isCompleted ? 'Completed' : 'Active'
 
           return (
-            <tr key={todo.id} className="todo-row">
-              <td className="todo-cell-id" data-label="ID">{todo.id > 0 ? todo.id : 'new'}</td>
-              <td className="todo-cell-task" data-label="Task">
+            <li key={todo.id} className="todo-row">
+              <div className="todo-cell-id">
+                <span className="todo-cell-label">ID</span>
+                <span>{todo.id > 0 ? todo.id : 'new'}</span>
+              </div>
+              <div className="todo-cell-task">
+                <span className="todo-cell-label">Task</span>
                 {isEditing ? (
                   <div className="todo-edit-panel">
                     <label htmlFor={`edit-todo-${todo.id}`}>Edit task description</label>
@@ -267,15 +261,20 @@ export function TodoList({
                     </button>
                   </p>
                 )}
-              </td>
-              <td data-label="Status">
+              </div>
+              <div>
+                <span className="todo-cell-label">Status</span>
                 <strong className={`todo-status ${todo.isCompleted ? 'todo-status-completed' : 'todo-status-active'}`}>
                   {statusLabel}
                 </strong>
                 {isOptimisticCreate ? <strong className="todo-status todo-status-pending">Pending</strong> : null}
-              </td>
-              <td className="todo-meta" data-label="Created">{todo.createdAt}</td>
-              <td className="todo-actions" data-label="Actions">
+              </div>
+              <p className="todo-meta">
+                <span className="todo-cell-label">Created</span>
+                <span>{todo.createdAt}</span>
+              </p>
+              <div className="todo-actions">
+                <span className="todo-cell-label">Actions</span>
                 <button
                   type="button"
                   className="btn btn-icon btn-primary"
@@ -363,12 +362,11 @@ export function TodoList({
                     </svg>
                   </button>
                 )}
-              </td>
-            </tr>
+              </div>
+            </li>
           )
         })}
-          </tbody>
-        </table>
+        </ul>
       </div>
       {isPaginationVisible && renderPaginationControls('bottom')}
     </>

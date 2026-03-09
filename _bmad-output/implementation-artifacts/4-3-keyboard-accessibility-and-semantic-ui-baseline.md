@@ -1,6 +1,6 @@
 # Story 4.3: Keyboard Accessibility and Semantic UI Baseline
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -110,6 +110,9 @@ GPT-5.3-Codex
 - Improved readable contrast for text, controls, alerts, and status badges (`active`, `completed`, `pending`).
 - Added end-to-end accessibility checks for axe baseline scans in empty and populated states.
 - Added keyboard-flow E2E coverage for Tab/Enter/Space behavior on desktop browser projects.
+- Post-review fixes: migrated task rendering to native `<ul>/<li>` semantics and retained keyboard-operable controls.
+- Post-review fixes: strengthened keyboard-flow accessibility test to cover uncomplete and retry activation paths.
+- Post-review fixes: updated CRUD E2E selectors to match semantic list markup.
 - Confirmed CI already executes Playwright E2E tests, so the new accessibility spec is included automatically.
 - No README impact: changes are internal accessibility improvements and test coverage additions without command/workflow changes.
 
@@ -118,11 +121,39 @@ GPT-5.3-Codex
 - frontend/src/app/App.tsx
 - frontend/src/app/App.test.tsx
 - frontend/src/features/todos/components/TodoList.tsx
+- frontend/src/features/todos/components/TodoList.test.tsx
 - frontend/src/index.css
 - frontend/tests/e2e/accessibility.spec.ts
+- frontend/tests/e2e/todo-crud.spec.ts
 - frontend/package.json
 - frontend/package-lock.json
+- frontend/playwright-report/index.html
 - _bmad-output/implementation-artifacts/sprint-status.yaml
+
+## Senior Developer Review (AI)
+
+### Reviewer
+
+Raj (GPT-5.3-Codex)
+
+### Outcome
+
+Approved after fixes.
+
+### Findings Resolution Summary
+
+- Fixed semantic mismatch by implementing native list semantics (`ul`/`li`) in `TodoList`.
+- Fixed accessibility E2E false-positive path by validating deletion against `listitem` semantics and real retry behavior.
+- Expanded keyboard-only E2E coverage to include uncomplete and retry interactions.
+- Updated affected unit/integration/E2E selectors to align with semantic list rendering.
+- Re-ran frontend touched-service quality gates and confirmed all required gates pass.
+
+### Verification Evidence
+
+- `frontend`: `npm run lint` (pass)
+- `frontend`: `npm run test` (72 passed)
+- `frontend`: `npm run test:e2e` (52 passed, 3 skipped)
 
 ### Change Log
 - 2026-03-09: Implemented Story 4.3 accessibility baseline updates, added automated accessibility tests, and passed all frontend quality gates.
+- 2026-03-09: Completed post-review remediation for semantic list structure, keyboard retry coverage, and E2E selector alignment; revalidated all frontend quality gates.
