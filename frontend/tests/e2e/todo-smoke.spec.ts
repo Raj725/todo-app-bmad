@@ -631,18 +631,22 @@ test('pagination controls support pointer and keyboard navigation across larger 
 
   await page.goto('/')
 
-  await expect(page.getByText('Page 1 of 2')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Previous page' })).toBeDisabled()
-  await expect(page.getByRole('button', { name: 'Next page' })).toBeEnabled()
+  const pageIndicator = page.locator('.todo-page-indicator').first()
+  const previousPageButton = page.getByRole('button', { name: 'Previous page' }).first()
+  const nextPageButton = page.getByRole('button', { name: 'Next page' }).first()
 
-  await page.getByRole('button', { name: 'Next page' }).hover()
-  await page.getByRole('button', { name: 'Next page' }).focus()
+  await expect(pageIndicator).toHaveText('Page 1 of 2')
+  await expect(previousPageButton).toBeDisabled()
+  await expect(nextPageButton).toBeEnabled()
+
+  await nextPageButton.hover()
+  await nextPageButton.focus()
   await page.keyboard.press('Enter')
 
-  await expect(page.getByText('Page 2 of 2')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Next page' })).toBeDisabled()
-  await expect(page.getByRole('button', { name: 'Previous page' })).toBeEnabled()
+  await expect(pageIndicator).toHaveText('Page 2 of 2')
+  await expect(nextPageButton).toBeDisabled()
+  await expect(previousPageButton).toBeEnabled()
 
-  await page.getByRole('button', { name: 'Previous page' }).click()
-  await expect(page.getByText('Page 1 of 2')).toBeVisible()
+  await previousPageButton.click()
+  await expect(pageIndicator).toHaveText('Page 1 of 2')
 })
