@@ -184,10 +184,22 @@ Run all backend tests:
 python3 -m pytest -q
 ```
 
+Run backend tests with CI coverage gate (`>=70%`):
+
+```bash
+python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
+```
+
 From repository root:
 
 ```bash
 cd backend && python3 -m pytest -q
+```
+
+From repository root with coverage gate:
+
+```bash
+cd backend && python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
 ```
 
 Run individual test modules:
@@ -216,13 +228,13 @@ PR checks are configured in `.github/workflows/tests.yml`.
 
 Backend-related check:
 
-- Backend tests: `python3 -m pytest -q`
-- Backend contract/behavior regression gate: `python3 -m pytest -q`
+- Backend tests with coverage gate: `python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70`
+- Backend contract/behavior regression gate: same command as above
 
 Run it locally before opening or updating a PR:
 
 ```bash
-python3 -m pytest -q
+python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
 ```
 
 Story 4.4 MVP note:
