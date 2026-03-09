@@ -76,6 +76,14 @@ Output markdown summary:
 - Add more edge cases as needed
 ```
 
+### Step 6: Commit and Push (If Successful)
+
+If all tests pass:
+
+- Add new test files and modified configs
+- Commit with message: `test: add automated [type] tests for [feature]`
+- Push to current branch
+
 ## Keep It Simple
 
 **Do:**

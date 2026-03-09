@@ -21,6 +21,7 @@
 - [ ] Test summary created
 - [ ] Tests saved to appropriate directories
 - [ ] Summary includes coverage metrics
+- [ ] Changes committed and pushed (if tests pass)
 
 ## Validation
 
