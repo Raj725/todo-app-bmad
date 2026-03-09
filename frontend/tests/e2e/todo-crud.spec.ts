@@ -1,4 +1,29 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+async function goToFirstPage(page: Page) {
+  const previousButton = page.getByRole('button', { name: 'Previous page' })
+  while ((await previousButton.isVisible().catch(() => false)) && (await previousButton.isEnabled().catch(() => false))) {
+    await previousButton.click()
+  }
+}
+
+async function ensureTaskVisible(page: Page, taskText: string) {
+  await goToFirstPage(page)
+
+  const taskLocator = page.getByText(taskText)
+  const nextButton = page.getByRole('button', { name: 'Next page' })
+
+  while (!(await taskLocator.first().isVisible().catch(() => false))) {
+    const canGoNext = (await nextButton.isVisible().catch(() => false)) && (await nextButton.isEnabled().catch(() => false))
+    if (!canGoNext) {
+      break
+    }
+
+    await nextButton.click()
+  }
+
+  await expect(taskLocator.first()).toBeVisible()
+}
 
 test.describe('Todo CRUD Operations', () => {
   test.beforeEach(async ({ page }) => {
@@ -22,6 +47,8 @@ test.describe('Todo CRUD Operations', () => {
 
     // 2. Edit description
     await test.step('Edit Todo Description', async () => {
+      await ensureTaskVisible(page, todoText)
+
       // Click Edit button
       await page.getByRole('button', { name: `Edit task "${todoText}"` }).click()
       
@@ -39,8 +66,12 @@ test.describe('Todo CRUD Operations', () => {
 
     // 3. Mark as completed
     await test.step('Mark as Completed', async () => { 
+      await ensureTaskVisible(page, updatedText)
+
       // Button aria-label changes based on status. Currently active.
       await page.getByRole('button', { name: `Mark task "${updatedText}" as complete` }).click()
+
+      await ensureTaskVisible(page, updatedText)
       
       // Verify button changes to "Mark active"
       await expect(page.getByRole('button', { name: `Mark task "${updatedText}" as active` })).toBeVisible()
@@ -53,6 +84,8 @@ test.describe('Todo CRUD Operations', () => {
 
     // 4. Delete the todo
     await test.step('Delete Todo', async () => {
+      await ensureTaskVisible(page, updatedText)
+
         // Click Delete to verify confirmation
         // Wait, after update, the text is updatedText.
         await page.getByRole('button', { name: `Delete task "${updatedText}"` }).click()

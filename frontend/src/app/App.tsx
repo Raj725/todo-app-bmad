@@ -7,6 +7,8 @@ import { useDeleteTodoMutation } from '../features/todos/hooks/useDeleteTodoMuta
 import { useUpdateTodoMutation } from '../features/todos/hooks/useUpdateTodoMutation'
 import { useTodosQuery } from '../features/todos/hooks/useTodosQuery'
 
+const TASK_LIST_PAGE_SIZE = 25
+
 function App() {
   const todosQuery = useTodosQuery()
   const createTodoMutation = useCreateTodoMutation()
@@ -32,6 +34,7 @@ function App() {
         {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length > 0 && (
           <TodoList
             todos={todosQuery.data}
+            pageSize={TASK_LIST_PAGE_SIZE}
             pendingTodoIds={updateTodoMutation.pendingTodoIds}
             failedToggleTodoIds={updateTodoMutation.failedToggleTodoIds}
             failedToggleErrorMessages={updateTodoMutation.failedToggleErrorMessages}

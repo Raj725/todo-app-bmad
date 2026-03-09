@@ -167,4 +167,55 @@ describe('TodoList', () => {
     fireEvent.click(retryButton)
     expect(onEditTodo).toHaveBeenLastCalledWith(expect.objectContaining({ id: 55 }), 'Updated description')
   })
+
+  it('paginates sorted rows and exposes page indicators with next/previous controls', () => {
+    const todos: Todo[] = [
+      todo({ id: 1, description: 'Task 1', createdAt: '2026-03-06T15:00:01.000Z' }),
+      todo({ id: 2, description: 'Task 2', createdAt: '2026-03-06T15:00:02.000Z' }),
+      todo({ id: 3, description: 'Task 3', createdAt: '2026-03-06T15:00:03.000Z' }),
+      todo({ id: 4, description: 'Task 4', createdAt: '2026-03-06T15:00:04.000Z' }),
+      todo({ id: 5, description: 'Task 5', createdAt: '2026-03-06T15:00:05.000Z' }),
+      todo({ id: 6, description: 'Task 6', createdAt: '2026-03-06T15:00:06.000Z' }),
+      todo({ id: 7, description: 'Task 7', createdAt: '2026-03-06T15:00:07.000Z' }),
+    ]
+
+    render(<TodoList todos={todos} pageSize={3} {...baseProps} />)
+
+    expect(screen.getByText('Page 1 of 3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Next page' })).toBeEnabled()
+
+    expect(screen.getByText('Task 7')).toBeInTheDocument()
+    expect(screen.getByText('Task 6')).toBeInTheDocument()
+    expect(screen.getByText('Task 5')).toBeInTheDocument()
+    expect(screen.queryByText('Task 4')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }))
+
+    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument()
+    expect(screen.getByText('Task 4')).toBeInTheDocument()
+    expect(screen.getByText('Task 3')).toBeInTheDocument()
+    expect(screen.getByText('Task 2')).toBeInTheDocument()
+  })
+
+  it('keeps actionable ordering deterministic within paginated results', () => {
+    const todos: Todo[] = [
+      todo({ id: 1, description: 'Active newest', isCompleted: false, createdAt: '2026-03-06T20:00:00.000Z' }),
+      todo({ id: 2, description: 'Completed newest', isCompleted: true, createdAt: '2026-03-06T21:00:00.000Z' }),
+      todo({ id: 3, description: 'Active older', isCompleted: false, createdAt: '2026-03-06T19:00:00.000Z' }),
+      todo({ id: 4, description: 'Completed older', isCompleted: true, createdAt: '2026-03-06T18:00:00.000Z' }),
+    ]
+
+    render(<TodoList todos={todos} pageSize={2} {...baseProps} />)
+
+    const pageOneRows = screen.getAllByRole('listitem')
+    expect(within(pageOneRows[0]).getByText('Active newest')).toBeInTheDocument()
+    expect(within(pageOneRows[1]).getByText('Active older')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }))
+
+    const pageTwoRows = screen.getAllByRole('listitem')
+    expect(within(pageTwoRows[0]).getByText('Completed newest')).toBeInTheDocument()
+    expect(within(pageTwoRows[1]).getByText('Completed older')).toBeInTheDocument()
+  })
 })

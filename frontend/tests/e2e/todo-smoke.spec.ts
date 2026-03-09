@@ -604,3 +604,45 @@ test('real backend reload shows only confirmed persistence and drops failed opti
   await expect(page.getByText(failedDescription)).not.toBeVisible()
   await expect(page.getByText('Create failed once.')).not.toBeVisible()
 })
+
+test('pagination controls support pointer and keyboard navigation across larger task lists', async ({ page }) => {
+  const todos: TodoApiItem[] = Array.from({ length: 31 }, (_, index) => {
+    const id = index + 1
+    return {
+      id,
+      description: `Paginated task ${id}`,
+      is_completed: false,
+      created_at: `2026-03-06T17:00:${String(id).padStart(2, '0')}.000Z`,
+    }
+  })
+
+  await page.route(/\/todos(?:\/\d+)?(?:\?.*)?$/, async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: todos }),
+      })
+      return
+    }
+
+    await route.fallback()
+  })
+
+  await page.goto('/')
+
+  await expect(page.getByText('Page 1 of 2')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Previous page' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Next page' })).toBeEnabled()
+
+  await page.getByRole('button', { name: 'Next page' }).hover()
+  await page.getByRole('button', { name: 'Next page' }).focus()
+  await page.keyboard.press('Enter')
+
+  await expect(page.getByText('Page 2 of 2')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Next page' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Previous page' })).toBeEnabled()
+
+  await page.getByRole('button', { name: 'Previous page' }).click()
+  await expect(page.getByText('Page 1 of 2')).toBeVisible()
+})
