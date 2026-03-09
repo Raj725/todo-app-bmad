@@ -68,3 +68,9 @@ development_status:
   4-4-operational-health-and-quality-gates: done
   4-5-visual-clarity-layout-utilization-and-list-scalability: done
   epic-4-retrospective: optional
+
+  epic-5: in-progress
+  5-1-project-brief-and-prd-refinement: done
+  5-2-containerization-and-deployment: ready-for-dev
+  5-3-qa-infrastructure-and-coverage: backlog
+  epic-5-retrospective: backlog

@@ -512,3 +512,21 @@ so that I can manage larger task lists comfortably across desktop and mobile.
 **When** the visible list exceeds a practical reading length
 **Then** users can navigate list pages using pagination controls
 **And** current page, total pages, and next/previous actions are clearly presented and keyboard operable.
+
+## Epic 5: Production Readiness & Quality Gates
+
+**Objective:** Harden the application for production release by implementing containerization, comprehensive testing, and quality gates.
+
+**Context:**
+The project has moved from MVP to Production Integration. We need to ensure the application is deployable, testable, and maintainable.
+
+**Stories:**
+- **5.1 Project Brief & PRD Refinement:** (Planning) Formalize the new requirements and update artifacts.
+- **5.2 Containerization:** Implement Docker files and Docker Compose orchestration with health checks.
+- **5.3 QA Infrastructure:** Implement 70% test coverage gates and integrated E2E/Component tests.
+
+**Requirements Covered:**
+- Containerization (Docker/Compose)
+- Test Coverage (70% Target)
+- Accessibility Compliance (Zero Critical Violations)
+- E2E Test Suite (5 Core Journeys)
