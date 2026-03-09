@@ -22,39 +22,42 @@ function App() {
         errorMessage={createTodoMutation.createErrorMessage}
         onSubmit={(description) => createTodoMutation.mutate(description)}
       />
-      {todosQuery.isPending && <TodoListLoadingState />}
-      {!todosQuery.isPending && todosQuery.isError && <p>Unable to load tasks.</p>}
-      {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length === 0 && (
-        <TodoListEmptyState />
-      )}
-      {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length > 0 && (
-        <TodoList
-          todos={todosQuery.data}
-          pendingTodoIds={updateTodoMutation.pendingTodoIds}
-          failedToggleTodoIds={updateTodoMutation.failedToggleTodoIds}
-          failedToggleErrorMessages={updateTodoMutation.failedToggleErrorMessages}
-          failedEditTodoIds={updateTodoMutation.failedDescriptionTodoIds}
-          failedEditErrorMessages={updateTodoMutation.failedDescriptionErrorMessages}
-          onToggleTodo={(todo) => {
-            updateTodoMutation.mutate({
-              todoId: todo.id,
-              isCompleted: !todo.isCompleted,
-            })
-          }}
-          onEditTodo={(todo, description) => {
-            updateTodoMutation.mutate({
-              todoId: todo.id,
-              description,
-            })
-          }}
-          pendingDeleteIds={deleteTodoMutation.pendingDeleteIds}
-          failedDeleteTodoIds={deleteTodoMutation.failedDeleteTodoIds}
-          failedDeleteErrorMessages={deleteTodoMutation.failedDeleteErrorMessages}
-          onDeleteTodo={(todo) => {
-            deleteTodoMutation.mutate({ todoId: todo.id })
-          }}
-        />
-      )}
+      <section aria-labelledby="task-list-heading">
+        <h2 id="task-list-heading">Tasks</h2>
+        {todosQuery.isPending && <TodoListLoadingState />}
+        {!todosQuery.isPending && todosQuery.isError && <p role="alert">Unable to load tasks.</p>}
+        {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length === 0 && (
+          <TodoListEmptyState />
+        )}
+        {!todosQuery.isPending && !todosQuery.isError && todosQuery.data && todosQuery.data.length > 0 && (
+          <TodoList
+            todos={todosQuery.data}
+            pendingTodoIds={updateTodoMutation.pendingTodoIds}
+            failedToggleTodoIds={updateTodoMutation.failedToggleTodoIds}
+            failedToggleErrorMessages={updateTodoMutation.failedToggleErrorMessages}
+            failedEditTodoIds={updateTodoMutation.failedDescriptionTodoIds}
+            failedEditErrorMessages={updateTodoMutation.failedDescriptionErrorMessages}
+            onToggleTodo={(todo) => {
+              updateTodoMutation.mutate({
+                todoId: todo.id,
+                isCompleted: !todo.isCompleted,
+              })
+            }}
+            onEditTodo={(todo, description) => {
+              updateTodoMutation.mutate({
+                todoId: todo.id,
+                description,
+              })
+            }}
+            pendingDeleteIds={deleteTodoMutation.pendingDeleteIds}
+            failedDeleteTodoIds={deleteTodoMutation.failedDeleteTodoIds}
+            failedDeleteErrorMessages={deleteTodoMutation.failedDeleteErrorMessages}
+            onDeleteTodo={(todo) => {
+              deleteTodoMutation.mutate({ todoId: todo.id })
+            }}
+          />
+        )}
+      </section>
     </main>
   )
 }

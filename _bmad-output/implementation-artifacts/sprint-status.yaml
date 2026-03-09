@@ -64,6 +64,6 @@ development_status:
   epic-4: in-progress
   4-1-durable-persistence-across-refresh-and-session-return: done
   4-2-responsive-experience-for-desktop-and-mobile-browsers: done
-  4-3-keyboard-accessibility-and-semantic-ui-baseline: backlog
+  4-3-keyboard-accessibility-and-semantic-ui-baseline: review
   4-4-operational-health-and-quality-gates: backlog
   epic-4-retrospective: optional

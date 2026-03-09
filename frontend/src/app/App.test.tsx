@@ -38,6 +38,7 @@ describe('Task list and quick-add flows', () => {
     renderWithQueryClient()
 
     expect(screen.getByRole('heading', { name: 'Todo App' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
     expect(screen.getByText('Loading tasks...')).toBeInTheDocument()
     expect(within(getQuickAddSection()).getByRole('button', { name: 'Quick add task' })).toBeInTheDocument()
   })

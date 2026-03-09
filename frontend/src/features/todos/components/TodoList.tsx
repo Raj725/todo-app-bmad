@@ -115,12 +115,17 @@ export function TodoList({
                 <button type="button" onClick={cancelEditing} disabled={isUpdatePending}>
                   Cancel
                 </button>
-                {editValidationError && <p role="alert">{editValidationError}</p>}
+                {editValidationError && <p role="alert" className="todo-alert">{editValidationError}</p>}
               </>
             ) : (
               <p>
-                {todo.description} {todo.isCompleted ? <strong>Completed</strong> : <strong>Active</strong>}
-                {isOptimisticCreate ? <strong> Pending</strong> : null}
+                {todo.description}{' '}
+                {todo.isCompleted ? (
+                  <strong className="todo-status todo-status-completed">Completed</strong>
+                ) : (
+                  <strong className="todo-status todo-status-active">Active</strong>
+                )}
+                {isOptimisticCreate ? <strong className="todo-status todo-status-pending"> Pending</strong> : null}
               </p>
             )}
             <p>Created: {todo.createdAt}</p>
@@ -139,7 +144,7 @@ export function TodoList({
                   : 'Mark complete'}
             </button>
             {hasToggleError && !isUpdatePending && (
-              <p role="alert">
+              <p role="alert" className="todo-alert">
                 {toggleErrorMessage}{' '}
                 <button
                   type="button"
@@ -163,7 +168,7 @@ export function TodoList({
             )}
 
             {hasEditError && !isUpdatePending && canRetryEdit && (
-              <p role="alert">
+              <p role="alert" className="todo-alert">
                 {editErrorMessage}{' '}
                 <button
                   type="button"
@@ -215,7 +220,7 @@ export function TodoList({
 
             {/* Scoped delete error with retry */}
             {hasDeleteError && !isDeletePending && (
-              <p role="alert">
+              <p role="alert" className="todo-alert">
                 {deleteErrorMessage}{' '}
                 <button
                   type="button"

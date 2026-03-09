@@ -421,4 +421,17 @@
     <action>Remain flexible - allow user to choose their own path or ask for other assistance</action>
   </step>
 
+  <step n="11" goal="Commit, push, and create pull request">
+    <critical>Do not include unrelated files in the commit.</critical>
+    <action>Review changed files and stage only story-relevant updates.</action>
+    <action>Create a commit with a clear message including {{story_key}}.</action>
+    <action>Push the current story branch to origin.</action>
+    <action>Create a pull request targeting the repository default branch unless project policy specifies otherwise.</action>
+    <action>Include story key, acceptance criteria coverage summary, tests executed, and risk notes in the PR body.</action>
+    <check if="push fails or PR creation fails">
+      <action>HALT and report the failure reason with remediation guidance.</action>
+    </check>
+    <output>✅ Branch pushed and PR created for {{story_key}}</output>
+  </step>
+
 </workflow>
