@@ -111,6 +111,23 @@ From repository root:
 cd frontend && npm run preview
 ```
 
+## Docker
+
+Build frontend image:
+
+```bash
+docker build -t todo-frontend ./frontend
+```
+
+Run frontend container (serves static build with Nginx):
+
+```bash
+docker run --rm -p 8080:80 todo-frontend
+```
+
+When used with the repository `docker-compose.yml`, the frontend routes `/api/*`
+requests to the backend service through Nginx.
+
 ## Scripts
 
 - `npm run dev` - start Vite dev server

@@ -119,6 +119,29 @@ cd backend && python3 -m alembic upgrade head && uvicorn app.main:app --reload -
 
 This ensures schema migrations are applied before the API starts serving traffic in local and CI-style runs.
 
+## Docker
+
+Build backend image:
+
+```bash
+docker build -t todo-backend ./backend
+```
+
+Run backend container directly:
+
+```bash
+docker run --rm -p 8000:8000 \
+	-e DATABASE_URL=sqlite:///./todo.db \
+	-e CORS_ALLOW_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 \
+	todo-backend
+```
+
+The container runs Alembic migrations on startup and exposes:
+
+- API docs: http://127.0.0.1:8000/docs
+- Health: http://127.0.0.1:8000/health
+- Readiness: http://127.0.0.1:8000/ready
+
 Interactive API docs:
 
 - http://127.0.0.1:8000/docs

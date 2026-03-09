@@ -60,6 +60,25 @@ npm run dev
 - Frontend: http://127.0.0.1:5173
 - Backend API docs: http://127.0.0.1:8000/docs
 
+## Docker Compose Quick Start
+
+Start the full stack with containers:
+
+```bash
+docker compose up --build
+```
+
+Endpoints:
+
+- Frontend: http://localhost:8080
+- Backend API docs: http://localhost:8000/docs
+
+Stop and remove containers:
+
+```bash
+docker compose down
+```
+
 ## Common Commands
 
 ### Frontend

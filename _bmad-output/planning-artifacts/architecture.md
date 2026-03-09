@@ -65,6 +65,8 @@ This is a low-complexity, greenfield MVP with moderate interaction reliability d
 - Input validation and safe failure contracts
 - Accessibility and responsive UX consistency
 - Operational readiness (health checks, lightweight observability)
+- **Containerization Strategy:** Docker + Docker Compose based deployment
+- **Quality Assurance Strategy:** Integrated testing (Unit/Integration/E2E) with coverage metrics
 
 ## Starter Template Evaluation
 
@@ -95,6 +97,31 @@ Full-stack web application based on project requirements analysis, with an expli
 
 **Rationale for Selection:**
 This option directly matches the documented product and technical intent: React SPA UX with a separate FastAPI service for durable CRUD persistence. It minimizes framework friction, keeps architecture understandable for an intermediate team, and supports the required optimistic UX + explicit rollback/error semantics without overcommitting to heavyweight full-stack frameworks.
+
+## Deployment & QA Strategy (New - Epic 5)
+
+### Containerization Architecture
+- **Service Isolation:** Frontend (Nginx/Node) and Backend (Uvicorn/FastAPI) run in separate containers.
+- **Orchestration:** `docker-compose.yml` manages lifecycle, networking, and volumes.
+- **Dockerfiles:**
+    - **Backend:** Python 3.11-slim base, multi-stage build, non-root user `appuser`.
+    - **Frontend:** Node 20-alpine build stage -> Nginx alpine runtime stage (static file serving).
+- **Health Checks:**
+    - Backend: `/health` or `/ready` endpoint checks.
+    - Frontend: basic HTTP check.
+
+### Testing Strategy
+- **Unit/Component Tests:**
+    - **Tools:** Vitest + React Testing Library (Frontend), Pytest (Backend logic).
+    - **Constraint:** Run on every commit.
+- **Integration Tests:**
+    - **Tools:** Pytest + TestClient (API contracts).
+    - **Scope:** 100% coverage of API endpoints including error paths.
+- **E2E Tests:**
+    - **Tools:** Playwright.
+    - **Scenarios:** Create, Complete, Delete, Session Persistence, Error Handling.
+- **Coverage Metrics:**
+    - Targeted ≥ 70% line/branch coverage reported via `pytest-cov` and `vitest coverage`.
 
 **Initialization Commands:**
 

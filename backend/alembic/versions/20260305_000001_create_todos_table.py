@@ -20,7 +20,7 @@ def upgrade() -> None:
         "todos",
         sa.Column("id", sa.Integer(), primary_key=True, nullable=False),
         sa.Column("description", sa.String(length=280), nullable=False),
-        sa.Column("is_completed", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("is_completed", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("CURRENT_TIMESTAMP")),
     )
     op.create_index("ix_todos_id", "todos", ["id"], unique=False)

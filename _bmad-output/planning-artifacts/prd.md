@@ -58,6 +58,9 @@ Business success metrics are intentionally deferred for this phase and will be d
 - Optimistic UI behavior is predictable: immediate feedback on action, clear rollback and error messaging on failure.
 - The interface remains responsive and usable on desktop and mobile, including clear empty/loading/error states.
 - API behavior is deterministic and minimal (clear contracts for list/create/update/delete), supporting maintainability and future extension.
+- **Containerization Support:** The application must be deployable via `docker-compose` with multi-stage builds and health checks.
+- **Test Coverage:** The codebase must maintain ≥ 70% meaningful test coverage across frontend and backend.
+- **Accessibility Compliance:** The application must incur zero critical WCAG accessibility violations.
 
 ### Measurable Outcomes
 
@@ -65,6 +68,9 @@ Business success metrics are intentionally deferred for this phase and will be d
 - Core task flow completion (create → view → complete → delete) is achievable without assistance.
 - Zero data-loss incidents across refresh/session-return scenarios during validation testing.
 - All key UI states (empty/loading/error/success) are present and understandable in both desktop and mobile layouts.
+- **Deployment Success:** `docker-compose up` successfully starts all services in a healthy state.
+- **E2E Pass Rate:** Minimum 5 critical user journey tests (Create, Complete, Delete, Empty, Error) pass consistently.
+
 
 ## Product Scope
 
