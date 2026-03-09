@@ -4,6 +4,7 @@ import type { Todo } from '../types'
 
 type TodoListProps = {
   todos: Todo[]
+  pageSize?: number
   pendingTodoIds: Set<number>
   failedToggleTodoIds: Set<number>
   failedToggleErrorMessages: Map<number, string>
@@ -19,6 +20,7 @@ type TodoListProps = {
 
 export function TodoList({
   todos,
+  pageSize = 10,
   pendingTodoIds,
   failedToggleTodoIds,
   failedToggleErrorMessages,
@@ -36,7 +38,15 @@ export function TodoList({
   const [editDraft, setEditDraft] = useState('')
   const [editValidationError, setEditValidationError] = useState<string | null>(null)
   const [lastSubmittedEdits, setLastSubmittedEdits] = useState<Record<number, string>>({})
+  const [currentPage, setCurrentPage] = useState(1)
   const sortedTodos = sortTodosByActionableOrder(todos)
+  const effectivePageSize = Math.max(1, pageSize)
+  const totalPages = Math.max(1, Math.ceil(sortedTodos.length / effectivePageSize))
+  const currentPageSafe = Math.min(currentPage, totalPages)
+  const isPaginationVisible = sortedTodos.length > effectivePageSize
+
+  const currentOffset = (currentPageSafe - 1) * effectivePageSize
+  const visibleTodos = sortedTodos.slice(currentOffset, currentOffset + effectivePageSize)
 
   const startEditing = (todo: Todo) => {
     setEditTodoId(todo.id)
@@ -64,8 +74,9 @@ export function TodoList({
   }
 
   return (
-    <ul>
-      {sortedTodos.map((todo) => {
+    <>
+      <ul className="todo-list">
+        {visibleTodos.map((todo) => {
         const isOptimisticCreate = todo.id < 0
         const isUpdatePending = pendingTodoIds.has(todo.id)
         const isDeletePending = pendingDeleteIds.has(todo.id)
@@ -82,8 +93,8 @@ export function TodoList({
           failedEditErrorMessages.get(todo.id) ?? 'Unable to update task description.'
         const deleteErrorMessage = failedDeleteErrorMessages.get(todo.id) ?? 'Unable to delete task.'
 
-        return (
-          <li key={todo.id}>
+          return (
+            <li key={todo.id} className="todo-row">
             {isEditing ? (
               <>
                 <label htmlFor={`edit-todo-${todo.id}`}>Edit task description</label>
@@ -109,16 +120,16 @@ export function TodoList({
                   aria-label={`Edit description for task "${todo.description}"`}
                   disabled={isUpdatePending}
                 />
-                <button type="button" onClick={() => saveEdit(todo)} disabled={isUpdatePending}>
+                <button type="button" className="btn btn-primary" onClick={() => saveEdit(todo)} disabled={isUpdatePending}>
                   {isUpdatePending ? 'Saving…' : 'Save'}
                 </button>
-                <button type="button" onClick={cancelEditing} disabled={isUpdatePending}>
+                <button type="button" className="btn btn-neutral" onClick={cancelEditing} disabled={isUpdatePending}>
                   Cancel
                 </button>
                 {editValidationError && <p role="alert" className="todo-alert">{editValidationError}</p>}
               </>
             ) : (
-              <p>
+              <p className="todo-description">
                 {todo.description}{' '}
                 {todo.isCompleted ? (
                   <strong className="todo-status todo-status-completed">Completed</strong>
@@ -128,11 +139,12 @@ export function TodoList({
                 {isOptimisticCreate ? <strong className="todo-status todo-status-pending"> Pending</strong> : null}
               </p>
             )}
-            <p>Created: {todo.createdAt}</p>
+            <p className="todo-meta">Created: {todo.createdAt}</p>
 
             {/* Toggle button */}
             <button
               type="button"
+              className="btn btn-primary"
               onClick={() => onToggleTodo(todo)}
               disabled={isAnyPending}
               aria-label={`Mark task "${todo.description}" as ${todo.isCompleted ? 'active' : 'complete'}`}
@@ -148,6 +160,7 @@ export function TodoList({
                 {toggleErrorMessage}{' '}
                 <button
                   type="button"
+                  className="btn btn-neutral"
                   onClick={() => onToggleTodo(todo)}
                   aria-label={`Retry toggle task "${todo.description}"`}
                 >
@@ -159,6 +172,7 @@ export function TodoList({
             {!isEditing && (
               <button
                 type="button"
+                className="btn btn-neutral"
                 onClick={() => startEditing(todo)}
                 disabled={isAnyPending}
                 aria-label={`Edit task "${todo.description}"`}
@@ -172,6 +186,7 @@ export function TodoList({
                 {editErrorMessage}{' '}
                 <button
                   type="button"
+                  className="btn btn-neutral"
                   onClick={() => onEditTodo(todo, lastSubmittedEdits[todo.id])}
                   aria-label={`Retry edit task "${todo.description}"`}
                 >
@@ -182,13 +197,14 @@ export function TodoList({
 
             {/* Delete controls */}
             {isDeletePending ? (
-              <button type="button" disabled aria-label={`Deleting task "${todo.description}"…`}>
+              <button type="button" className="btn btn-danger" disabled aria-label={`Deleting task "${todo.description}"…`}>
                 Deleting…
               </button>
             ) : isConfirmingDelete ? (
               <>
                 <button
                   type="button"
+                  className="btn btn-danger"
                   onClick={() => {
                     setConfirmDeleteId(null)
                     onDeleteTodo(todo)
@@ -200,6 +216,7 @@ export function TodoList({
                 </button>
                 <button
                   type="button"
+                  className="btn btn-neutral"
                   onClick={() => setConfirmDeleteId(null)}
                   aria-label={`Cancel delete task "${todo.description}"`}
                   disabled={isAnyPending}
@@ -210,6 +227,7 @@ export function TodoList({
             ) : (
               <button
                 type="button"
+                className="btn btn-danger"
                 onClick={() => setConfirmDeleteId(todo.id)}
                 disabled={isAnyPending}
                 aria-label={`Delete task "${todo.description}"`}
@@ -224,6 +242,7 @@ export function TodoList({
                 {deleteErrorMessage}{' '}
                 <button
                   type="button"
+                  className="btn btn-neutral"
                   onClick={() => onDeleteTodo(todo)}
                   aria-label={`Retry delete task "${todo.description}"`}
                 >
@@ -231,9 +250,36 @@ export function TodoList({
                 </button>
               </p>
             )}
-          </li>
-        )
-      })}
-    </ul>
+            </li>
+          )
+        })}
+      </ul>
+
+      {isPaginationVisible && (
+        <nav className="todo-pagination" aria-label="Task list pagination">
+          <button
+            type="button"
+            className="btn btn-neutral"
+            onClick={() => setCurrentPage((previous) => Math.max(1, previous - 1))}
+            disabled={currentPageSafe === 1}
+            aria-label="Previous page"
+          >
+            Previous
+          </button>
+          <p className="todo-page-indicator" aria-live="polite">
+            Page {currentPageSafe} of {totalPages}
+          </p>
+          <button
+            type="button"
+            className="btn btn-neutral"
+            onClick={() => setCurrentPage((previous) => Math.min(totalPages, previous + 1))}
+            disabled={currentPageSafe === totalPages}
+            aria-label="Next page"
+          >
+            Next
+          </button>
+        </nav>
+      )}
+    </>
   )
 }
