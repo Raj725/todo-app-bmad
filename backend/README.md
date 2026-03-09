@@ -215,13 +215,6 @@ From repository root:
 cd backend && python3 tests/test_health_readiness.py && python3 tests/test_todo_create.py
 ```
 
-## Troubleshooting
-
-- If browser shows CORS policy errors from frontend origin `http://localhost:5173`:
-	- ensure backend is running with current code and environment
-	- verify `CORS_ALLOW_ORIGINS` includes the frontend origin
-	- restart backend after changing environment variables
-
 ## CI (Pull Requests)
 
 PR checks are configured in `.github/workflows/tests.yml`.
@@ -237,13 +230,12 @@ Run it locally before opening or updating a PR:
 python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
 ```
 
-Story 4.4 MVP note:
-
-- A dedicated backend static typing tool gate (mypy/pyright) is deferred for now.
-- The required backend quality gate remains the non-optional pytest regression suite, including health/readiness contract coverage.
-
 ## Troubleshooting
 
+- If browser shows CORS policy errors from frontend origin `http://localhost:5173`:
+	- ensure backend is running with current code and environment
+	- verify `CORS_ALLOW_ORIGINS` includes the frontend origin
+	- restart backend after changing environment variables
 - If pytest is missing, install dependencies again:
 	- python3 -m pip install -r requirements.txt
 - If `/ready` tests fail, verify database connectivity and `DATABASE_URL` value for the test runtime.

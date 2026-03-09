@@ -1,6 +1,6 @@
 # Story 5.3: QA Infrastructure and Coverage
 
-Status: review
+Status: done
 
 ## Story
 
@@ -193,7 +193,7 @@ GPT-5.3-Codex
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 - `.github/workflows/tests.yml`
 - `backend/requirements-dev.txt`
-- `backend/tests/test_qa_coverage_gates.py`
+- `backend/tests/test_cross_cutting_coverage.py`
 - `backend/README.md`
 - `frontend/package.json`
 - `frontend/package-lock.json`
@@ -204,9 +204,14 @@ GPT-5.3-Codex
 ## Change Log
 
 - 2026-03-09: Implemented QA coverage infrastructure with CI-enforced 70% thresholds across frontend and backend, validated E2E/a11y critical journeys, and documented local/CI QA command matrix.
+- 2026-03-10: Code review fixes applied — merged duplicate backend README Troubleshooting sections, excluded barrel src/App.tsx from coverage scope, renamed test_qa_coverage_gates.py to test_cross_cutting_coverage.py, added follow-up task for app/main.py coverage.
+
+## Review Follow-ups (AI)
+
+- [ ] [AI-Review][MEDIUM] `app/main.py` has 0% test coverage — add a lightweight integration test that imports the FastAPI `app` and asserts router registration (health/readiness/todos routes present)
 
 ## Story Completion Status
 
 - Story implementation complete.
 - All tasks/subtasks marked complete and validated.
-- Status set to `review`.
+- Status set to `done`.
