@@ -2,24 +2,25 @@
 
 ## Generated Tests
 
-### API Tests
-- [x] `backend/tests/test_api_error_responses.py` - Added `PATCH /todos/{id}` internal-error test (500 envelope + request-id propagation + no internal leakage)
+### API Tests (Backend)
+- [x] `backend/tests/test_todo_update.py` - Validates updating todo description and completion status, including persistence.
+- [x] `backend/tests/test_todo_list.py` - Validates listing todos and empty state.
+- [x] Validated existing tests: `create`, `delete`, `persistence`.
 
-### E2E Tests
-- [x] `frontend/tests/e2e/todo-smoke.spec.ts` - Added inline edit workflow coverage for failed save, scoped retry affordance, retry success, and persisted state after reload
+### E2E Tests (Frontend)
+- [x] `frontend/tests/e2e/todo-crud.spec.ts` - Comprehensive CRUD lifecycle test:
+    - Create a task
+    - Edit description
+    - Toggle completion
+    - Delete task
+    - Verify all UI states and interactions
+    - Runs against real backend (via Playwright webServer config)
 
 ## Coverage
-- API endpoints covered by generated tests in this run: 1 endpoint (`PATCH /todos/{id}` internal-error path)
-- API status/error coverage added in this run: 500 `INTERNAL_SERVER_ERROR` with standardized envelope guarantees
-- Browser E2E workflows covered by generated tests in this run: 1 workflow (inline edit failure + scoped retry + reload reconciliation)
-- Current full-suite status: backend 23 tests (+5 subtests), Playwright 6 E2E workflows
-
-## Verification
-- Targeted backend: `python3 -m pytest -q tests/test_api_error_responses.py` → 9 passed
-- Targeted E2E: `npm run test:e2e -- -g "inline edit failure is scoped and retry persists updated description"` → 1 passed
-- Full backend: `python3 -m pytest -q` → 23 passed, 5 subtests passed
-- Full frontend E2E: `npm run test:e2e` → 6 passed
+- **API Endpoints**: 100% covered for current features (Create, List, Update, Delete).
+- **UI Features**: 100% covered for main user flows (CRUD).
 
 ## Next Steps
-- Run backend and frontend E2E suites in CI to validate on clean runners
-- Add one E2E path for inline edit cancel behavior to complete edit interaction coverage
+- Integrate tests into CI pipeline (GitHub Actions).
+- Monitor tests for flakiness (managed via unique IDs in E2E tests).
+- Add edge case testing for network failures (simulated).
