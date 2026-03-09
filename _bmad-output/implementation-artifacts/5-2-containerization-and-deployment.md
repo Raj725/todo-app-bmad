@@ -95,3 +95,59 @@ CMD ["nginx", "-g", "daemon off;"]
 ## Technical Notes
 - Ensure `.dockerignore` files are created for both frontend and backend to exclude `node_modules`, `__pycache__`, `.venv`, etc.
 - Database URL in backend needs to point to the docker service name (e.g., `postgresql://user:pass@db:5432/dbname`).
+
+## Tasks
+
+### Backend Containerization
+- [ ] Create `backend/Dockerfile` using `python:3.11-slim` or similar lightweight base image.
+    - [ ] Implement multi-stage build to minimize image size (build vs runtime).
+    - [ ] Run application as a **non-root user** for security.
+    - [ ] Expose port 8000.
+    - [ ] Include health check instruction in Dockerfile or Compose.
+    - [ ] Verify `uvicorn` starts successfully within the container. (e.g., `docker run -p 8000:8000 backend_image`)
+    - [ ] Create `.dockerignore` for backend (exclude `.venv`, `__pycache__`, etc.)
+
+### Frontend Containerization
+- [ ] Create `frontend/Dockerfile` using `node:20-alpine` (or similar).
+    - [ ] Implement multi-stage build: Stage 1 Build (npm ci, npm run build), Stage 2 Serve (nginx:alpine).
+    - [ ] Configure Nginx to handle SPA routing (redirect 404s to `index.html`) using a custom `nginx.conf`.
+    - [ ] Run Nginx as non-root user if possible (or standard nginx user).
+    - [ ] Expose port 80.
+    - [ ] Create `.dockerignore` for frontend (exclude `node_modules`, `dist`, etc.)
+
+### Orchestration with Docker Compose
+- [ ] Create `docker-compose.yml` in the project root.
+    - [ ] Define `backend` service: Maps port 8000:8000.
+    - [ ] Define `frontend` service: Maps port 8080:80.
+    - [ ] Define `db` service (PostgreSQL): Persist data with volume.
+- [ ] Configure networking so `frontend` (browser-side) can talk to `backend` (API).
+    - [ ] Implement Nginx reverse proxy config in `frontend/nginx.conf` to forward `/api` requests to `http://backend:8000`.
+- [ ] Define environment variables for database connection strings.
+
+### Verification & Health Checks
+- [ ] Implement health checks for services.
+    - [ ] Backend: `/health` endpoint returning 200 OK.
+    - [ ] PostgreSql: `pg_isready`.
+- [ ] Verify `docker-compose up` starts the full stack successfully.
+- [ ] Verify `docker-compose ps` shows "healthy" status for services.
+- [ ] Verify application is accessible at `http://localhost:8080`.
+- [ ] Verify API docs accessible at `http://localhost:8000/docs`.
+
+## Dev Agent Record
+- [ ] Story loaded and context analyzed
+- [ ] Implementation plan created
+- [ ] Code changes implemented
+- [ ] Tests passed
+- [ ] Documentation updated
+- [ ] PR created
+
+## File List
+- `backend/Dockerfile`
+- `backend/.dockerignore`
+- `frontend/Dockerfile`
+- `frontend/.dockerignore`
+- `frontend/nginx.conf`
+- `docker-compose.yml`
+
+## Change Log
+- Initial creation of story file.
