@@ -76,9 +76,9 @@ test.describe('Todo CRUD Operations', () => {
       // Verify button changes to "Mark active"
       await expect(page.getByRole('button', { name: `Mark task "${updatedText}" as active` })).toBeVisible()
       
-      // Verify status text in the specific table row for this task.
+      // Verify status text in the specific list row for this task.
       const todoRow = page
-        .locator('tr.todo-row')
+        .locator('li.todo-row')
         .filter({ has: page.locator('.todo-description', { hasText: updatedText }) })
         .first()
       await expect(todoRow.locator('.todo-status')).toContainText('Completed')

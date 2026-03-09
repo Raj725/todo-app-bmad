@@ -41,7 +41,7 @@ describe('TodoList', () => {
 
     render(<TodoList todos={todos} {...baseProps} />)
 
-    const rows = screen.getAllByRole('row').slice(1)
+    const rows = screen.getAllByRole('listitem')
     expect(within(rows[0]).getByText('Active newest')).toBeInTheDocument()
     expect(within(rows[1]).getByText('Active same-time higher id')).toBeInTheDocument()
     expect(within(rows[2]).getByText('Active same-time lower id')).toBeInTheDocument()
@@ -208,13 +208,13 @@ describe('TodoList', () => {
 
     render(<TodoList todos={todos} pageSize={2} {...baseProps} />)
 
-    const pageOneRows = screen.getAllByRole('row').slice(1)
+    const pageOneRows = screen.getAllByRole('listitem')
     expect(within(pageOneRows[0]).getByText('Active newest')).toBeInTheDocument()
     expect(within(pageOneRows[1]).getByText('Active older')).toBeInTheDocument()
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Next page' })[0])
 
-    const pageTwoRows = screen.getAllByRole('row').slice(1)
+    const pageTwoRows = screen.getAllByRole('listitem')
     expect(within(pageTwoRows[0]).getByText('Completed newest')).toBeInTheDocument()
     expect(within(pageTwoRows[1]).getByText('Completed older')).toBeInTheDocument()
   })

@@ -16,9 +16,11 @@ test.describe('Accessibility baseline', () => {
 
     const todos: TodoApiItem[] = []
     let nextId = 1
+    let failedToggleInjected = false
+    let deleteAttemptCount = 0
 
     const tabToElement = async (accessibleName: string) => {
-      for (let attempt = 0; attempt < 12; attempt += 1) {
+      for (let attempt = 0; attempt < 30; attempt += 1) {
         await page.keyboard.press('Tab')
         const target = page.getByRole('button', { name: accessibleName })
         if (await target.evaluate((node) => node === document.activeElement)) {
@@ -73,6 +75,23 @@ test.describe('Accessibility baseline', () => {
           return
         }
 
+        if (!updateBody.is_completed && !failedToggleInjected) {
+          failedToggleInjected = true
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: {
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'toggle failed',
+                details: [],
+                request_id: 'a11y-toggle-retry-1',
+              },
+            }),
+          })
+          return
+        }
+
         todo.is_completed = updateBody.is_completed
 
         await route.fulfill({
@@ -86,6 +105,23 @@ test.describe('Accessibility baseline', () => {
       if (route.request().method() === 'DELETE') {
         const todoId = Number(route.request().url().split('/').pop())
         const targetIndex = todos.findIndex((item) => item.id === todoId)
+
+        deleteAttemptCount += 1
+        if (deleteAttemptCount === 1) {
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: {
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'delete failed',
+                details: [],
+                request_id: 'a11y-delete-retry-1',
+              },
+            }),
+          })
+          return
+        }
 
         if (targetIndex >= 0) {
           todos.splice(targetIndex, 1)
@@ -117,6 +153,16 @@ test.describe('Accessibility baseline', () => {
     await page.keyboard.press(' ')
     await expect(page.getByRole('button', { name: 'Mark task "Keyboard flow task" as active' })).toBeVisible()
 
+    await tabToElement('Mark task "Keyboard flow task" as active')
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('button', { name: 'Mark task "Keyboard flow task" as active' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Retry toggle task "Keyboard flow task"' })).toBeVisible()
+
+    const retryToggleButton = page.getByRole('button', { name: 'Retry toggle task "Keyboard flow task"' })
+    await retryToggleButton.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('button', { name: 'Mark task "Keyboard flow task" as complete' })).toBeVisible()
+
     await tabToElement('Delete task "Keyboard flow task"')
     await page.keyboard.press(' ')
 
@@ -125,8 +171,13 @@ test.describe('Accessibility baseline', () => {
     })
     await expect(confirmDeleteButton).toBeVisible()
     await confirmDeleteButton.focus()
-    await page.keyboard.press(' ')
-    await expect(page.getByText('Keyboard flow task')).toHaveCount(0)
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('button', { name: 'Retry delete task "Keyboard flow task"' })).toBeVisible()
+
+    const retryDeleteButton = page.getByRole('button', { name: 'Retry delete task "Keyboard flow task"' })
+    await retryDeleteButton.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('listitem').filter({ hasText: 'Keyboard flow task' })).toHaveCount(0)
   })
 
   test('passes automated axe checks in empty and populated states', async ({ page }) => {
