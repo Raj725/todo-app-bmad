@@ -34,7 +34,7 @@ export function TodoQuickAdd({ isPending, isError, errorMessage, onSubmit }: Tod
   }
 
   return (
-    <section aria-label="Quick add task section">
+    <section aria-label="Quick add task section" className="quick-add">
       <form onSubmit={handleSubmit}>
         <label htmlFor="quick-add-description">Task description</label>
         <input

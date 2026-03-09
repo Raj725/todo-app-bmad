@@ -58,6 +58,7 @@
 
   <step n="3" goal="Execute adversarial review">
     <critical>VALIDATE EVERY CLAIM - Check git reality vs story claims</critical>
+    <critical>NEVER allow story status "done" if any required touched-service quality gate is missing or failing</critical>
 
     <!-- Git vs Story Discrepancies -->
     <action>Review git vs story File List discrepancies:
@@ -68,6 +69,16 @@
 
     <!-- Use combined file list: story File List + git discovered files -->
     <action>Create comprehensive review file list from story File List and git changes</action>
+    <action>Determine touched services from comprehensive review file list:</action>
+    <action>- If any changed path starts with "frontend/", set frontend_touched = true</action>
+    <action>- If any changed path starts with "backend/", set backend_touched = true</action>
+    <action>- Otherwise set both flags false</action>
+
+    <action>Validate required quality-gate evidence in story Dev Agent Record and/or attached execution logs:</action>
+    <action if="frontend_touched == true">Require evidence that frontend gates passed in the completion run: `npm run lint`, `npm run test`, and `npm run test:e2e` from `frontend/`</action>
+    <action if="backend_touched == true">Require evidence that backend gate passed in the completion run: `python3 -m pytest -q` from `backend/`</action>
+    <action if="frontend_touched == true AND frontend gate evidence is missing or indicates failure">Record HIGH finding: "Frontend touched-service quality gates are incomplete or failing"</action>
+    <action if="backend_touched == true AND backend gate evidence is missing or indicates failure">Record HIGH finding: "Backend touched-service quality gate is incomplete or failing"</action>
 
     <!-- AC Validation -->
     <action>For EACH Acceptance Criterion:
@@ -170,14 +181,15 @@
 
   <step n="5" goal="Update story status and sync sprint tracking">
     <!-- Determine new status based on review outcome -->
-    <check if="all HIGH and MEDIUM issues fixed AND all ACs implemented">
+    <check if="all HIGH and MEDIUM issues fixed AND all ACs implemented AND touched-service quality gates verified passing">
       <action>Set {{new_status}} = "done"</action>
       <action>Update story Status field to "done"</action>
     </check>
-    <check if="HIGH or MEDIUM issues remain OR ACs not fully implemented">
+    <check if="HIGH or MEDIUM issues remain OR ACs not fully implemented OR touched-service quality gates missing/failing">
       <action>Set {{new_status}} = "in-progress"</action>
       <action>Update story Status field to "in-progress"</action>
     </check>
+    <action if="touched-service quality gates missing/failing">Add review note: "Story cannot be marked done until required frontend/backend validation gates are green in completion evidence"</action>
     <action>Save story file</action>
 
     <!-- Determine sprint tracking status -->

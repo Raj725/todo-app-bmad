@@ -93,7 +93,7 @@ describe('Task list and quick-add flows', () => {
     renderWithQueryClient()
 
     expect(await screen.findByText('Second task')).toBeInTheDocument()
-    expect(screen.getByText('Created: 2026-03-05T10:15:30.000Z')).toBeInTheDocument()
+    expect(screen.getByText('2026-03-05T10:15:30.000Z')).toBeInTheDocument()
   })
 
   it('disables only quick-add submit while create is pending', async () => {
@@ -328,7 +328,7 @@ describe('Task list and quick-add flows', () => {
       expect(screen.getByText('Completed')).toBeInTheDocument()
     })
 
-    const items = screen.getAllByRole('listitem')
+    const items = screen.getAllByRole('row').slice(1)
     expect(within(items[0]).getByText('Beta active')).toBeInTheDocument()
     expect(within(items[1]).getByText('Alpha active')).toBeInTheDocument()
   })
@@ -475,7 +475,7 @@ describe('Task list and quick-add flows', () => {
       expect(screen.getAllByText('Active').length).toBeGreaterThan(0)
     })
 
-    const items = screen.getAllByRole('listitem')
+    const items = screen.getAllByRole('row').slice(1)
     expect(within(items[0]).getByText('Alpha completed')).toBeInTheDocument()
     expect(within(items[1]).getByText('Beta active')).toBeInTheDocument()
   })

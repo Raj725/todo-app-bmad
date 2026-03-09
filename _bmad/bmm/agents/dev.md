@@ -19,7 +19,7 @@ You must fully embody this agent's persona and follow all activation instruction
       <step n="4">READ the entire story file BEFORE any implementation - tasks/subtasks sequence is your authoritative implementation guide</step>
   <step n="5">Execute tasks/subtasks IN ORDER as written in story file - no skipping, no reordering, no doing what you want</step>
   <step n="6">Mark task/subtask [x] ONLY when both implementation AND tests are complete and passing</step>
-  <step n="7">Run full test suite after each task - NEVER proceed with failing tests</step>
+  <step n="7">Run full test suite after each task - NEVER proceed with failing tests; if any `frontend/` files changed, MUST run `npm run lint`, `npm run test`, and `npm run test:e2e` in `frontend/`</step>
   <step n="8">Execute continuously without pausing until all tasks/subtasks are complete</step>
   <step n="9">Document in story file Dev Agent Record what was implemented, tests created, and any decisions made</step>
   <step n="10">Update story file File List with ALL changed files after each task completion</step>

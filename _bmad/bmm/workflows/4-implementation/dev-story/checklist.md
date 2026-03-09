@@ -46,6 +46,12 @@ validation-rules:
 - [ ] **Regression Prevention:** ALL existing tests pass (no regressions introduced)
 - [ ] **Code Quality:** Linting and static checks pass when configured in project
 - [ ] **Test Framework Compliance:** Tests use project's testing frameworks and patterns from Dev Notes
+- [ ] **Frontend Gate (Conditional):** If any `frontend/` files changed, `npm run lint` passed in `frontend/`
+- [ ] **Frontend Unit Gate (Conditional):** If any `frontend/` files changed, `npm run test` passed in `frontend/`
+- [ ] **Frontend E2E Gate (Conditional):** If any `frontend/` files changed, `npm run test:e2e` passed in `frontend/`
+- [ ] **Backend Test Gate (Conditional):** If any `backend/` files changed, `python3 -m pytest -q` passed in `backend/`
+- [ ] **Touched-Service Matrix Complete:** Every touched service has its mandatory quality gates executed and passing in the same run
+- [ ] **Validation Evidence Captured:** Dev Agent Record includes exact validation commands and pass/fail outcomes
 
 ## 📝 Documentation & Tracking
 
@@ -62,6 +68,7 @@ validation-rules:
 - [ ] **Story Status Updated:** Story Status set to "review"
 - [ ] **Sprint Status Updated:** Sprint status updated to "review" (when sprint tracking is used)
 - [ ] **Quality Gates Passed:** All quality checks and validations completed successfully
+- [ ] **No Failing Test Residue:** No FE/BE/E2E/API/unit/integration regression remains at story completion
 - [ ] **No HALT Conditions:** No blocking issues or incomplete work remaining
 - [ ] **User Communication Ready:** Implementation summary prepared for user review
 

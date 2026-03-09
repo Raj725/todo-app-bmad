@@ -275,12 +275,24 @@
 
   <step n="7" goal="Run validations and tests">
     <action>Determine how to run tests for this repo (infer test framework from project structure)</action>
+    <action>Build a deterministic service test matrix from changed file paths before running tests:</action>
+    <action>- If any changed path starts with "frontend/", mark frontend_touched = true</action>
+    <action>- If any changed path starts with "backend/", mark backend_touched = true</action>
+    <action>- If neither service path is touched, still run project-level tests required by story scope</action>
     <action>Run all existing tests to ensure no regressions</action>
     <action>Run the new tests to verify implementation correctness</action>
     <action>Run linting and code quality checks if configured in project</action>
+    <action if="frontend_touched == true">Run frontend quality gates in this order from frontend/: `npm run lint`, `npm run test`, `npm run test:e2e`</action>
+    <action if="frontend_touched == true AND test:e2e script is missing">HALT: "frontend/ changed but npm script 'test:e2e' is not configured"</action>
+    <action if="backend_touched == true">Run backend quality gate from backend/: `python3 -m pytest -q`</action>
+    <action if="backend_touched == true AND pytest command is unavailable">HALT: "backend/ changed but python3/pytest execution is unavailable"</action>
+    <action if="frontend_touched == false AND backend_touched == false">Run story-scope tests plus project regression checks required by touched files (do not skip)</action>
+    <action>Record the exact commands executed and PASS/FAIL outcomes in Dev Agent Record → Completion Notes</action>
     <action>Validate implementation meets ALL story acceptance criteria; enforce quantitative thresholds explicitly</action>
     <action if="regression tests fail">STOP and fix before continuing - identify breaking changes immediately</action>
     <action if="new tests fail">STOP and fix before continuing - ensure implementation correctness</action>
+    <action if="frontend_touched == true AND frontend e2e fails">STOP and fix before continuing - do not continue with failing frontend Playwright tests</action>
+    <action if="backend_touched == true AND backend tests fail">STOP and fix before continuing - do not continue with failing backend pytest suite</action>
   </step>
 
   <step n="8" goal="Validate and mark task complete ONLY when fully done">
@@ -291,6 +303,9 @@
     <action>Confirm implementation matches EXACTLY what the task/subtask specifies - no extra features</action>
     <action>Validate that ALL acceptance criteria related to this task are satisfied</action>
     <action>Run full test suite to ensure NO regressions introduced</action>
+    <action if="frontend_touched == true">Verify `npm run test:e2e` was executed in this run and passed</action>
+    <action if="backend_touched == true">Verify `python3 -m pytest -q` was executed in this run from backend/ and passed</action>
+    <action>Verify no touched-service quality gate is missing from this run (frontend/backend matrix must be complete)</action>
 
     <!-- REVIEW FOLLOW-UP HANDLING -->
     <check if="task is review follow-up (has [AI-Review] prefix)">
@@ -337,6 +352,9 @@
   <step n="9" goal="Story completion and mark for review" tag="sprint-status">
     <action>Verify ALL tasks and subtasks are marked [x] (re-scan the story document now)</action>
     <action>Run the full regression suite (do not skip)</action>
+    <action>Re-run service-level quality gates for all touched services before marking review</action>
+    <action if="frontend_touched == true">Require a passing `npm run test:e2e` result from frontend/ in the completion run</action>
+    <action if="backend_touched == true">Require a passing `python3 -m pytest -q` result from backend/ in the completion run</action>
     <action>Confirm File List includes every changed file</action>
     <action>Execute enhanced definition-of-done validation</action>
     <action>Update the story Status to: "review"</action>
@@ -349,6 +367,8 @@
       - Integration tests for component interactions added when required
       - End-to-end tests for critical flows added when story demands them
       - All tests pass (no regressions, new tests successful)
+      - If frontend/ changed: frontend lint, unit tests, and Playwright E2E (`npm run test:e2e`) all pass
+      - If backend/ changed: backend pytest suite (`python3 -m pytest -q`) passes
       - Code quality checks pass (linting, static analysis if configured)
       - File List includes every new/modified/deleted file (relative paths)
       - Dev Agent Record contains implementation notes
@@ -380,6 +400,8 @@
     <!-- Final validation gates -->
     <action if="any task is incomplete">HALT - Complete remaining tasks before marking ready for review</action>
     <action if="regression failures exist">HALT - Fix regression issues before completing</action>
+    <action if="frontend_touched == true AND frontend quality gates are not all passing">HALT - Frontend touched but lint/unit/e2e gates are not all green</action>
+    <action if="backend_touched == true AND backend quality gate is not passing">HALT - Backend touched but pytest gate is not green</action>
     <action if="File List is incomplete">HALT - Update File List with all changed files</action>
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
   </step>
