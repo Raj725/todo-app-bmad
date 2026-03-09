@@ -482,3 +482,33 @@ So that deployments remain reliable and regressions are caught early.
 **When** CI runs linting, type checks, and automated tests
 **Then** contract and behavior regressions are surfaced before deployment
 **And** accessibility/performance-related checks are included per MVP standards.
+
+### Story 4.5: Visual Clarity, Layout Utilization, and List Scalability
+
+**FRs Implemented:** FR2, FR10, FR30, FR31, FR33
+
+As an end user,
+I want a more intuitive and visually clear task interface that uses available screen space effectively,
+so that I can manage larger task lists comfortably across desktop and mobile.
+
+**Acceptance Criteria:**
+
+**Given** desktop and laptop viewports
+**When** the app is rendered
+**Then** the task surface uses available horizontal space more effectively without harming readability
+**And** primary controls and task content remain visually prominent above the fold.
+
+**Given** interactive task controls and list rows
+**When** users hover or focus them
+**Then** hover/focus states are clearly visible for buttons and task items
+**And** visual hierarchy distinguishes primary, secondary, and destructive actions.
+
+**Given** the app color system
+**When** users interact with active, completed, pending, and error states
+**Then** colors remain accessible and semantically distinct
+**And** the interface feels cohesive and intuitive rather than flat.
+
+**Given** larger task lists
+**When** the visible list exceeds a practical reading length
+**Then** users can navigate list pages using pagination controls
+**And** current page, total pages, and next/previous actions are clearly presented and keyboard operable.

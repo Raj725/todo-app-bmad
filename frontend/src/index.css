@@ -62,7 +62,7 @@ body {
 
 main {
   width: 100%;
-  max-width: 72rem;
+  max-width: min(96rem, calc(100vw - 2rem));
   margin: 0 auto;
   padding: 1.5rem 1.5rem 1.75rem;
   text-align: left;
@@ -77,6 +77,14 @@ form {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.quick-add {
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-muted);
 }
 
 label,
@@ -177,29 +185,50 @@ ul {
   margin: 1rem 0 0;
 }
 
-.todo-list {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.todo-row {
-  padding: 0.9rem;
+.todo-table-wrap {
+  margin-top: 0.75rem;
   border: 1px solid var(--surface-border);
   border-radius: 10px;
-  background-color: var(--surface-muted);
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  overflow-x: auto;
+  background: var(--surface);
 }
 
-.todo-row:hover,
-.todo-row:focus-within {
-  border-color: #93b4d1;
-  background-color: var(--surface);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+.todo-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.todo-row > button,
-.todo-row > p > button {
-  margin: 0.25rem 0.5rem 0.25rem 0;
+.todo-table th,
+.todo-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid #d5dee9;
+  vertical-align: top;
+}
+
+.todo-table th {
+  font-size: 0.97rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-align: left;
+}
+
+.todo-row:hover {
+  background: #f7fbff;
+}
+
+.todo-col-id {
+  width: 5.5rem;
+}
+
+.todo-col-actions {
+  width: 12.5rem;
+}
+
+.todo-cell-id {
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
 p[role='alert'] {
@@ -207,36 +236,105 @@ p[role='alert'] {
 }
 
 .todo-alert {
+  margin: 0.45rem 0 0;
   color: var(--status-error);
 }
 
 .todo-description {
-  margin: 0 0 0.2rem;
+  margin: 0;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .todo-meta {
-  margin: 0 0 0.3rem;
+  margin: 0;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.todo-status {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  border: 1px solid transparent;
 }
 
 .todo-status-active {
   color: var(--status-active);
+  background: #e8f8f5;
+  border-color: #9dd9ce;
 }
 
 .todo-status-completed {
   color: var(--status-completed);
+  background: #eaf7ec;
+  border-color: #a4d8ac;
 }
 
 .todo-status-pending {
   color: var(--status-pending);
+  background: #fff7e8;
+  border-color: #f8d6a1;
+}
+
+.todo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-icon {
+  width: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.todo-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.todo-table-toolbar {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.todo-page-summary {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.todo-page-size {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.todo-page-size-select {
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid #94a3b8;
+  padding: 0.45rem 0.6rem;
+  color: var(--text-primary);
+  background-color: var(--surface);
 }
 
 .todo-pagination {
-  margin-top: 0.8rem;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
@@ -269,6 +367,27 @@ p[role='alert'] {
 
   .todo-pagination {
     justify-content: space-between;
+  }
+
+  .todo-table th,
+  .todo-table td {
+    padding: 0.62rem;
+  }
+
+  .todo-description {
+    white-space: normal;
+  }
+
+  .todo-col-actions {
+    width: 9rem;
+  }
+
+  .todo-page-size {
+    width: 100%;
+  }
+
+  .todo-page-size-select {
+    width: 7rem;
   }
 
   .todo-page-indicator {
