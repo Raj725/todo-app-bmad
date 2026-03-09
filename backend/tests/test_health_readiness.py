@@ -5,6 +5,11 @@ import time
 import unittest
 import urllib.request
 from pathlib import Path
+from unittest.mock import patch
+
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.api.routes.readiness import readiness
 
 
 class HealthReadinessTests(unittest.TestCase):
@@ -60,7 +65,17 @@ class HealthReadinessTests(unittest.TestCase):
         with urllib.request.urlopen(f"{self.base_url}/ready") as response:
             payload = json.loads(response.read().decode("utf-8"))
 
-        self.assertEqual(payload, {"status": "ready"})
+        self.assertEqual(payload, {"status": "ready", "checks": {"database": "ok"}})
+
+    def test_readiness_returns_503_with_stable_payload_when_dependency_unavailable(self) -> None:
+        with patch("app.api.routes.readiness.engine.connect", side_effect=SQLAlchemyError("db down")):
+            response = readiness()
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            json.loads(response.body.decode("utf-8")),
+            {"status": "not_ready", "checks": {"database": "unavailable"}},
+        )
 
     def test_health_simple_cors_response_includes_allow_origin_for_frontend(self) -> None:
         request = urllib.request.Request(

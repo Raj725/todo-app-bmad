@@ -69,7 +69,9 @@ test.describe('Todo CRUD Operations', () => {
       await ensureTaskVisible(page, updatedText)
 
       // Button aria-label changes based on status. Currently active.
-      await page.getByRole('button', { name: `Mark task "${updatedText}" as complete` }).click()
+      const markCompleteButton = page.getByRole('button', { name: `Mark task "${updatedText}" as complete` })
+      await expect(markCompleteButton).toBeEnabled()
+      await markCompleteButton.click()
 
       await ensureTaskVisible(page, updatedText)
       
