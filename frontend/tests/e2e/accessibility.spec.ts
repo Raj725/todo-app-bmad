@@ -118,15 +118,15 @@ test.describe('Accessibility baseline', () => {
     await expect(page.getByRole('button', { name: 'Mark task "Keyboard flow task" as active' })).toBeVisible()
 
     await tabToElement('Delete task "Keyboard flow task"')
-    await page.keyboard.press('Enter')
+    await page.keyboard.press(' ')
 
     const confirmDeleteButton = page.getByRole('button', {
       name: 'Confirm delete task "Keyboard flow task"',
     })
     await expect(confirmDeleteButton).toBeVisible()
     await confirmDeleteButton.focus()
-    await page.keyboard.press('Enter')
-    await expect(page.getByRole('listitem').filter({ hasText: 'Keyboard flow task' })).toHaveCount(0)
+    await page.keyboard.press(' ')
+    await expect(page.getByText('Keyboard flow task')).toHaveCount(0)
   })
 
   test('passes automated axe checks in empty and populated states', async ({ page }) => {
@@ -170,6 +170,7 @@ test.describe('Accessibility baseline', () => {
 
     const emptyResults = await new AxeBuilder({ page }).analyze()
     expect(emptyResults.violations.filter((violation) => violation.impact === 'critical')).toHaveLength(0)
+    expect(emptyResults.violations.filter((violation) => violation.id === 'color-contrast')).toHaveLength(0)
 
     await page.getByLabel('Task description').fill('Axe state task')
     await page.getByRole('button', { name: 'Quick add task' }).click()
@@ -177,5 +178,6 @@ test.describe('Accessibility baseline', () => {
 
     const populatedResults = await new AxeBuilder({ page }).analyze()
     expect(populatedResults.violations.filter((violation) => violation.impact === 'critical')).toHaveLength(0)
+    expect(populatedResults.violations.filter((violation) => violation.id === 'color-contrast')).toHaveLength(0)
   })
 })
