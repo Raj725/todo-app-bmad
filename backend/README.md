@@ -188,6 +188,7 @@ PR checks are configured in `.github/workflows/tests.yml`.
 Backend-related check:
 
 - Backend tests: `python3 -m pytest -q`
+- Backend contract/behavior regression gate: `python3 -m pytest -q`
 
 Run it locally before opening or updating a PR:
 
@@ -195,10 +196,16 @@ Run it locally before opening or updating a PR:
 python3 -m pytest -q
 ```
 
+Story 4.4 MVP note:
+
+- A dedicated backend static typing tool gate (mypy/pyright) is deferred for now.
+- The required backend quality gate remains the non-optional pytest regression suite, including health/readiness contract coverage.
+
 ## Troubleshooting
 
 - If pytest is missing, install dependencies again:
 	- python3 -m pip install -r requirements.txt
+- If `/ready` tests fail, verify database connectivity and `DATABASE_URL` value for the test runtime.
 - If port 8000 is busy, use another port:
 	- uvicorn app.main:app --reload --host 127.0.0.1 --port 8001
 - If database schema is out of date, rerun migrations:

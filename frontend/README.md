@@ -115,9 +115,11 @@ cd frontend && npm run preview
 
 - `npm run dev` - start Vite dev server
 - `npm run build` - type-check and build
+- `npm run typecheck` - run TypeScript static type checks (`tsc --noEmit`)
 - `npm run test` - run Vitest suite
 - `npm run test:e2e` - run Playwright browser E2E tests
 - `npm run test:e2e:ui` - run Playwright in interactive UI mode
+- `npm run perf:budget` - build and enforce the main bundle size budget
 - `npm run lint` - run ESLint
 - `npm run preview` - preview production build
 
@@ -176,6 +178,36 @@ From repository root:
 cd frontend && npm run lint
 ```
 
+Run type checking:
+
+```bash
+npm run typecheck
+```
+
+From repository root:
+
+```bash
+cd frontend && npm run typecheck
+```
+
+Run the performance budget guardrail:
+
+```bash
+npm run perf:budget
+```
+
+If the budget check fails, verify if recent dependencies or large assets caused the increase.
+To resolve:
+- Optimize imports (use tree-shakable imports)
+- Lazy load heavy components
+- Or increase the limit in `scripts/check-bundle-size.mjs` if the growth is justified.
+
+From repository root:
+
+```bash
+cd frontend && npm run perf:budget
+```
+
 ## CI (Pull Requests)
 
 PR checks are configured in `.github/workflows/tests.yml`.
@@ -184,14 +216,18 @@ Frontend-related checks:
 
 - Frontend tests: `npm run test`
 - Frontend lint: `npm run lint`
+- Frontend typecheck: `npm run typecheck`
 - Frontend E2E: `npm run test:e2e`
+- Frontend performance budget: `npm run perf:budget`
 
-Run both locally before opening or updating a PR:
+Run all locally before opening or updating a PR:
 
 ```bash
+npm run typecheck
 npm run test
 npm run lint
 npm run test:e2e
+npm run perf:budget
 ```
 
 If the E2E job fails in CI, open the failed GitHub Actions run and download the `playwright-artifacts` bundle to inspect the HTML report, traces, screenshots, and videos.
@@ -201,6 +237,8 @@ If the E2E job fails in CI, open the failed GitHub Actions run and download the 
 - If API calls fail locally, verify backend is running and `VITE_API_BASE_URL` is correct.
 - If `npm run test:e2e` fails to start backend, install backend dependencies:
   - `cd backend && python3 -m pip install -r requirements.txt`
+- If `npm run typecheck` fails, fix TypeScript errors before running build/test.
+- If `npm run perf:budget` fails, reduce bundle size or adjust the agreed Story 4.4 budget threshold.
 - If port 5173 is busy, Vite will prompt for another port.
 - If tests fail after dependency changes, reinstall with `npm install`.
 
