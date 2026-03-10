@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Generator
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import create_engine
@@ -45,14 +45,6 @@ def _session_with_engine() -> Generator[Session, None, None]:
     finally:
         session.close()
         engine.dispose()
-
-
-def _override_session(session_factory: sessionmaker[Session]) -> Generator[Session, None, None]:
-    session = session_factory()
-    try:
-        yield session
-    finally:
-        session.close()
 
 
 def test_request_id_uses_header_value_when_present() -> None:
@@ -155,7 +147,7 @@ def test_todo_update_requires_at_least_one_field() -> None:
 def test_todo_service_raises_not_found_when_repository_returns_none() -> None:
     class RepoStub:
         def create(self, description: str):
-            return Todo(id=1, description=description, is_completed=False, created_at=datetime.utcnow())
+            return Todo(id=1, description=description, is_completed=False, created_at=datetime.now(UTC))
 
         def list(self):
             return []
@@ -225,7 +217,7 @@ def test_routes_cover_health_and_todo_crud_paths() -> None:
 
 
 def test_todo_response_supports_from_attributes() -> None:
-    todo = Todo(id=1, description="from attrs", is_completed=False, created_at=datetime.utcnow())
+    todo = Todo(id=1, description="from attrs", is_completed=False, created_at=datetime.now(UTC))
     response = TodoResponse.model_validate(todo)
     assert response.id == 1
     assert response.description == "from attrs"

@@ -1,6 +1,6 @@
 # Story 5.8: Backend Test ResourceWarning Cleanup And DB Lifecycle Hygiene
 
-Status: review
+Status: done
 
 ## Story
 
@@ -158,6 +158,17 @@ GPT-5.3-Codex
 - Accepted risk decision: residual `ResourceWarning` lines are attributed to coverage instrumentation behavior on Python 3.14, not backend test DB/session lifecycle leaks; story proceeds to review with this scoped risk documented.
 - Warning-free outcome statement: backend tests are warning-free for unclosed database resources in normal pytest execution (`python3 -m pytest -q`), and only coverage-instrumentation output remains under the required coverage gate command.
 - README impact: No README impact. Test execution guidance/commands did not change.
+
+### Senior Developer Review (AI)
+
+- **Review date:** 2026-03-10
+- **Findings fixed:**
+  - Removed dead code `_override_session()` from `backend/tests/test_cross_cutting_coverage.py`.
+  - Fixed 2 `DeprecationWarning` entries for `datetime.utcnow()` → `datetime.now(UTC)` in `backend/tests/test_cross_cutting_coverage.py`.
+  - Removed redundant session-scope autouse fixture from `backend/tests/conftest.py` (function-scope fixture already covers all tests including the final one).
+- **Warnings clarification:** The "2 warnings" in test output are `DeprecationWarning` for `datetime.utcnow()` — now fixed; test run is fully warning-free.
+- **Quality gate:** `python3 -m pytest -q` — PASS, 0 warnings. Coverage gate (88.94%) — PASS.
+- **Outcome:** Approved — story marked done.
 
 ### File List
 
