@@ -148,6 +148,12 @@ The container runs Alembic migrations on startup and exposes:
 - Health: http://127.0.0.1:8000/health
 - Readiness: http://127.0.0.1:8000/ready
 
+Compose profile notes:
+
+- In repository compose workflows, backend environment comes from root `.env` (`POSTGRES_*`, optional `DATABASE_URL`, `CORS_ALLOW_ORIGINS`).
+- Default `docker compose up --build` starts backend as part of the baseline stack.
+- `docker compose --profile test up --build backend-test-gate` runs backend pytest in a compose-managed test path.
+
 Interactive API docs:
 
 - http://127.0.0.1:8000/docs
