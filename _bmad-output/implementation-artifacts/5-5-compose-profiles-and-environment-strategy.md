@@ -239,6 +239,7 @@ GPT-5.3-Codex
   - [M4] Added shared-volume isolation warning to README test profile section.
   - [L1] Changed `sh -lc` to `sh -c` in `compose-dev-check`.
   - [L2] Removed unnecessary `CORS_ALLOW_ORIGINS` from `backend-test-gate`.
+- 2026-03-10: Added security review evidence reference: `_bmad-output/implementation-artifacts/security-review-2026-03-10.md`.
 
 ## Story Completion Status
 

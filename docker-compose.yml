@@ -22,6 +22,7 @@ services:
   backend:
     build:
       context: ./backend
+      target: runtime
     restart: unless-stopped
     environment:
       <<: *backend-env
