@@ -16,8 +16,8 @@ This artifact maps required QA activities to reproducible commands, generated ou
 | --- | --- | --- | --- | --- | --- |
 | API contract and integration validation | Backend API endpoint contract behavior and integration checks pass with coverage gate | `cd backend && python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70` | `backend/tests/test_todo_create.py`, `backend/tests/test_todo_list.py`, `backend/tests/test_todo_update.py`, `backend/tests/test_todo_delete.py`, `backend/tests/test_api_error_responses.py`, `backend/tests/test_health_readiness.py`, `backend/tests/test_persistence_durability.py`, `backend/tests/test_cross_cutting_coverage.py` | PASS | `40 passed, 5 subtests passed, coverage 88.94% (>=70%)`; warning-only output (ResourceWarning and DeprecationWarning) |
 | Frontend quality and coverage gate | Unit/integration tests and coverage report available | `cd frontend && npm run test:coverage` | `frontend/coverage/lcov.info`, `frontend/coverage/lcov-report/index.html` | PASS | `72 passed`; coverage summary: statements 95.93%, branches 87.95%, functions 97.52%, lines 95.89% |
-| Accessibility automation evidence | Playwright end-to-end run including accessibility checks | `cd frontend && npm run test:e2e` | `frontend/tests/e2e/accessibility.spec.ts`, `frontend/playwright-report/index.html`, `frontend/test-results/` | PASS | `52 passed, 3 skipped`; accessibility scenario includes automated axe checks in empty and populated states |
-| Performance budget validation | Frontend bundle size compared against configured budget threshold | `cd frontend && npm run perf:budget` | `_bmad-output/implementation-artifacts/performance-audit-2026-03-10.md`, `frontend/dist/assets/index-CmZVYe1C.js` | PASS | Budget check output: `245516 bytes` against limit `358400 bytes` |
+| Accessibility automation evidence | Playwright end-to-end run including accessibility checks | `cd frontend && npm run test:e2e` | `frontend/tests/e2e/accessibility.spec.ts`, `frontend/playwright-report/index.html`, `frontend/test-results/` | PASS | `52 passed, 3 skipped`; axe assertions cover `critical` impact and `color-contrast` rules only; serious/moderate/minor violations are not automatically asserted |
+| Performance budget validation | Frontend bundle size compared against configured budget threshold | `cd frontend && npm run perf:budget` | `_bmad-output/implementation-artifacts/performance-audit-2026-03-10.md` | PASS | Budget check output: `245516 bytes` against limit `358400 bytes`; no Lighthouse/browser UX score was captured — see performance audit Limitations section |
 | Reviewer-facing evidence discoverability | Root docs include direct links and reproducible command set | Manual documentation update | `README.md` | PASS | Added QA evidence section with artifact links and command references |
 
 ## Command Log and Outcomes
@@ -66,11 +66,10 @@ This artifact maps required QA activities to reproducible commands, generated ou
 ## Accessibility Findings Summary
 
 - Automated accessibility checks: PASS
-- Critical violations: 0
-- Serious violations: 0
-- Moderate violations: 0
-- Minor violations: 0
-- Notes: Playwright run reported 3 skipped tests unrelated to accessibility failures. No unresolved accessibility violations were detected in the executed automated checks.
+- Critical violations: 0 (asserted by automated axe check)
+- Color-contrast violations: 0 (asserted by automated axe check)
+- Serious / Moderate / Minor violations: not automatically asserted — the current test suite only validates critical-impact and color-contrast rules; other severity levels may exist but are not caught by the automated gate
+- Notes: Playwright run reported 3 skipped tests unrelated to accessibility failures. Automated coverage is scoped to `critical` impact and `color-contrast` rule assertions in `frontend/tests/e2e/accessibility.spec.ts`. A full-spectrum axe audit would require expanding assertions to cover all severity levels.
 
 ## Cross-Artifact Navigation
 

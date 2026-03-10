@@ -222,7 +222,7 @@ Expected outputs:
 
 - Frontend coverage report: `frontend/coverage/lcov-report/index.html`
 - Playwright HTML report: `frontend/playwright-report/index.html`
-- Performance budget result: terminal output plus `frontend/dist/` bundle artifacts
+- Performance budget result: terminal pass/fail output and `_bmad-output/implementation-artifacts/performance-audit-YYYY-MM-DD.md`
 - Backend coverage summary: terminal report with total coverage and threshold verdict
 
 ## Environment Variables

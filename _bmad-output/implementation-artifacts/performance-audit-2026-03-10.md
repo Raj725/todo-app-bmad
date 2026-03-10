@@ -18,7 +18,7 @@ cd frontend && npm run perf:budget
 ## Results
 
 - Build status: PASS
-- Main bundle file: `frontend/dist/assets/index-CmZVYe1C.js`
+- Main bundle file: `frontend/dist/assets/index-*.js` (content-hashed filename)
 - Measured size: `245516` bytes
 - Budget limit: `358400` bytes
 - Delta to limit: `112884` bytes under budget
@@ -26,7 +26,9 @@ cd frontend && npm run perf:budget
 
 Console evidence excerpt:
 
-- `Performance budget check passed: index-CmZVYe1C.js is 245516 bytes (limit 358400 bytes)`
+```
+Performance budget check passed: index-CmZVYe1C.js is 245516 bytes (limit 358400 bytes)
+```
 
 ## Traceability Links
 
