@@ -181,6 +181,7 @@ Recent commits (latest first):
 - `backend/README.md`
 - `frontend/README.md`
 - `backend/.env.example`
+- `_bmad-output/implementation-artifacts/security-review-2026-03-10.md`
 
 ## Dev Agent Record
 

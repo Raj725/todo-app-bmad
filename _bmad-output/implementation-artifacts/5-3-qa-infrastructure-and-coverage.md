@@ -153,6 +153,7 @@ Because this story targets project stability, prioritize compatibility with curr
 - `_bmad-output/planning-artifacts/prd.md`
 - `_bmad-output/planning-artifacts/architecture.md`
 - `_bmad-output/implementation-artifacts/5-2-containerization-and-deployment.md`
+- `_bmad-output/implementation-artifacts/security-review-2026-03-10.md`
 - `.github/workflows/tests.yml`
 - `frontend/package.json`
 - `frontend/vitest.config.ts`

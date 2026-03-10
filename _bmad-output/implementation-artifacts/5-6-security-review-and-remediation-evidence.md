@@ -1,6 +1,6 @@
 # Story 5.6: Security Review And Remediation Evidence
 
-Status: review
+Status: done
 
 ## Story
 
@@ -177,6 +177,7 @@ Latest commits (newest first):
 - `_bmad-output/implementation-artifacts/5-3-qa-infrastructure-and-coverage.md`
 - `_bmad-output/implementation-artifacts/5-4-frontend-docker-runtime-hardening.md`
 - `_bmad-output/implementation-artifacts/5-5-compose-profiles-and-environment-strategy.md`
+- `_bmad-output/implementation-artifacts/security-review-2026-03-10.md`
 - `README.md`
 - `backend/README.md`
 - `frontend/README.md`
@@ -221,9 +222,11 @@ GPT-5.3-Codex
 ## Change Log
 
 - 2026-03-10: Completed security review and remediation evidence story. Added dated security report, fixed backend compose runtime target misconfiguration (SEC-001), and added cross-links for audit traceability.
+- 2026-03-10: Code review fixes applied — [M1] added security report to story References section, [M2] added naming convention note and clickable links in README security section, [L1] added security report to References in stories 5-3 and 5-5, [L2] added root cause explanation to SEC-001 finding, [L3] converted README security paths to relative markdown links.
 
 ## Story Completion Status
 
 - Security review report created and linked.
 - Required validation commands executed and captured.
-- Story status set to `review`.
+- Code review fixes applied (5 files).
+- Story status set to `done`.
