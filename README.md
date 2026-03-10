@@ -201,6 +201,30 @@ Reports follow the naming convention `security-review-YYYY-MM-DD.md`.
 - Latest security review report: [security-review-2026-03-10.md](_bmad-output/implementation-artifacts/security-review-2026-03-10.md)
 - Story traceability: [5-6-security-review-and-remediation-evidence.md](_bmad-output/implementation-artifacts/5-6-security-review-and-remediation-evidence.md)
 
+## QA Evidence Artifacts
+
+Reports follow the naming convention `qa-tooling-evidence-YYYY-MM-DD.md` and `performance-audit-YYYY-MM-DD.md`.
+
+- Latest QA traceability report: [qa-tooling-evidence-2026-03-10.md](_bmad-output/implementation-artifacts/qa-tooling-evidence-2026-03-10.md)
+- Latest performance audit report: [performance-audit-2026-03-10.md](_bmad-output/implementation-artifacts/performance-audit-2026-03-10.md)
+- Story traceability: [5-7-qa-tooling-evidence-and-traceability.md](_bmad-output/implementation-artifacts/5-7-qa-tooling-evidence-and-traceability.md)
+
+Validation command set used for QA evidence generation:
+
+```bash
+cd frontend && npm run test:coverage
+cd frontend && npm run test:e2e
+cd frontend && npm run perf:budget
+cd backend && python3 -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
+```
+
+Expected outputs:
+
+- Frontend coverage report: `frontend/coverage/lcov-report/index.html`
+- Playwright HTML report: `frontend/playwright-report/index.html`
+- Performance budget result: terminal pass/fail output and `_bmad-output/implementation-artifacts/performance-audit-YYYY-MM-DD.md`
+- Backend coverage summary: terminal report with total coverage and threshold verdict
+
 ## Environment Variables
 
 ### Frontend

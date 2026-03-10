@@ -76,4 +76,5 @@ development_status:
   5-4-frontend-docker-runtime-hardening: done
   5-5-compose-profiles-and-environment-strategy: done
   5-6-security-review-and-remediation-evidence: done
+  5-7-qa-tooling-evidence-and-traceability: done
   epic-5-retrospective: backlog
