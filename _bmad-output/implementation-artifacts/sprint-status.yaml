@@ -73,4 +73,5 @@ development_status:
   5-1-project-brief-and-prd-refinement: done
   5-2-containerization-and-deployment: done
   5-3-qa-infrastructure-and-coverage: done
+  5-4-frontend-docker-runtime-hardening: done
   epic-5-retrospective: backlog

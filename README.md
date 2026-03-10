@@ -79,6 +79,30 @@ Stop and remove containers:
 docker compose down
 ```
 
+### Docker Runtime Hardening Verification (Frontend)
+
+The frontend image is intentionally multi-stage and includes a Dockerfile-level
+`HEALTHCHECK` for container runtime parity. To validate runtime hardening,
+health checks, SPA fallback, and `/api` proxy behavior:
+
+```bash
+docker compose build frontend
+docker compose up -d
+docker compose ps
+curl -sSf http://localhost:8080/
+curl -sSf http://localhost:8000/health
+curl -sSf http://localhost:8080/api/health
+curl -sS http://localhost:8080/non-existent-client-route | grep -qi "todo"
+docker compose down
+```
+
+Expected outcomes:
+
+- `docker compose ps` shows frontend as `healthy`.
+- Frontend root and backend health endpoints return success.
+- Frontend `/api/health` proxies to backend successfully.
+- Non-file SPA routes return the frontend app shell.
+
 ## Common Commands
 
 ### Frontend
