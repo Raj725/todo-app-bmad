@@ -30,3 +30,10 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 USER app
 
 CMD ["sh", "-c", "python -m alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+
+FROM runtime AS test
+USER root
+RUN python -m pip install --no-cache-dir -r requirements-dev.txt
+RUN chown -R app:app /app
+USER app
+CMD ["python3", "-m", "pytest", "-q"]

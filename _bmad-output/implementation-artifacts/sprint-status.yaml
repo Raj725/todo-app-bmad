@@ -74,5 +74,5 @@ development_status:
   5-2-containerization-and-deployment: done
   5-3-qa-infrastructure-and-coverage: done
   5-4-frontend-docker-runtime-hardening: done
-  5-5-compose-profiles-and-environment-strategy: review
+  5-5-compose-profiles-and-environment-strategy: done
   epic-5-retrospective: backlog

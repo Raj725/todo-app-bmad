@@ -1,6 +1,6 @@
 # Story 5.5: Compose Profiles and Environment Strategy
 
-Status: review
+Status: done
 
 ## Story
 
@@ -219,6 +219,7 @@ GPT-5.3-Codex
 
 - `.env.example`
 - `docker-compose.yml`
+- `backend/Dockerfile`
 - `README.md`
 - `backend/README.md`
 - `frontend/README.md`
@@ -228,9 +229,42 @@ GPT-5.3-Codex
 ### Change Log
 
 - 2026-03-10: Implemented compose profile/environment strategy for Story 5.5, added compose-level `.env.example`, updated docs for default/dev/test workflows, and validated compose plus FE/BE quality gates.
+- 2026-03-10: Code review fixes applied:
+  - [H1] Added `test` build stage to `backend/Dockerfile` installing `requirements-dev.txt` so `backend-test-gate` can actually run pytest (was broken: `ModuleNotFoundError`).
+  - [H1] Added `chown -R app:app /app` in test stage so tests can create temp SQLite DBs.
+  - [H1] Added `target: test` to `backend-test-gate` compose service to use the new stage.
+  - [M1] Verified test profile runtime end-to-end: `docker compose --profile test up --build backend-test-gate` → 40 passed.
+  - [M2] Extracted `x-backend-env` YAML extension field with anchor to DRY backend/test-gate environment blocks.
+  - [M3] Added `/ready` endpoint check to `compose-dev-check` service.
+  - [M4] Added shared-volume isolation warning to README test profile section.
+  - [L1] Changed `sh -lc` to `sh -c` in `compose-dev-check`.
+  - [L2] Removed unnecessary `CORS_ALLOW_ORIGINS` from `backend-test-gate`.
 
 ## Story Completion Status
 
 - Story implementation completed and validated.
-- Status set to `review`.
+- Status set to `done`.
 - Compose profile/environment compliance gap closed with scoped configuration and documentation updates.
+
+## Senior Developer Review (AI)
+
+**Reviewer:** Raj on 2026-03-10
+
+**Findings (7 total): 1 High, 4 Medium, 2 Low — all fixed.**
+
+| # | Severity | Finding | Fix |
+|---|----------|---------|-----|
+| H1 | HIGH | `backend-test-gate` broken: pytest not in Docker image, /app not writable | Added `test` Dockerfile stage with dev deps + chown; compose uses `target: test` |
+| M1 | MEDIUM | Test profile never runtime-tested (only `config` validated) | Verified: 40 passed, 0 errors via `docker compose --profile test up --build backend-test-gate` |
+| M2 | MEDIUM | Duplicated env block creates drift risk | Extracted `x-backend-env` YAML extension with anchor |
+| M3 | MEDIUM | `compose-dev-check` omits `/ready` endpoint | Added `curl -fsS http://backend:8000/ready` to command |
+| M4 | MEDIUM | Test profile shares prod DB volume without warning | Added isolation note to README test profile section |
+| L1 | LOW | `compose-dev-check` uses unnecessary login shell (`sh -lc`) | Changed to `sh -c` |
+| L2 | LOW | `CORS_ALLOW_ORIGINS` unnecessary in test-gate | Removed from test-gate env block |
+
+**Quality Gates:**
+- `docker compose config` (default/dev/test): PASS
+- `docker compose --profile test up --build backend-test-gate`: 40 passed
+- `cd backend && python3 -m pytest -q`: 40 passed
+
+**Outcome: Approved** — all issues fixed, all ACs implemented, quality gates green.

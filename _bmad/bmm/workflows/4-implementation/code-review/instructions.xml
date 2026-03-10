@@ -44,6 +44,7 @@
   </step>
 
   <step n="2" goal="Build review attack plan">
+    <action>Initialize {{review_changed_files}} = empty list (tracks every file modified during review)</action>
     <action>Extract ALL Acceptance Criteria from story</action>
     <action>Extract ALL Tasks/Subtasks with completion status ([x] vs [ ])</action>
     <action>From Dev Agent Record → File List, compile list of claimed changes</action>
@@ -164,6 +165,7 @@
       <action>Update story Dev Agent Record with fixes applied</action>
       <action>Set {{fixed_count}} = number of HIGH and MEDIUM issues fixed</action>
       <action>Set {{action_count}} = 0</action>
+      <action>Append every file path edited or created during fixes to {{review_changed_files}} list</action>
     </check>
 
     <check if="user chooses 2">
@@ -191,6 +193,7 @@
     </check>
     <action if="touched-service quality gates missing/failing">Add review note: "Story cannot be marked done until required frontend/backend validation gates are green in completion evidence"</action>
     <action>Save story file</action>
+    <action>Append {{story_path}} to {{review_changed_files}} list</action>
 
     <!-- Determine sprint tracking status -->
     <check if="{sprint_status} file exists">
@@ -208,12 +211,14 @@
       <check if="{{new_status}} == 'done'">
         <action>Update development_status[{{story_key}}] = "done"</action>
         <action>Save file, preserving ALL comments and structure</action>
+        <action>Append {sprint_status} to {{review_changed_files}} list</action>
         <output>✅ Sprint status synced: {{story_key}} → done</output>
       </check>
 
       <check if="{{new_status}} == 'in-progress'">
         <action>Update development_status[{{story_key}}] = "in-progress"</action>
         <action>Save file, preserving ALL comments and structure</action>
+        <action>Append {sprint_status} to {{review_changed_files}} list</action>
         <output>🔄 Sprint status synced: {{story_key}} → in-progress</output>
       </check>
 
@@ -234,6 +239,18 @@
 
       {{#if new_status == "done"}}Code review complete!{{else}}Address the action items and continue development.{{/if}}
     </output>
+  </step>
+
+  <step n="6" goal="Commit and push review changes">
+    <check if="{{review_changed_files}} is not empty">
+      <action>Stage only the files tracked in {{review_changed_files}}: `git add <file1> <file2> ...`</action>
+      <action>Commit with message: `fix(review): apply code review feedback for story {{story_key}}`</action>
+      <action>Push to current branch: `git push`</action>
+      <output>📤 Review changes committed and pushed ({{review_changed_files | length}} files).</output>
+    </check>
+    <check if="{{review_changed_files}} is empty">
+      <output>ℹ️ No changes to commit.</output>
+    </check>
   </step>
 
 </workflow>

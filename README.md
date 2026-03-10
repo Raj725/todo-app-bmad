@@ -121,6 +121,8 @@ docker compose --profile test up --build backend-test-gate
 docker compose --profile test down
 ```
 
+> **Note:** The test profile runs against the same database volume as the default/dev stack. Run `docker compose down -v` before test runs if you need a clean database for isolation.
+
 ### Docker Runtime Hardening Verification (Frontend)
 
 The frontend image is intentionally multi-stage and includes a Dockerfile-level
