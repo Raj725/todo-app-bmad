@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Generator
-from datetime import datetime
+from contextlib import contextmanager
+from datetime import UTC, datetime
 
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import create_engine
@@ -29,22 +30,21 @@ def _request_with_headers(headers: dict[str, str] | None = None) -> Request:
     return Request({"type": "http", "headers": encoded_headers})
 
 
-def _test_session_factory() -> sessionmaker[Session]:
+@contextmanager
+def _session_with_engine() -> Generator[Session, None, None]:
     engine = create_engine(
         "sqlite+pysqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
-    return sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False, class_=Session)
-
-
-def _override_session(session_factory: sessionmaker[Session]) -> Generator[Session, None, None]:
+    session_factory = sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False, class_=Session)
     session = session_factory()
     try:
         yield session
     finally:
         session.close()
+        engine.dispose()
 
 
 def test_request_id_uses_header_value_when_present() -> None:
@@ -147,7 +147,7 @@ def test_todo_update_requires_at_least_one_field() -> None:
 def test_todo_service_raises_not_found_when_repository_returns_none() -> None:
     class RepoStub:
         def create(self, description: str):
-            return Todo(id=1, description=description, is_completed=False, created_at=datetime.utcnow())
+            return Todo(id=1, description=description, is_completed=False, created_at=datetime.now(UTC))
 
         def list(self):
             return []
@@ -177,54 +177,47 @@ def test_todo_service_raises_not_found_when_repository_returns_none() -> None:
 
 
 def test_todo_repository_crud_paths() -> None:
-    session_factory = _test_session_factory()
-    session = session_factory()
-    repo = TodoRepository(session)
+    with _session_with_engine() as session:
+        repo = TodoRepository(session)
 
-    created = repo.create("repo todo")
-    assert created.id > 0
+        created = repo.create("repo todo")
+        assert created.id > 0
 
-    listed = repo.list()
-    assert len(listed) == 1
+        listed = repo.list()
+        assert len(listed) == 1
 
-    updated = repo.update(created.id, is_completed=True, description="updated")
-    assert updated is not None
-    assert updated.is_completed is True
-    assert updated.description == "updated"
+        updated = repo.update(created.id, is_completed=True, description="updated")
+        assert updated is not None
+        assert updated.is_completed is True
+        assert updated.description == "updated"
 
-    assert repo.update(9999, is_completed=True) is None
-    assert repo.delete(9999) is None
-    assert repo.delete(created.id) is True
-
-    session.close()
+        assert repo.update(9999, is_completed=True) is None
+        assert repo.delete(9999) is None
+        assert repo.delete(created.id) is True
 
 
 def test_routes_cover_health_and_todo_crud_paths() -> None:
-    session_factory = _test_session_factory()
-    session = session_factory()
+    with _session_with_engine() as session:
+        health_payload = health.health()
+        assert health_payload == {"status": "ok"}
 
-    health_payload = health.health()
-    assert health_payload == {"status": "ok"}
+        created = todos.create_todo(TodoCreateRequest(description="Route todo"), session)
+        assert isinstance(created, SuccessResponse)
+        created_id = created.data.id
 
-    created = todos.create_todo(TodoCreateRequest(description="Route todo"), session)
-    assert isinstance(created, SuccessResponse)
-    created_id = created.data.id
+        listed = todos.list_todos(session)
+        assert len(listed.data) == 1
 
-    listed = todos.list_todos(session)
-    assert len(listed.data) == 1
+        updated = todos.update_todo(created_id, TodoUpdateRequest(is_completed=True), session)
+        assert updated.data.is_completed is True
 
-    updated = todos.update_todo(created_id, TodoUpdateRequest(is_completed=True), session)
-    assert updated.data.is_completed is True
-
-    todos.delete_todo(created_id, session)
-    remaining = todos.list_todos(session)
-    assert remaining.data == []
-
-    session.close()
+        todos.delete_todo(created_id, session)
+        remaining = todos.list_todos(session)
+        assert remaining.data == []
 
 
 def test_todo_response_supports_from_attributes() -> None:
-    todo = Todo(id=1, description="from attrs", is_completed=False, created_at=datetime.utcnow())
+    todo = Todo(id=1, description="from attrs", is_completed=False, created_at=datetime.now(UTC))
     response = TodoResponse.model_validate(todo)
     assert response.id == 1
     assert response.description == "from attrs"
