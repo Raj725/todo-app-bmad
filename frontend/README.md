@@ -141,6 +141,12 @@ Runtime hardening notes:
 When used with the repository `docker-compose.yml`, the frontend routes `/api/*`
 requests to the backend service through Nginx.
 
+Compose profile notes:
+
+- Default `docker compose up --build` keeps the baseline frontend workflow unchanged.
+- Root `.env` controls compose-level values (`FRONTEND_PORT`, `VITE_API_BASE_URL`, and related backend/db variables).
+- `docker compose --profile dev up --build -d` additionally runs `compose-dev-check` for profile-specific smoke verification.
+
 Verify hardening and runtime health with compose:
 
 ```bash

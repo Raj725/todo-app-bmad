@@ -65,6 +65,7 @@ npm run dev
 Start the full stack with containers:
 
 ```bash
+cp .env.example .env
 docker compose up --build
 ```
 
@@ -78,6 +79,49 @@ Stop and remove containers:
 ```bash
 docker compose down
 ```
+
+### Docker Compose Profiles (`dev` and `test`)
+
+Profile behavior is additive. The default stack (`db`, `backend`, `frontend`) still starts with no profile.
+
+- `dev` profile enables the `compose-dev-check` helper container for in-network smoke verification.
+- `test` profile enables the `backend-test-gate` helper container to run backend pytest inside compose.
+
+Validate resolved config for each workflow:
+
+```bash
+docker compose config
+docker compose --profile dev config
+docker compose --profile test config
+```
+
+Run default workflow (baseline onboarding path):
+
+```bash
+docker compose up --build -d
+docker compose ps
+docker compose down
+```
+
+Run dev profile workflow:
+
+```bash
+docker compose --profile dev up --build -d
+docker compose --profile dev ps
+curl -sSf http://localhost:8080/
+curl -sSf http://localhost:8000/health
+curl -sSf http://localhost:8000/ready
+docker compose --profile dev down
+```
+
+Run test profile workflow:
+
+```bash
+docker compose --profile test up --build backend-test-gate
+docker compose --profile test down
+```
+
+> **Note:** The test profile runs against the same database volume as the default/dev stack. Run `docker compose down -v` before test runs if you need a clean database for isolation.
 
 ### Docker Runtime Hardening Verification (Frontend)
 
@@ -168,6 +212,18 @@ echo "VITE_API_BASE_URL=http://127.0.0.1:8000" > .env.local
 - `DATABASE_URL` (default: `sqlite:///./todo.db`)
 - `CORS_ALLOW_ORIGINS` (default: `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173`)
 
+### Compose (root `.env`)
+
+- `COMPOSE_PROFILES` (optional; examples: `dev`, `test`, `dev,test`)
+- `FRONTEND_PORT` (default: `8080`)
+- `BACKEND_PORT` (default: `8000`)
+- `POSTGRES_DB` (default: `todo`)
+- `POSTGRES_USER` (default: `todo`)
+- `POSTGRES_PASSWORD` (default: `todo`)
+- `DATABASE_URL` (optional override; defaults to a value derived from `POSTGRES_*`)
+- `CORS_ALLOW_ORIGINS` (default compose CORS for frontend container origins)
+- `VITE_API_BASE_URL` (default: `/api`)
+
 Configured via:
 
 ```bash
@@ -185,6 +241,11 @@ cp .env.example .env
   - confirm backend is running on `127.0.0.1:8000`
   - check `VITE_API_BASE_URL` in `frontend/.env.local`
   - if browser reports CORS blocked, verify backend `CORS_ALLOW_ORIGINS` includes frontend origin and restart backend
+- If `docker compose --profile ... up` appears stuck:
+  - run `docker compose ps` and wait for health checks to become `healthy`
+  - inspect logs with `docker compose logs backend frontend db`
+- If profile config values are unexpected:
+  - run `docker compose --profile dev config` (or `test`) and verify resolved env/ports
 
 ## Service Docs
 
