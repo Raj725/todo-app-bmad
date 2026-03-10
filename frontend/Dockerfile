@@ -16,6 +16,12 @@ FROM nginx:1.27-alpine AS runtime
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Runtime user handling rationale:
+# nginx binds to privileged port 80, so this image keeps the default master process
+# startup behavior while nginx workers run as the standard unprivileged nginx user.
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=5s \
+	CMD wget -qO- http://127.0.0.1:80/ || exit 1
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
