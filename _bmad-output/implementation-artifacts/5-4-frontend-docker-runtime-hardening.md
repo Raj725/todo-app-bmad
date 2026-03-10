@@ -1,6 +1,6 @@
 # Story 5.4: Frontend Docker Runtime Hardening
 
-Status: review
+Status: done
 
 ## Story
 
@@ -200,12 +200,32 @@ GPT-5.3-Codex
 - `frontend/Dockerfile`
 - `frontend/README.md`
 - `README.md`
+- `docker-compose.yml`
+
+### Senior Developer Review (AI)
+
+**Reviewer**: Raj (via Claude Opus 4.6)  
+**Date**: 2026-03-10  
+**Outcome**: Approve with fixes applied  
+
+**Issues found**: 0 Critical, 2 Medium, 3 Low  
+**Issues fixed**: 2 Medium, 2 Low (L2 deferred — cosmetic)  
+
+Fixes applied:
+- **M1**: Added compose-override sync comment in Dockerfile HEALTHCHECK and documented override semantics in frontend README.
+- **M2**: Changed `wget -qO-` to `wget -qO /dev/null` in both Dockerfile and docker-compose.yml to suppress HTML in health logs.
+- **L1**: Corrected `nginx:alpine` → `nginx:1.27-alpine` in frontend README.
+- **L3**: Added sentence to frontend README explaining compose vs Dockerfile HEALTHCHECK override behavior.
+- **L2** (deferred): Fragile `grep -qi "todo"` in verification commands — cosmetic, not blocking.
+
+All ACs validated. Frontend touched-service quality gates verified passing (lint, test, e2e). Story approved for done.
 
 ## Change Log
 
 - 2026-03-10: Implemented frontend Docker runtime hardening updates (Dockerfile HEALTHCHECK + runtime user rationale docs), validated compose health/proxy/fallback behavior, and updated frontend/root README verification guidance.
+- 2026-03-10: [Review] Fixed healthcheck stdout leak (M2), added compose-override sync comments (M1/L3), corrected nginx version in docs (L1). Status → done.
 
 ## Story Completion Status
 
 - All tasks/subtasks completed and validated against AC1-AC5.
-- Story implementation complete and ready for review.
+- Code review passed with fixes applied. Story done.

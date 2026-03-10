@@ -127,13 +127,16 @@ docker run --rm -p 8080:80 todo-frontend
 
 Runtime hardening notes:
 
-- The Docker image remains multi-stage (`node:20-alpine` build + `nginx:alpine` runtime).
+- The Docker image remains multi-stage (`node:20-alpine` build + `nginx:1.27-alpine` runtime).
 - The runtime image includes a Dockerfile `HEALTHCHECK`:
-  - `wget -qO- http://127.0.0.1:80/ || exit 1`
+  - `wget -qO /dev/null http://127.0.0.1:80/ || exit 1`
   - interval `10s`, timeout `5s`, retries `3`, start period `5s`
 - Explicit `USER nginx` is not set in this image because Nginx must bind to port `80`.
   Runtime safety is preserved by standard Nginx behavior where worker processes run as
   the unprivileged `nginx` user.
+- When running via `docker compose`, the compose-level healthcheck overrides the
+  Dockerfile `HEALTHCHECK`. Both are kept in sync; standalone `docker run` uses
+  the Dockerfile version.
 
 When used with the repository `docker-compose.yml`, the frontend routes `/api/*`
 requests to the backend service through Nginx.
