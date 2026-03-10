@@ -194,6 +194,13 @@ cd frontend && npm run lint && npm run typecheck
 cd frontend && npm run test:e2e
 ```
 
+## Security Review Artifacts
+
+Reports follow the naming convention `security-review-YYYY-MM-DD.md`.
+
+- Latest security review report: [security-review-2026-03-10.md](_bmad-output/implementation-artifacts/security-review-2026-03-10.md)
+- Story traceability: [5-6-security-review-and-remediation-evidence.md](_bmad-output/implementation-artifacts/5-6-security-review-and-remediation-evidence.md)
+
 ## Environment Variables
 
 ### Frontend

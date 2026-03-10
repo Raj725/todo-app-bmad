@@ -153,6 +153,7 @@ Because this story targets project stability, prioritize compatibility with curr
 - `_bmad-output/planning-artifacts/prd.md`
 - `_bmad-output/planning-artifacts/architecture.md`
 - `_bmad-output/implementation-artifacts/5-2-containerization-and-deployment.md`
+- `_bmad-output/implementation-artifacts/security-review-2026-03-10.md`
 - `.github/workflows/tests.yml`
 - `frontend/package.json`
 - `frontend/vitest.config.ts`
@@ -205,6 +206,7 @@ GPT-5.3-Codex
 
 - 2026-03-09: Implemented QA coverage infrastructure with CI-enforced 70% thresholds across frontend and backend, validated E2E/a11y critical journeys, and documented local/CI QA command matrix.
 - 2026-03-10: Code review fixes applied — merged duplicate backend README Troubleshooting sections, excluded barrel src/App.tsx from coverage scope, renamed test_qa_coverage_gates.py to test_cross_cutting_coverage.py, added follow-up task for app/main.py coverage.
+- 2026-03-10: Added security evidence cross-reference to `_bmad-output/implementation-artifacts/security-review-2026-03-10.md` for Epic 5 QA traceability.
 
 ## Review Follow-ups (AI)
 
